@@ -724,8 +724,9 @@ class query
 			$last_value = "";
       while($data=$this->db->get_next_res())
       {
-	      if(array_key_exists($col->get_save_column(),$data)) { $name = $col->get_save_column(); }
-	      if(array_key_exists($col->db_col_name,$data)) { $name = $col->db_col_name; }
+        $arr_data = json_decode(json_encode($data), true);
+	      if(array_key_exists($col->get_save_column(),$arr_data)) { $name = $col->get_save_column(); }
+	      if(array_key_exists($col->db_col_name,$arr_data)) { $name = $col->db_col_name; }
         if($last_value!=$data->$name && $last_value!='') { $alles_gleich='0'; break; }
         $last_value = $data->$name;
       }

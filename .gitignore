@@ -1,2 +1,4 @@
 app_user_admin/uploads
 app_user_admin/user_pics
+temp
+.DS_Store
