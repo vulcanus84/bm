@@ -26,7 +26,8 @@ try
 		{
 			if(isset($_GET['tournament_id']))
 			{
-				$db->update(array('group_status'=>'Started'),'groups','group_id',$_GET['tournament_id']);				header('Location: index.php');
+				$db->update(array('group_status'=>'Started'),'groups','group_id',$_GET['tournament_id']);
+				header('Location: index.php');
 			}
 		}
 
@@ -1697,6 +1698,8 @@ try
 							if($myTournament->get_counting()=='win') { $db3->insert(array('game_winner_id'=>$opponent->id,'game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$my_user->id,'game_player2_id'=>$opponent->id,'game_location'=>$court_nr,'game_round'=>$_GET['round'],'game_duration'=>'0'),'games'); }
 							if($myTournament->get_counting()=='pointsOneSet') { $db3->insert(array('game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$my_user->id,'game_player2_id'=>$opponent->id,'game_location'=>$court_nr,'game_round'=>$_GET['round'],'game_duration'=>'0'),'games'); }
 							if($myTournament->get_counting()=='official2sets') { $db3->insert(array('game_set1_p1'=>'10','game_set1_p2'=>'21','game_set2_p1'=>'10','game_set2_p2'=>'21','game_winner_id'=>$opponent->id,'game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$my_user->id,'game_player2_id'=>$opponent->id,'game_location'=>$court_nr,'game_round'=>$_GET['round'],'game_duration'=>'0'),'games'); }
+							if($myTournament->get_counting()=='2sets11points') { $db3->insert(array('game_set1_p1'=>'5','game_set1_p2'=>'11','game_set2_p1'=>'5','game_set2_p2'=>'11','game_winner_id'=>$opponent->id,'game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$my_user->id,'game_player2_id'=>$opponent->id,'game_location'=>$court_nr,'game_round'=>$_GET['round'],'game_duration'=>'0'),'games'); }
+							if($myTournament->get_counting()=='2setswinning') { $db3->insert(array('game_set1_p1'=>'10','game_set1_p2'=>'21','game_set2_p1'=>'10','game_set2_p2'=>'21','game_winner_id'=>$opponent->id,'game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$my_user->id,'game_player2_id'=>$opponent->id,'game_location'=>$court_nr,'game_round'=>$_GET['round'],'game_duration'=>'0'),'games'); }
 
 							$db->insert(array('news_tournament_id'=>$_GET['tournament_id'],'news_title'=>'Freilos ausgelost','news_text'=>'Im Turnier '.$myTournament->get_title().' hat '.$opponent->login.' das Freilos bekommen.'),'news');
 
