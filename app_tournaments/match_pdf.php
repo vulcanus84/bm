@@ -105,7 +105,7 @@ while($d = $db->get_next_res())
 	$txt.= "<tr><td style=\"text-align:center;font-size:16pt;font-weight:bold;\">".$p1_name."</td><td></td><td style=\"text-align:center;font-size:16pt;font-weight:bold;\">".$p2_name."</td></tr>";
 	$txt.= "<tr><td colspan=\"3\" style=\"text-align:center;font-size:12pt;\"></td></tr>";
 
-	if($myTournament->get_counting()=='official2sets')
+	if($myTournament->get_counting()=='official2sets' OR $myTournament->get_counting()=='2sets11points' OR $myTournament->get_counting()=='2setswinning')
 	{
 		$txt.= "<tr><td style=\"border:1px solid black;font-size:36pt;\"></td><td style=\"text-align:center;font-size:36pt;\">:</td><td style=\"border:1px solid black;\"></td></tr>";
 		$txt.= "<tr><td colspan=\"3\" style=\"text-align:center;font-size:20pt;\"></td></tr>";
