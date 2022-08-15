@@ -226,9 +226,9 @@
 					$pic_width = 30/$db->count().'vw';
 					while($d = $db->get_next_res())
 					{
-						$myUser = new badminton_user(clone($db),$d->group2user_user_id);
-						$arr_table[0][$i] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,true)."<br/>".$myUser->account."</td>";	
-						$arr_table[$i][0] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,true)."<br/>".$myUser->account."</td>";	
+						$myUser = new user($d->group2user_user_id);
+						$arr_table[0][$i] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,true)."<br/>".$myUser->login."</td>";	
+						$arr_table[$i][0] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,true)."<br/>".$myUser->login."</td>";	
 						$arr_players[$i] = $d->group2user_user_id;
 						$i++;
 					}
@@ -256,8 +256,8 @@
 										{
 											if($temp->game_set1_p1<1 AND $temp->game_set1_p2<1)
 											{
-												$myUser = new badminton_user(clone($db),$temp->game_winner_id);
-												$txt = "<span style='font-size:16pt;font-weight:bold;'>".$myUser->account."</span><br/>hat gewonnen";
+												$myUser = new user($temp->game_winner_id);
+												$txt = "<span style='font-size:16pt;font-weight:bold;'>".$myUser->login."</span><br/>hat gewonnen";
 											}
 											else
 											{
@@ -271,8 +271,8 @@
 										{
 											if($temp->game_set1_p1<1 AND $temp->game_set1_p2<1)
 											{
-												$myUser = new badminton_user(clone($db),$temp->game_winner_id);
-												$txt = "<span style='font-size:16pt;font-weight:bold;'>".$myUser->account."</span><br/>hat gewonnen";
+												$myUser = new user($temp->game_winner_id);
+												$txt = "<span style='font-size:16pt;font-weight:bold;'>".$myUser->login."</span><br/>hat gewonnen";
 											}
 											else
 											{
@@ -360,8 +360,8 @@
   					while($d = $db->get_next_res())
   					{
   						$i++;
-  						$my_user = new badminton_user(clone($db),$d->group2user_user_id);
-  						$x.= "<div style='float:left;width:15%;text-align:center;margin-left:5px;margin-top:30px;'><b>Rang ".$i."</b><br/>".$my_user->get_picture(false,null,'100%',false)."<br/>".$my_user->account."</div>";
+  						$my_user = new user($d->group2user_user_id);
+  						$x.= "<div style='float:left;width:15%;text-align:center;margin-left:5px;margin-top:30px;'><b>Rang ".$i."</b><br/>".$my_user->get_picture(false,null,'100%',false)."<br/>".$my_user->login."</div>";
   						$my_user = null;
   						$last_wins = $d->group2user_wins;
   					}
