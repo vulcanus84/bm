@@ -10,7 +10,7 @@ $color = imagecolorallocate($im, 254, 255, 255);
 $font = level."inc/CSM.ttf";
 $font_size = 24;
 
-if(isset($_GET['p4']))
+if(isset($_GET['p4']) && $_GET['p4']!='')
 {
 	for($i=1;$i<7;$i++)
 	{
