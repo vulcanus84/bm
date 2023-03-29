@@ -6,9 +6,9 @@
 
   try
   {
-		$txt = "";
+	$txt = "";
     $myPage = new page();
-    $myPage->permission_required=false;
+    $myPage->login_required=false;
     $myPage->set_title('Turnierübersicht');
     $myTournament = new tournament(clone($db),$_GET['tournament_id']);
 
