@@ -202,6 +202,16 @@ class page
 			}
 			if($modus=='full')
 			{
+        $txt.= "<!-- The Modal -->";
+        $txt.= "<div id='myModal' class='modal'>";
+        $txt.= "  <!-- Modal content -->";
+        $txt.= "  <div class='modal-content'>";
+        $txt.= "    <span onclick=\"$('#myModal').hide();\" class='close'>&times;</span>";
+        $txt.= "    <p id='myModalText'>Some text in the Modal..</p>";
+        $txt.= "  </div>";
+        $txt.= "</div>";
+
+
 	      $txt.= "    <div class='page'>\n";
       	$txt.= $this->get_header();
 			}
