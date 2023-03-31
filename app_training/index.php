@@ -109,7 +109,7 @@ try
 		if($db->count()>0) { $w_str.= ")"; }
 
 		$db->sql_query("SELECT * FROM locations $w_str ORDER BY location_name");
-		$myPage->add_content("<select onchange=\"window.location = 'index.php?location=' + this.value;\" style='width:95vw;height:10vh;font-size:5vh;color:black;'>");
+		$myPage->add_content("<select onchange=\"window.location = 'index.php?location=' + this.value;\" style='width:95vw;font-size:3vh;color:black;'>");
 		$myPage->add_content("<option value=''>-- Auswählen --</option>");
 		$myPage->add_content("<option value='Aufgaben'");
 		if(isset($_GET['location']) && $_GET['location']== 'Aufgaben') { $myPage->add_content(" selected='1'" ); }
@@ -129,14 +129,20 @@ try
 		{
 			if($_GET['location']=='Aufgaben')
 			{
+				$last_topic = "";
 				$db->sql_query("SELECT * FROM exams ORDER BY exam_category, exam_level");
 				while($d = $db->get_next_res())
 				{
 					$txt = "";
-					$txt.= "<h2 style='margin-top:0px;'>".$d->exam_category." / Aufgabe ".$d->exam_level."</h2>";
-					$txt.= "<span style='margin-top:0px;font-weight:bold;'>".$d->exam_title."</span><br>";
-					$txt.= nl2br($d->exam_description);
-					$txt.= "<hr/>";
+					if($last_topic!=$d->exam_category) 
+					{ 
+						if($last_topic!='') { $txt.="</table>"; }
+						$txt.= "<h1>".$d->exam_category."</h1><table style='width:100%;'>"; $last_topic = $d->exam_category;
+					}
+					$txt.= "<tr><td style='width:10vw;border-right:2px solid black;border-bottom:2px solid black;text-align:center;'><h2 style='font-size:24pt;'>".$d->exam_level."</h2></td>";
+					$txt.= "<td style='padding-left:2vw;border-bottom:2px solid black;'><span style='margin-top:0px;font-weight:bold;font-size:14pt;'>".$d->exam_title."</span><br>";
+					$txt.= "<span style='font-size:12pt;'>".nl2br($d->exam_description)."</span>";
+					$txt.= "</td></tr>";
 					$myPage->add_content($txt);
 				}
 			}
