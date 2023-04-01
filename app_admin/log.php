@@ -6,11 +6,12 @@
   try
   {
     $myQuery = new query($db);
-    $myQuery->set_default_order_by("log_date");
+    $myQuery->set_default_order_by("log_id");
     $myQuery->set_default_sort_dir("DESC");
     $myQuery->set_sql_table("log");
     $myQuery->set_edit_mode("remove");
 
+    $myColumn = new column("log_id","ID"); $myColumn->set_edit_typ('not_editable'); $myQuery->add_column($myColumn);
     $myColumn = new column("log_category","Kategorie"); $myColumn->set_edit_typ('not_editable'); $myQuery->add_column($myColumn);
     $myColumn = new column("log_date","Zeitpunkt");  $myColumn->set_edit_typ('not_editable'); $myQuery->add_column($myColumn);
     $myColumn = new column("log_user","Benutzer"); $myColumn->set_edit_typ('not_editable'); $myQuery->add_column($myColumn);

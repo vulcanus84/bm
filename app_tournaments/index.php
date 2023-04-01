@@ -6,6 +6,7 @@ if(!isset($_SESSION['login_user'])) { header("Location: ../index.php"); }
 try
 {
 	$myPage = new page();
+	$myLogger = new log();
 	if(isset($_GET['tournament_id']))
 	{
 		$myTournament = new tournament($db,$_GET['tournament_id']);
@@ -1357,20 +1358,23 @@ try
 
 			if($myTournament->get_system()=='Doppel_dynamisch')
 			{
-				if($anz_teilnehmer>5)
+				if($anz_teilnehmer>3)
 				{
-					//Teilnehmer ungerade?
+					$anz_courts = ceil($anz_teilnehmer/4);
+					$rest = $anz_teilnehmer % 4;
+					if($rest==3) { $anz_courts = $anz_courts + 1; } //one court for the single game and one to show the freilos
+					//Teilnehmer ungerade?, Freilos hinzufügen
 					if($anz_teilnehmer % 2 != 0)
 					{
 						$db->insert(array('group2user_group_id'=>$_GET['tournament_id'],'group2user_user_id'=>'1'),'group2user');
 						$anz_teilnehmer++;
 					}
-					$db->update(array('group_status'=>'Started','group_round'=>'1','group_courts'=>ceil($anz_teilnehmer/4)),'groups','group_id',$_GET['tournament_id']);
+					$db->update(array('group_status'=>'Started','group_round'=>'1','group_courts'=>$anz_courts),'groups','group_id',$_GET['tournament_id']);
 					print "OK";
 				}
 				else
 				{
-					print "Zu wenig Teilnehmer für Doppel (min. 6 Spieler)";
+					print "Zu wenig Teilnehmer für Doppel (min. 4 Spieler)";
 				}
 			}
 
@@ -1488,6 +1492,11 @@ try
 
 		if($_GET['ajax']=='define_games')
 		{
+			//Tournament with Freilos
+			$with_freilos=false;
+			$db->sql_query("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id='1'");
+			if($db->count()==1) { $with_freilos=true; $myLogger->write_to_log("Tournament","Freilos vorhanden"); }
+
 			if(substr($myTournament->get_system(),0,6)=='Doppel')
 			{
 				$users_on_court = null;
@@ -1504,15 +1513,16 @@ try
 				if($myTournament->get_system()=='Doppel_dynamisch')
 				{
 					$p1=null;$p2=null;$p3=null;$p4=null;
-
 					//If a single should be played, define first
-					if($db->count()%4 != 0)
+	
+					if($db->count()%4 != 0 OR $with_freilos)
 					{
+						$myLogger->write_to_log("Tournament","Anzahl Teilnehmer nicht durch 4 teilbar");
 						//select all player, but not Freilos
 						$w_str = "WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id!='1'";
 
 						//get all single games of current tournament and extract users
-						$db3->sql_query("SELECT * FROM games WHERE game_group_id='$_GET[tournament_id]' AND game_player3_id IS NULL");
+						$db3->sql_query("SELECT * FROM games WHERE game_group_id='$_GET[tournament_id]' AND game_player3_id IS NULL AND (game_player1_id='1' OR game_player2_id='1')");
 						if($db3->count()>0)
 						{
 							while($d = $db3->get_next_res())
@@ -1522,22 +1532,98 @@ try
 						}
 
 						//if Freilos is activated, set always one of the single players with this user
-						$db3->sql_query("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id='1'");
-						if($db3->count()==1) { $p1 = '1'; $limit = '1'; } else { $limit = '2'; }
-
+						if($with_freilos) { $p1 = '1'; $limit = '1'; } else { $limit = '2'; }
 						$db3->sql_query("SELECT * FROM group2user $w_str ORDER BY group2user_wins ASC, rand() LIMIT $limit");
 						//if there are no more player which are not played single, choose randomly
-						if($db3->count()<2) { $db3->sql_query("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' ORDER BY rand() LIMIT $limit"); }
+						if($db3->count()<$limit) 
+						{ 
+							$myLogger->write_to_log("Tournament","Keine Person fürs Freilos gefunden, suche per Zufall jemanden aus");
+							$db3->sql_query("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' ORDER BY rand() LIMIT $limit"); 
+						}
+						else
+						{
+							$myLogger->write_to_log("Tournament","Freilos sauber zugeteilt, folgender SQL String wurde verwendet");
+							$myLogger->write_to_log("Tournament","SELECT * FROM group2user $w_str ORDER BY group2user_wins ASC, rand() LIMIT $limit");
+						}
 						while($d = $db3->get_next_res())
 						{
 							if($p1==0) { $p1 = $d->group2user_user_id; } else { $p2 = $d->group2user_user_id; }
 						}
 
 						//insert games and set players on court, that they are not available anymore for the other games
-						$db3->insert(array('game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$p1,'game_player2_id'=>$p2,'game_location'=>$court_nr,'game_round'=>$_GET['round']),'games');
+						if($limit==1) { $win_id = $p2; } else { $win_id = null; }
+						$db3->insert(array('game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$p1,'game_player2_id'=>$p2,'game_winner_id'=>$win_id,'game_location'=>$court_nr,'game_round'=>$_GET['round']),'games');
 						$court_nr++;
 						$users_on_court.= $p1.'/'.$p2.'/';
 						$p1=null;$p2=null;$p3=null;$p4=null;
+
+						$open_players = $myTournament->get_number_of_players() - 2;
+						//Do we need a single game?
+						if($open_players % 4 > 0)
+						{
+							$myLogger->write_to_log("Tournament","Einzelspiel definieren");
+							//Combine where-string which excludes all player, which are allready assigned
+							$w_str = "WHERE group2user_group_id='$_GET[tournament_id]'";
+							$arr_users = explode('/',$users_on_court);
+							foreach($arr_users as $user)
+							{
+								if($user!='') { $w_str.= " AND group2user_user_id != '$user'"; }
+							}
+
+							//get all single games of current tournament and extract users
+							$db3->sql_query("SELECT * FROM games WHERE game_group_id='$_GET[tournament_id]' AND game_player3_id IS NULL AND game_player1_id!='1' AND game_player2_id!='1'");
+							if($db3->count()>0)
+							{
+								while($d = $db3->get_next_res())
+								{
+									$w_str .= " AND group2user_user_id!='".$d->game_player1_id."' AND group2user_user_id!='".$d->game_player2_id."'";
+								}
+							}
+
+							$db3->sql_query("SELECT * FROM group2user $w_str ORDER BY group2user_wins ASC, group2user_BHZ ASC, rand() LIMIT 2");
+							if($db3->count()==2)
+							{
+								//Found two players with no single games
+								while($d = $db3->get_next_res())
+								{
+									if($p1==0) { $p1 = $d->group2user_user_id; } else { $p2 = $d->group2user_user_id; }
+								}
+								$myLogger->write_to_log("Tournament","2 Spieler gefunden, die noch keine Einzel gespielt haben");
+
+								//insert games and set players on court, that they are not available anymore for the other games
+								$db3->insert(array('game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$p1,'game_player2_id'=>$p2,'game_location'=>$court_nr,'game_round'=>$_GET['round']),'games');
+								$court_nr++;
+								$users_on_court.= $p1.'/'.$p2.'/';
+								$p1=null;$p2=null;$p3=null;$p4=null;
+							}
+							else
+							{
+								$limit = 2;
+								if($db3->count()==1)
+								{
+									//Found one player with no single games
+									$d = $db3->get_next_res();
+									$p1 = $d->group2user_user_id;
+									$limit = 1;
+									$myLogger->write_to_log("Tournament","1 Spieler gefunden, der noch keine Einzel gespielt hat, suche noch jemanden per Zufall");
+								}
+								else
+								{
+									$myLogger->write_to_log("Tournament","Keine Spieler gefunden, die noch keine Einzel gespielt haben, suche per Zufall aus");
+								}
+								$db3->sql_query("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id!='1' AND group2user_user_id!=$p1 ORDER BY rand() LIMIT $limit");								
+								//Get another player randomly
+								while($d = $db3->get_next_res())
+								{
+									if($p1==0) { $p1 = $d->group2user_user_id; } else { $p2 = $d->group2user_user_id; }
+								}
+								//insert games and set players on court, that they are not available anymore for the other games
+								$db3->insert(array('game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$p1,'game_player2_id'=>$p2,'game_location'=>$court_nr,'game_round'=>$_GET['round']),'games');
+								$court_nr++;
+								$users_on_court.= $p1.'/'.$p2.'/';
+								$p1=null;$p2=null;$p3=null;$p4=null;
+							}
+						}
 					}
 
 					while($d = $db->get_next_res())
