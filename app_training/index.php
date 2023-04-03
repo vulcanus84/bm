@@ -184,13 +184,13 @@ try
 						if($last_name!=$d->user_account)
 						{
 							if($last_name!='') { $txt.="</tr></td><tr><td colspan='2'><hr/></tr></td>"; }
-							$txt.= "<td style='width:40vw;padding-left:5px;vertical-align:top;'>
+							$txt.= "<td style='width:30vw;padding-left:5px;vertical-align:top;'>
 										<span style='font-size:14pt;font-weight:bold;'>".$d->user_account."</span>
 									</td>
 									<td>";
 							$last_name = $d->user_account;
 						}
-						$txt.= "<span style='margin-top:0px;font-size:12pt;'>".$d->exam_title."</span><br/>";
+						$txt.= "<span style='margin-top:0px;font-size:12pt;'>".$d->exam_category." > ".$d->exam_title."</span><br/>";
 						$myPage->add_content($txt);
 					}
 					$myPage->add_content("</table>");
