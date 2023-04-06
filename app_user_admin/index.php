@@ -15,7 +15,14 @@ try
 		$folder = 'user_pics/';
 		$username = $_POST['user_account'];
 		//Check if account exist
-		$db->sql_query("SELECT * FROM users	WHERE user_account=:uid",array('uid'=>$_POST['user_account']));
+		if(isset($_POST['user_id']))
+		{
+			$db->sql_query("SELECT * FROM users	WHERE user_account=:uacc AND user_id<>:uid",array('uacc'=>$_POST['user_account'],'uid'=>$_POST['user_id']));
+		}
+		else
+		{
+			$db->sql_query("SELECT * FROM users	WHERE user_account=:uacc",array('uacc'=>$_POST['user_account']));
+		}
 		if($db->count()>0) 
 		{
 			$x = 1;
