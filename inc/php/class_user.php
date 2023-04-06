@@ -1,121 +1,120 @@
 <?php
 class user
 {
-  public $firstname;
-  public $lastname;
-  public $fullname;
+	public $firstname;
+	public $lastname;
+	public $fullname;
 	public $gender;
 	public $birthday;
 	public $training_location;
-  public $image_path;
-  public $hidden;
+	public $image_path;
+	public $hidden;
 
 	private $frontend_language;
 	private $db;
 
-  //Read-only konfiguriert
-  protected $id;
-  protected $login;
+	//Read-only konfiguriert
+	protected $id;
+	protected $login;
+
+	public function __get($name)
+	{
+		if (isset($this->$name)) { return $this->$name; } else { return null;  }
+	}
+
+	public function __set($name, $value)
+	{
+		if ($name === 'login' OR $name === 'id') { throw new Exception("Error in class User: <br>Not allowed to change property $name"); }
+		else { $this->$name = $value; }
+	}
 
 
-  public function __get($name)
-  {
-    if (isset($this->$name)) { return $this->$name; } else { return null;  }
-  }
+	public function __construct($user_id=0)
+	{
+		include(level.'inc/db.php');
+		if($user_id!=0) { $this->load_user_by_id($user_id); }
+	}
 
-  public function __set($name, $value)
-  {
-      if ($name === 'login' OR $name === 'id') { throw new Exception("Error in class User: <br>Not allowed to change property $name"); }
-      else { $this->$name = $value; }
-  }
-
-
-  public function __construct($user_id=0)
-  {
-    include(level.'inc/db.php');
-    if($user_id!=0) { $this->load_user_by_id($user_id); }
-  }
-
-  public function save()
-  {
-    include(level.'inc/db.php');
-    $db->sql_query("UPDATE users SET
-                          user_firstname = '$this->firstname',
-                          user_lastname = '$this->lastname',
-													user_language = '".$this->get_frontend_language()."'
-                          WHERE user_id='$this->id'");
-  }
+	public function save()
+	{
+		include(level.'inc/db.php');
+		$db->sql_query("UPDATE users SET
+							user_firstname = '$this->firstname',
+							user_lastname = '$this->lastname',
+							user_language = '".$this->get_frontend_language()."'
+							WHERE user_id='$this->id'");
+	}
 
 
-  public function load_user_by_login($login)
-  {
-    include(level.'inc/db.php');
+	public function load_user_by_login($login)
+	{
+		include(level.'inc/db.php');
 		$res = $db->sql_query_with_fetch("SELECT * FROM users WHERE user_account=:uid",array('uid'=>$login));
-    $this->load_user_by_id($res->user_id);
-  }
+		$this->load_user_by_id($res->user_id);
+	}
 
-  public function load_user_by_id($id)
-  {
-    include(level.'inc/db.php');
+	public function load_user_by_id($id)
+	{
+		include(level.'inc/db.php');
 
-    $db->sql_query("SELECT *, DATE_FORMAT(user_birthday,'%d.%m.%Y') as user_birthday FROM users	WHERE user_id=:uid",array('uid'=>$id));
-    if($db->count()>0)
-    {
-    	$res = $db->get_next_res();
-	    $this->id = $id;
-	    $this->login = $res->user_account;
+		$db->sql_query("SELECT *, DATE_FORMAT(user_birthday,'%d.%m.%Y') as user_birthday FROM users	WHERE user_id=:uid",array('uid'=>$id));
+		if($db->count()>0)
+		{
+			$res = $db->get_next_res();
+			$this->id = $id;
+			$this->login = $res->user_account;
 
-	    $this->firstname = $res->user_firstname;
-	    $this->lastname = $res->user_lastname;
-	    $this->fullname = $this->firstname." ".$this->lastname;
+			$this->firstname = $res->user_firstname;
+			$this->lastname = $res->user_lastname;
+			$this->fullname = $this->firstname." ".$this->lastname;
 			if(trim($this->fullname)=='') { $this->fullname = $this->login; }
-	    $this->gender = $res->user_gender;
+			$this->gender = $res->user_gender;
 			$this->birthday = $res->user_birthday;
 			$this->training_location = $res->user_training_location;
 
-	    $this->set_frontend_language($res->user_language);
-	    $this->image_path = "app_user_admin/pics/".$this->login.".jpg";
-	    if($res->user_hide>0) { $this->hidden = true; } else { $this->hidden = false; }
-    }
-    else
-    {
-    	throw new Exception("Error in class User: <br>User with ID $id not found");
-    }
-  }
+			$this->set_frontend_language($res->user_language);
+			$this->image_path = "app_user_admin/pics/".$this->login.".jpg";
+			if($res->user_hide>0) { $this->hidden = true; } else { $this->hidden = false; }
+		}
+		else
+		{
+			throw new Exception("Error in class User: <br>User with ID $id not found");
+		}
+	}
 
 	/**
 	 *The class page manage this function for all pages by default, also the class query
 	 *To disable it, set the public variable "permission_required" from class page to false
 	 *For special permissions use the parameter "path" for the name of the special permission
 	 */
-  public function check_permission($path,$permission_typ='read')
-  {
-    include(level.'inc/db.php');
-    //links without required permission
-    if(substr($path,0,9)=='index.php') { return true; }
-    if(substr($path,0,10)=='/index.php') { return true; }
+	public function check_permission($path,$permission_typ='read')
+	{
+		include(level.'inc/db.php');
+		//links without required permission
+		if(substr($path,0,9)=='index.php') { return true; }
+		if(substr($path,0,10)=='/index.php') { return true; }
 
-		//evaluate normal permissions
-    $db->sql_query("SELECT * FROM permissions WHERE permission_user_id='$this->id'");
-    while($d = $db->get_next_res())
-    {
-      switch($permission_typ)
-      {
-        case 'read':
-          if(strpos($path,$d->permission_path)!==FALSE AND $d->permission_read=='1') { return true; }
-          break;
-        case 'write':
-          if(strpos($path,$d->permission_path)!==FALSE AND $d->permission_write=='1') { return true; }
-          break;
-        case 'delete':
-          if(strpos($path,$d->permission_path)!==FALSE AND $d->permission_delete=='1') { return true; }
-          break;
-        case 'app_permission':
-          if(strpos($d->permission_path,$path)!==FALSE AND ($d->permission_read=='1' OR $d->permission_write=='1' OR $d->permission_delete=='1')) { return true; }
-          break;
-    	}
-    }
-  }
+			//evaluate normal permissions
+		$db->sql_query("SELECT * FROM permissions WHERE permission_user_id='$this->id'");
+		while($d = $db->get_next_res())
+		{
+		switch($permission_typ)
+		{
+			case 'read':
+			if(strpos($path,$d->permission_path)!==FALSE AND $d->permission_read=='1') { return true; }
+			break;
+			case 'write':
+			if(strpos($path,$d->permission_path)!==FALSE AND $d->permission_write=='1') { return true; }
+			break;
+			case 'delete':
+			if(strpos($path,$d->permission_path)!==FALSE AND $d->permission_delete=='1') { return true; }
+			break;
+			case 'app_permission':
+			if(strpos($d->permission_path,$path)!==FALSE AND ($d->permission_read=='1' OR $d->permission_write=='1' OR $d->permission_delete=='1')) { return true; }
+			break;
+			}
+		}
+	}
 
 	public function set_frontend_language($language)
 	{
@@ -708,7 +707,6 @@ class user
     }
     else {
       throw new Exception("Altes Passwort falsch");
-
     }
   }
 
