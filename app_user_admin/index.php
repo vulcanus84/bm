@@ -14,6 +14,20 @@ try
 	{
 		$folder = 'user_pics/';
 		$username = $_POST['user_account'];
+		//Check if account exist
+		$db->sql_query("SELECT * FROM users	WHERE user_account=:uid",array('uid'=>$_POST['user_account']));
+		if($db->count()>0) 
+		{
+			$x = 1;
+			while($x < 10)
+			{
+				$new_account = $_POST['user_account']."_".$x;
+				$db->sql_query("SELECT * FROM users	WHERE user_account=:uid",array('uid'=>$new_account));
+				if($db->count()==0) { $_POST['user_account'] = $new_account; break; }
+				$x++;
+			}
+		}
+
 		if(isset($_POST['user_id']))
 		{
 			$birthday = $_POST['user_birthday'];
@@ -36,10 +50,12 @@ try
 			$page->change_parameter('user_id',$user_id);
 		}
 
-		foreach ($_FILES["pictures"]["error"] as $key => $error) {
-		    if ($error == UPLOAD_ERR_OK) {
-						//Add user to DB
-						if(file_exists($folder.$user_id.'.png')) { unlink($folder.$user_id.'.png'); }
+		foreach ($_FILES["pictures"]["error"] as $key => $error) 
+		{
+		    if ($error == UPLOAD_ERR_OK) 
+			{
+				//Add user to DB
+				if(file_exists($folder.$user_id.'.png')) { unlink($folder.$user_id.'.png'); }
 
 		        $tmp_name = $_FILES["pictures"]["tmp_name"][$key];
 		        // basename() kann Directory Traversal Angriffe verhindern; weitere
@@ -47,131 +63,131 @@ try
 		        $name = basename($_FILES["pictures"]["name"][$key]);
 		        move_uploaded_file($tmp_name, $folder.$name);
 
-						//Crop image to 1:1 ratio
-						$filename = $folder.$name;
-						$im = imagecreatefromstring(file_get_contents($filename));
+				//Crop image to 1:1 ratio
+				$filename = $folder.$name;
+				$im = imagecreatefromstring(file_get_contents($filename));
 
-						$w = imagesx($im);
-						$h = imagesy($im);
+				$w = imagesx($im);
+				$h = imagesy($im);
 
-						$size = min($w,$h);
+				$size = min($w,$h);
 
-						if($w>$h) { $diff_x = ($w-$h)/2; } else { $diff_x = 0; }
-						if($w<$h) { $diff_y = ($h-$w)/2; } else { $diff_y = 0; }
+				if($w>$h) { $diff_x = ($w-$h)/2; } else { $diff_x = 0; }
+				if($w<$h) { $diff_y = ($h-$w)/2; } else { $diff_y = 0; }
 
-						$image_s = imagecrop($im, ['x' => $diff_x, 'y' => $diff_y, 'width' => $size, 'height' => $size]);
-						imagedestroy($im);
+				$image_s = imagecrop($im, ['x' => $diff_x, 'y' => $diff_y, 'width' => $size, 'height' => $size]);
+				imagedestroy($im);
 
-						//Round mask
-						$width = imagesx($image_s);
-						$height = imagesy($image_s);
+				//Round mask
+				$width = imagesx($image_s);
+				$height = imagesy($image_s);
 
-						$newwidth = 500;
-						$newheight = 500;
+				$newwidth = 500;
+				$newheight = 500;
 
-						$image = imagecreatetruecolor($newwidth, $newheight);
-						imagealphablending($image, true);
-						imagecopyresampled($image, $image_s, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+				$image = imagecreatetruecolor($newwidth, $newheight);
+				imagealphablending($image, true);
+				imagecopyresampled($image, $image_s, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
-						//create masking
-						$mask = imagecreatetruecolor($newwidth, $newheight);
+				//create masking
+				$mask = imagecreatetruecolor($newwidth, $newheight);
 
-						$transparent = imagecolorallocate($mask, 255, 0, 0);
-						imagecolortransparent($mask,$transparent);
+				$transparent = imagecolorallocate($mask, 255, 0, 0);
+				imagecolortransparent($mask,$transparent);
 
-						imagefilledellipse($mask, $newwidth/2, $newheight/2, $newwidth, $newheight, $transparent);
+				imagefilledellipse($mask, $newwidth/2, $newheight/2, $newwidth, $newheight, $transparent);
 
-						$red = imagecolorallocate($mask, 0, 0, 0);
-						imagecopymerge($image, $mask, 0, 0, 0, 0, $newwidth, $newheight, 100);
-						imagecolortransparent($image,$red);
-						imagefill($image, 0, 0, $red);
+				$red = imagecolorallocate($mask, 0, 0, 0);
+				imagecopymerge($image, $mask, 0, 0, 0, 0, $newwidth, $newheight, 100);
+				imagecolortransparent($image,$red);
+				imagefill($image, 0, 0, $red);
 
-						$exif = exif_read_data($filename);
+				$exif = exif_read_data($filename);
 
-						if (isset($exif['Orientation']))
-						{
-						  switch ($exif['Orientation'])
-						  {
-						    case 3:
-						      // Need to rotate 180 deg
-									$image = imagerotate($image, 180, 0);
-						      break;
+				if (isset($exif['Orientation']))
+				{
+					switch ($exif['Orientation'])
+					{
+					case 3:
+						// Need to rotate 180 deg
+							$image = imagerotate($image, 180, 0);
+						break;
 
-						    case 6:
-						      // Need to rotate 90 deg clockwise
-									$image = imagerotate($image, -90, 0);
-						      break;
+					case 6:
+						// Need to rotate 90 deg clockwise
+							$image = imagerotate($image, -90, 0);
+						break;
 
-						    case 8:
-						      // Need to rotate 90 deg counter clockwise
-									$image = imagerotate($image, 90, 0);
-						      break;
-						  }
-						}
+					case 8:
+						// Need to rotate 90 deg counter clockwise
+							$image = imagerotate($image, 90, 0);
+						break;
+					}
+				}
 
-						//output, save and free memory
-						imagepng($image,$folder.$user_id.'.png');
+				//output, save and free memory
+				imagepng($image,$folder.$user_id.'.png');
 
-						//*********************************
-						//Create Thumbnail
-						//*********************************
+				//*********************************
+				//Create Thumbnail
+				//*********************************
 
-						//Round mask
-						$width = imagesx($image_s);
-						$height = imagesy($image_s);
+				//Round mask
+				$width = imagesx($image_s);
+				$height = imagesy($image_s);
 
-						$newwidth = 120;
-						$newheight = 120;
+				$newwidth = 120;
+				$newheight = 120;
 
-						$image = imagecreatetruecolor($newwidth, $newheight);
-						imagealphablending($image, true);
-						imagecopyresampled($image, $image_s, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
+				$image = imagecreatetruecolor($newwidth, $newheight);
+				imagealphablending($image, true);
+				imagecopyresampled($image, $image_s, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
-						//create masking
-						$mask = imagecreatetruecolor($newwidth, $newheight);
+				//create masking
+				$mask = imagecreatetruecolor($newwidth, $newheight);
 
-						$transparent = imagecolorallocate($mask, 255, 0, 0);
-						imagecolortransparent($mask,$transparent);
+				$transparent = imagecolorallocate($mask, 255, 0, 0);
+				imagecolortransparent($mask,$transparent);
 
-						imagefilledellipse($mask, $newwidth/2, $newheight/2, $newwidth, $newheight, $transparent);
+				imagefilledellipse($mask, $newwidth/2, $newheight/2, $newwidth, $newheight, $transparent);
 
-						$red = imagecolorallocate($mask, 0, 0, 0);
-						imagecopymerge($image, $mask, 0, 0, 0, 0, $newwidth, $newheight, 100);
-						imagecolortransparent($image,$red);
-						imagefill($image, 0, 0, $red);
+				$red = imagecolorallocate($mask, 0, 0, 0);
+				imagecopymerge($image, $mask, 0, 0, 0, 0, $newwidth, $newheight, 100);
+				imagecolortransparent($image,$red);
+				imagefill($image, 0, 0, $red);
 
-						$exif = exif_read_data($filename);
+				$exif = exif_read_data($filename);
 
-						if (isset($exif['Orientation']))
-						{
-						  switch ($exif['Orientation'])
-						  {
-						    case 3:
-						      // Need to rotate 180 deg
-									$image = imagerotate($image, 180, 0);
-						      break;
+				if (isset($exif['Orientation']))
+				{
+					switch ($exif['Orientation'])
+					{
+					case 3:
+						// Need to rotate 180 deg
+							$image = imagerotate($image, 180, 0);
+						break;
 
-						    case 6:
-						      // Need to rotate 90 deg clockwise
-									$image = imagerotate($image, -90, 0);
-						      break;
+					case 6:
+						// Need to rotate 90 deg clockwise
+							$image = imagerotate($image, -90, 0);
+						break;
 
-						    case 8:
-						      // Need to rotate 90 deg counter clockwise
-									$image = imagerotate($image, 90, 0);
-						      break;
-						  }
-						}
+					case 8:
+						// Need to rotate 90 deg counter clockwise
+							$image = imagerotate($image, 90, 0);
+						break;
+					}
+				}
 
-						//output, save and free memory
-						imagepng($image,$folder.$user_id.'_t.png');
+				//output, save and free memory
+				imagepng($image,$folder.$user_id.'_t.png');
 
-				    $filename_new = 'uploads/'.microtime().$name;
-				    rename($folder.$name, $filename_new);
+				$filename_new = 'uploads/'.microtime().$name;
+				rename($folder.$name, $filename_new);
 
-						imagedestroy($image);
-						imagedestroy($image_s);
-						imagedestroy($mask);
+				imagedestroy($image);
+				imagedestroy($image_s);
+				imagedestroy($mask);
 
 		    }
 		}

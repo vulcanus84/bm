@@ -442,31 +442,31 @@ class user
 
 	function get_user_infos($with_form=true,$with_pic=true)
 	{
-    include(level.'inc/db.php');
-	  $page = new header_mod();                               //about the current page and header modification functions
+		include(level.'inc/db.php');
+		$page = new header_mod();                               //about the current page and header modification functions
 		$x = "";
 
 		if($with_form)
-    {
-      $x.= "<form id='new_user' action='".$page->change_parameter('action','modify_user')."' method='post' enctype='multipart/form-data'>";
-		  $x.= "<input type='hidden' id='user_id' name='user_id' value='".$this->id."' />";
-    }
+		{
+			$x.= "<form id='new_user' action='".$page->change_parameter('action','modify_user')."' method='post' enctype='multipart/form-data'>";
+			$x.= "<input type='hidden' id='user_id' name='user_id' value='".$this->id."' />";
+		}
 		$x.= "<table>";
-    if($with_pic)
-    {
-  		$x.= " 	<tr>";
-  		$x.= " 		<td colspan='2'>";
-  		$x.= 				$this->get_picture(false,'test');
-  		$x.= "		</td>";
-  		$x.= "	</tr>";
-  		$x.= " 	<tr>";
-  		$x.= " 		<td></td>";
-  		$x.= " 		<td>";
-  		$x.= "			<input style='visibility:hidden;' onchange='$(\"#new_user\").submit();' name='pictures[]' id='inpPicture' type='file' accept='image/*'/>";
-  		$x.= "		</td>";
-  		$x.= "	</tr>";
-  		$x.= "	<tr>";
-    }
+		if($with_pic)
+		{
+			$x.= " 	<tr>";
+			$x.= " 		<td colspan='2'>";
+			$x.= 				$this->get_picture(false,'test');
+			$x.= "		</td>";
+			$x.= "	</tr>";
+			$x.= " 	<tr>";
+			$x.= " 		<td></td>";
+			$x.= " 		<td>";
+			$x.= "			<input style='visibility:hidden;' onchange='$(\"#new_user\").submit();' name='pictures[]' id='inpPicture' type='file' accept='image/*'/>";
+			$x.= "		</td>";
+			$x.= "	</tr>";
+			$x.= "	<tr>";
+		}
 		$x.= "		<td>Anrede:</td>";
 		$x.= " 		<td>";
 		$x.= " 			<select name='user_gender'>";
@@ -496,14 +496,14 @@ class user
 		$x.= " 		<td>";
 		$x.= " 			<select name='user_training_location'>";
 
-	  $db->sql_query("SELECT * FROM location_permissions
-	  								LEFT JOIN locations ON loc_permission_loc_id = location_id
-	  								WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
-	  								ORDER BY location_name");
-	  while($d = $db->get_next_res())
-	  {
-		  $x.= "	   <option value='$d->location_id' "; if($this->training_location==$d->location_id) { $x.= " selected='1'"; } $x.= ">$d->location_name</option>";
-	  }
+		$db->sql_query("SELECT * FROM location_permissions
+										LEFT JOIN locations ON loc_permission_loc_id = location_id
+										WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
+										ORDER BY location_name");
+		while($d = $db->get_next_res())
+		{
+			$x.= "	   <option value='$d->location_id' "; if($this->training_location==$d->location_id) { $x.= " selected='1'"; } $x.= ">$d->location_name</option>";
+		}
 		$x.= " 			</select>";
 		$x.= " 		</td>";
 		$x.= " 	</tr>";
@@ -513,30 +513,29 @@ class user
 		$x.= " 		<td><input type='checkbox' name='user_hide' $val/></td>";
 		$x.= " 	</tr>";
 		$x.= " 	<tr><td>&nbsp;</td></tr>";
-    if($with_form)
-    {
-  		$x.= " 	<tr>";
-  		$x.= " 		<td colspan='2'><button onclick='$('#right_col').hide(); $(\"#new_user\").submit();'>Speichern</button>";
-  		$x.= "		<button type='button' style='background-color:blue;' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
-  		if($this->check_permission('app_user_admin')==false)
-  		{
-	  		$x.= "		<button type='button' style='background-color:red;' onclick='delete_permission(".$this->id.");'>Spieler löschen</button>";
-  		}
-  		$x.= "		<button type='button' style='background-color:purple;' onclick='show_history(".$this->id.");'>Infos</button></td>";
-  		$x.= "	</tr>";
-    }
+		if($with_form)
+		{
+			$x.= " 	<tr>";
+			$x.= " 		<td colspan='2'><button onclick='$('#right_col').hide(); $(\"#new_user\").submit();'>Speichern</button>";
+			$x.= "		<button type='button' style='background-color:blue;' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
+			if($this->check_permission('app_user_admin')==false)
+			{
+				$x.= "		<button type='button' style='background-color:red;' onclick='delete_permission(".$this->id.");'>Spieler löschen</button>";
+			}
+			$x.= "		<button type='button' style='background-color:purple;' onclick='show_history(".$this->id.");'>Infos</button></td>";
+			$x.= "	</tr>";
+	    }
 		$x.= "</table>";
-    if($with_form) { $x.= "</form>"; }
-
+		if($with_form) { $x.= "</form>"; }
 		$my_user = null;
 		return $x;
 	}
 
 	function get_new_user()
 	{
-    include(level.'inc/db.php');
+		include(level.'inc/db.php');
 
-	  $page = new header_mod();                               //about the current page and header modification functions
+	  	$page = new header_mod();                               //about the current page and header modification functions
 		$x = "<h1>Neuer Spieler</h1>";
 		$x.= "<form id='new_user' action='".$page->change_parameter('action','create_new_user')."' method='POST'>";
 		$x.= "<input type='hidden' name='user_lastname'/>";
@@ -560,14 +559,14 @@ class user
 		$x.= " 		<td>";
 		$x.= " 			<select name='user_training_location'>";
 
-	  $db->sql_query("SELECT * FROM location_permissions
+		$db->sql_query("SELECT * FROM location_permissions
 	  								LEFT JOIN locations ON loc_permission_loc_id = location_id
 	  								WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
 	  								ORDER BY location_name");
-	  while($d = $db->get_next_res())
-	  {
-		  $x.= "	   <option value='$d->location_id'>$d->location_name</option>";
-	  }
+		while($d = $db->get_next_res())
+		{
+			$x.= "	   <option value='$d->location_id'>$d->location_name</option>";
+		}
 		$x.= " 			</select>";
 		$x.= " 		</td>";
 		$x.= " 	</tr>";
