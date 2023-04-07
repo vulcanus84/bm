@@ -159,9 +159,10 @@ try
 					$last_date = "";
 					$last_location = "";
 					$last_name = "";
-					$db->sql_query("SELECT locations.location_name, exams.exam_category, exams.exam_title,exams.exam_level, users.user_account, DATE_FORMAT(exam2user_created_on,'%Y.%m.%d') as date_day_sort, DATE_FORMAT(exam2user_created_on,'%d.%m.%Y') as date_day 
+					$db->sql_query("SELECT trainer.user_account as trainer, locations.location_name, exams.exam_category, exams.exam_title,exams.exam_level, users.user_account, DATE_FORMAT(exam2user_created_on,'%Y.%m.%d') as date_day_sort, DATE_FORMAT(exam2user_created_on,'%d.%m.%Y') as date_day 
 										FROM `exam2user`
 										LEFT JOIN users ON exam2user_user_id = users.user_id
+										LEFT JOIN users as trainer ON exam2user_created_by = trainer.user_id
 										LEFT JOIN exams ON exam2user_exam_id = exams.exam_id
 										LEFT JOIN location2user ON location2user_user_id = exam2user_user_id
 										LEFT JOIN locations On location2user_location_id = locations.location_id
@@ -192,7 +193,7 @@ try
 									<td>";
 							$last_name = $d->user_account;
 						}
-						$txt.= "<span style='margin-top:0px;font-size:12pt;'>".$d->exam_category." > ".$d->exam_title."</span><br/>";
+						$txt.= "<span style='margin-top:0px;font-size:12pt;'>".$d->exam_category." > ".$d->exam_level." > ".$d->exam_title." <i>(zugeteilt von ".$d->trainer.")</i></span><br/>";
 						$myPage->add_content($txt);
 					}
 					$myPage->add_content("</table>");
