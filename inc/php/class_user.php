@@ -70,7 +70,6 @@ class user
 			if(trim($this->fullname)=='') { $this->fullname = $this->login; }
 			$this->gender = $res->user_gender;
 			$this->birthday = $res->user_birthday;
-			$this->training_location = $res->user_training_location;
 
 			$this->set_frontend_language($res->user_language);
 			$this->image_path = "app_user_admin/pics/".$this->login.".jpg";
@@ -492,19 +491,18 @@ class user
 		$x.= " 		<td><input type='text' name='user_birthday' value='".$this->birthday."'/></td>";
 		$x.= " 	</tr>";
 		$x.= "	<tr>";
-		$x.= "		<td>Trainingsort:</td>";
-		$x.= " 		<td>";
-		$x.= " 			<select name='user_training_location'>";
+		$x.= "		<td>Trainingsort(e):</td>";
+		$x.= " 		<td style='width:300px;'>";
 
 		$db->sql_query("SELECT * FROM location_permissions
 										LEFT JOIN locations ON loc_permission_loc_id = location_id
+										LEFT JOIN (SELECT * FROM location2user WHERE location2user_user_id='".$this->id."') as lj ON lj.location2user_location_id = locations.location_id
 										WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
 										ORDER BY location_name");
 		while($d = $db->get_next_res())
 		{
-			$x.= "	   <option value='$d->location_id' "; if($this->training_location==$d->location_id) { $x.= " selected='1'"; } $x.= ">$d->location_name</option>";
+			$x.= "	   <input type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if($d->location2user_id>0) { $x.= " checked='checked'"; } $x.= "/>".$d->location_name;
 		}
-		$x.= " 			</select>";
 		$x.= " 		</td>";
 		$x.= " 	</tr>";
 		$x.= "	<tr>";
@@ -555,19 +553,19 @@ class user
 		$x.= " 		<td><input type='text' name='user_account'/></td>";
 		$x.= " 	</tr>";
 		$x.= "	<tr>";
-		$x.= "		<td>Trainingsort:</td>";
-		$x.= " 		<td>";
-		$x.= " 			<select name='user_training_location'>";
+		$x.= "		<td>Trainingsort(e):</td>";
+		$x.= " 		<td style='width:300px;'>";
 
 		$db->sql_query("SELECT * FROM location_permissions
-	  								LEFT JOIN locations ON loc_permission_loc_id = location_id
-	  								WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
-	  								ORDER BY location_name");
+										LEFT JOIN locations ON loc_permission_loc_id = location_id
+										LEFT JOIN (SELECT * FROM location2user WHERE location2user_user_id='".$this->id."') as lj ON lj.location2user_location_id = locations.location_id
+										WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
+										ORDER BY location_name");
+		$is_checked = false;
 		while($d = $db->get_next_res())
 		{
-			$x.= "	   <option value='$d->location_id'>$d->location_name</option>";
+			$x.= "	   <input type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if(!$is_checked) { $x.= " checked='checked'"; $is_checked = true; } $x.= "/>".$d->location_name."<br/>";
 		}
-		$x.= " 			</select>";
 		$x.= " 		</td>";
 		$x.= " 	</tr>";
 		$x.= " 	<tr>";

@@ -13,15 +13,13 @@
     $myQuery->set_sql_table("users");
     $sql_table = $myQuery->get_sql_table();
     $myQuery->set_edit_mode("full");
-    $myQuery->set_sql_select("SELECT *, DATE_FORMAT(user_birthday,'%d.%m.%Y') as user_birthday_c FROM users LEFT JOIN locations ON user_training_location = location_id");
+    $myQuery->set_sql_select("SELECT *, DATE_FORMAT(user_birthday,'%d.%m.%Y') as user_birthday_c FROM users");
 
     $myCol = new column("user_id","ID"); $myCol->set_edit_typ('not_editable'); $myQuery->add_column($myCol);
     $myCol = new column("user_gender","Geschlecht"); $myCol->set_selection('Herr,Frau'); $myQuery->add_column($myCol);
     $myCol = new column("user_account","Benutzername"); $myQuery->add_column($myCol);
     $myCol = new column("user_firstname","Vorname"); $myQuery->add_column($myCol);
     $myCol = new column("user_lastname","Nachname"); $myQuery->add_column($myCol);
-		$db->sql_query("SELECT * FROM locations ORDER BY location_name");
-    $myCol = new column("user_training_location","Trainingsort"); $myCol->set_selection_by_sql($db,'location_name','location_id',''); $myQuery->add_column($myCol);
     $myCol = new column("user_birthday_c","Geburtstag"); $myCol->set_edit_typ('date'); $myCol->show_on_edit=true; $myCol->set_filter_column('user_birthday'); $myCol->set_save_column('user_birthday'); $myQuery->add_column($myCol);
     $myCol = new column("user_hide","Ausgeblendet"); $myCol->set_edit_typ('checkbox'); $myQuery->add_column($myCol);
 
