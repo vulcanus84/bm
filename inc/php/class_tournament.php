@@ -266,7 +266,7 @@ class tournament
 		$i=0;
 		while($d = $this->db->get_next_res())
 		{
-			if($i==0) { $w_str.= "user_training_location='$d->location_id'"; } else { $w_str.= " OR user_training_location='$d->location_id'"; }
+			if($i==0) { $w_str.= "location2user_location_id='$d->location_id'"; } else { $w_str.= " OR location2user_location_id='$d->location_id'"; }
 			$i++;
 		}
 		if($this->db->count()>0) { $w_str.= ")"; }
@@ -283,7 +283,9 @@ class tournament
 		$x = "";
 		if($group_by=='alphabetical')
 		{
-			$this->db->sql_query("SELECT * FROM users $w_str ORDER BY user_account ASC");
+			$this->db->sql_query("SELECT * FROM location2user 
+									LEFT JOIN users ON location2user_user_id = users.user_id 
+									$w_str ORDER BY user_account ASC");
 			$x.= "<h1>Spieler (".$this->db->count().")</h1>";
 			while($data = $this->db->get_next_res())
 			{
@@ -295,7 +297,9 @@ class tournament
 
 		if($group_by=='gender')
 		{
-			$this->db->sql_query("SELECT * FROM users $w_str AND user_gender='Frau' ORDER BY user_account ASC");
+			$this->db->sql_query("SELECT * FROM location2user 
+									LEFT JOIN users ON location2user_user_id = users.user_id 
+									$w_str AND user_gender='Frau' ORDER BY user_account ASC");
 			$x.= "<h1>Mädchen (".$this->db->count().")</h1>";
 			while($data = $this->db->get_next_res())
 			{
@@ -304,7 +308,9 @@ class tournament
 				$my_user = null;
 			}
 			$x.="<div style='clear:both;border-bottom:1px solid gray;'>&nbsp;</div>";
-			$this->db->sql_query("SELECT * FROM users  $w_str AND user_gender='Herr' ORDER BY user_account ASC");
+			$this->db->sql_query("SELECT * FROM location2user 
+									LEFT JOIN users ON location2user_user_id = users.user_id 
+									$w_str AND user_gender='Herr' ORDER BY user_account ASC");
 			$x.= "<h1>Jungs (".$this->db->count().")</h1>";
 			while($data = $this->db->get_next_res())
 			{
@@ -317,16 +323,21 @@ class tournament
 		if($group_by=='location')
 		{
 			$this->db2 = clone($this->db);
-			$this->db2->sql_query("SELECT MAX(location_name) as location_name, MAX(user_training_location) as user_training_location
-														FROM users
-														LEFT JOIN locations ON user_training_location = location_id
-														$w_str
-														GROUP BY user_training_location
-														ORDER BY location_name
-														");
+			$this->db2->sql_query("SELECT MAX(location_name) as location_name,MAX(location2user_location_id) as location2user_location_id
+									FROM location2user
+									LEFT JOIN locations ON location2user_location_id = locations.location_id
+									LEFT JOIN users ON location2user_user_Id = users.user_id
+									$w_str
+									GROUP BY location2user_location_id
+									ORDER BY location_name ASC");
 			while($data2 = $this->db2->get_next_res())
 			{
-				$this->db->sql_query("SELECT * FROM users $w_str AND user_training_location='$data2->user_training_location' ORDER BY user_account ASC");
+				$this->db->sql_query("SELECT * 
+										FROM location2user
+										LEFT JOIN locations ON location2user_location_id = locations.location_id
+										LEFT JOIN users ON location2user_user_Id = users.user_id
+										$w_str AND location2user_location_id='$data2->location2user_location_id'
+										ORDER BY user_account ASC");
 				$x.= "<h1>$data2->location_name (".$this->db->count().")</h1>";
 				while($data = $this->db->get_next_res())
 				{
@@ -341,19 +352,26 @@ class tournament
 		if($group_by=='age')
 		{
 			$this->db2 = clone($this->db);
-			$this->db2->sql_query("SELECT YEAR(CURRENT_DATE) - YEAR(user_birthday)
-	    - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d')) as diff_years
-	    FROM users $w_str GROUP BY YEAR(CURRENT_DATE) - YEAR(user_birthday)
-	    - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d')) ORDER BY diff_years");
+			$this->db2->sql_query("SELECT 
+									YEAR(CURRENT_DATE) - YEAR(user_birthday) - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d')) as diff_years
+	    							FROM location2user 
+									LEFT JOIN users ON location2user_user_id = users.user_id 
+									$w_str 
+									GROUP BY YEAR(CURRENT_DATE) - YEAR(user_birthday) - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d')) 
+									ORDER BY diff_years");
 			while($data2 = $this->db2->get_next_res())
 			{
 				if($data2->diff_years=='')
 				{
-					$this->db->sql_query("SELECT * FROM users $w_str AND user_birthday IS NULL ORDER BY user_account ASC");
+					$this->db->sql_query("SELECT * FROM location2user 
+											LEFT JOIN users ON location2user_user_id = users.user_id 
+											$w_str AND user_birthday IS NULL ORDER BY user_account ASC");
 				}
 				else
 				{
-					$this->db->sql_query("SELECT * FROM users $w_str AND YEAR(CURRENT_DATE) - YEAR(user_birthday) - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d'))='$data2->diff_years' ORDER BY user_birthday DESC");
+					$this->db->sql_query("SELECT * FROM location2user 
+											LEFT JOIN users ON location2user_user_id = users.user_id 
+											$w_str  AND YEAR(CURRENT_DATE) - YEAR(user_birthday) - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d'))='$data2->diff_years' ORDER BY user_account ASC");
 				}
 				if($data2->diff_years=='')
 				{

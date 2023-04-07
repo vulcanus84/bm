@@ -159,10 +159,12 @@ try
 					$last_date = "";
 					$last_location = "";
 					$last_name = "";
-					$db->sql_query("SELECT locations.location_name, exams.exam_category, exams.exam_title,exams.exam_level, users.user_account, DATE_FORMAT(exam2user_created_on,'%Y.%m.%d') as date_day_sort, DATE_FORMAT(exam2user_created_on,'%d.%m.%Y') as date_day FROM `exam2user`
+					$db->sql_query("SELECT locations.location_name, exams.exam_category, exams.exam_title,exams.exam_level, users.user_account, DATE_FORMAT(exam2user_created_on,'%Y.%m.%d') as date_day_sort, DATE_FORMAT(exam2user_created_on,'%d.%m.%Y') as date_day 
+										FROM `exam2user`
 										LEFT JOIN users ON exam2user_user_id = users.user_id
 										LEFT JOIN exams ON exam2user_exam_id = exams.exam_id
-										LEFT JOIN locations On users.user_training_location = locations.location_id
+										LEFT JOIN location2user ON location2user_user_id = exam2user_user_id
+										LEFT JOIN locations On location2user_location_id = locations.location_id
 										WHERE users.user_hide=0
 										ORDER BY date_day_sort DESC, locations.location_name, users.user_account,exams.exam_category, exams.exam_level");
 					while($d = $db->get_next_res())
@@ -198,7 +200,7 @@ try
 			}
 			else
 			{
-				$w_str = "user_training_location = '$_GET[location]' AND user_hide<1";
+				$w_str = "location2user_location_id = '$_GET[location]' AND user_hide<1";
 
 				if(isset($_SESSION['star_filter']))
 				{
@@ -229,7 +231,8 @@ try
 				}
 				$myPage->add_content("</tr>");
 
-				$db->sql_query("SELECT * FROM users
+				$db->sql_query("SELECT * FROM location2user 
+										LEFT JOIN users on location2user_user_id = users.user_id
 												WHERE $w_str
 												ORDER BY user_account ASC");
 				$db2 = clone($db);

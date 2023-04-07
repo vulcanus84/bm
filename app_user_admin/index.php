@@ -40,21 +40,51 @@ try
 			$birthday = $_POST['user_birthday'];
 			$user_id = $_POST['user_id'];
 			if(isset($_POST['user_hide'])) { $user_hide = '1'; } else { $user_hide = '0'; }
+			//Update User
 			if($birthday=='')
 			{
-				$db->update(array('user_account'=>$_POST['user_account'],'user_firstname'=>$_POST['user_firstname'],'user_lastname'=>$_POST['user_lastname'],'user_gender'=>$_POST['user_gender'],'user_training_location'=>$_POST['user_training_location'],'user_birthday'=>null,'user_hide'=>$user_hide),'users','user_id',$user_id);
+				$db->update(array('user_account'=>$_POST['user_account'],'user_firstname'=>$_POST['user_firstname'],'user_lastname'=>$_POST['user_lastname'],'user_gender'=>$_POST['user_gender'],'user_birthday'=>null,'user_hide'=>$user_hide),'users','user_id',$user_id);
 			}
 			else
 			{
 				$birthday = $helper->date2iso($_POST['user_birthday']);
-				$db->update(array('user_account'=>$_POST['user_account'],'user_firstname'=>$_POST['user_firstname'],'user_lastname'=>$_POST['user_lastname'],'user_gender'=>$_POST['user_gender'],'user_training_location'=>$_POST['user_training_location'],'user_birthday'=>$birthday,'user_hide'=>$user_hide),'users','user_id',$user_id);
+				$db->update(array('user_account'=>$_POST['user_account'],'user_firstname'=>$_POST['user_firstname'],'user_lastname'=>$_POST['user_lastname'],'user_gender'=>$_POST['user_gender'],'user_birthday'=>$birthday,'user_hide'=>$user_hide),'users','user_id',$user_id);
 			}
 		}
 		else
 		{
-			$db->insert(array('user_account'=>$_POST['user_account'],'user_gender'=>$_POST['user_gender'],'user_training_location'=>$_POST['user_training_location']),'users');
+			$db->insert(array('user_account'=>$_POST['user_account'],'user_gender'=>$_POST['user_gender']),'users');
 			$user_id = $db->last_inserted_id;
 			$page->change_parameter('user_id',$user_id);
+		}
+
+		//Update Training locations
+		//Check current locations
+		$db->sql_query("SELECT * FROM location_permissions
+							LEFT JOIN locations ON loc_permission_loc_id = location_id
+							LEFT JOIN (SELECT * FROM location2user WHERE location2user_user_id='".$user_id."') as lj ON lj.location2user_location_id = locations.location_id
+							WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
+							ORDER BY location_name");
+		while($d = $db->get_next_res())
+		{
+			if($d->location2user_id>0) 
+			{ 
+				//Shoud be checked, otherwise it was changed
+				if(!isset($_POST['loc_'.$d->location_id])) 
+				{ 
+					//Not checked, therefor remove location
+					$db->delete('location2user','location2user_id',$d->location2user_id);
+				}
+			}
+			else
+			{
+				//Shoud NOT be checked, otherwise it was changed
+				if(isset($_POST['loc_'.$d->location_id])) 
+				{ 
+					//Checked, therefor add location
+					$db->insert(array('location2user_user_id'=>$user_id,'location2user_location_id'=>$d->location_id),'location2user');
+				}
+			}
 		}
 
 		foreach ($_FILES["pictures"]["error"] as $key => $error) 
@@ -237,6 +267,15 @@ try
 		  }
 		});
 
+		function check_locations()
+		{
+			var input = $(\"form input:checkbox[name^='loc']:checked\");
+			if(input.length==0) 
+			{ 
+				alert('Mindestens ein Trainingsort muss gewählt sein'); 
+				$(\"form input:checkbox[name^='loc']\")[0].checked=true;
+			}
+		}
 		function new_user()
 		{
 			".$tmp."
