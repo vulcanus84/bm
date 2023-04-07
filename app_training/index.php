@@ -193,7 +193,7 @@ try
 									<td>";
 							$last_name = $d->user_account;
 						}
-						$txt.= "<span style='margin-top:0px;font-size:12pt;'>".$d->exam_category." > ".$d->exam_level." > ".$d->exam_title." <i>(zugeteilt von ".$d->trainer.")</i></span><br/>";
+						$txt.= "<span style='margin-top:0px;font-size:12pt;'>".$d->exam_category." > ".$d->exam_title." <i style='font-size:8pt;'>(zugeteilt von ".$d->trainer.")</i></span><br/>";
 						$myPage->add_content($txt);
 					}
 					$myPage->add_content("</table>");
