@@ -6,6 +6,8 @@
       $myMenu->add_item("News","news.php");
       $myMenu->add_item("Benutzer","users.php");
       $myMenu->add_item("Prüfungen","exams.php");
+      $myMenu->add_item("Prüfungen zuweisen","exam2user.php");
       $myMenu->add_item("Trainingsorte","locations.php");
+      $myMenu->add_item("Trainingsorte zuweisen","location2user.php");
       $myMenu->add_item("Admin Functions","admin.php");
       $myPage->menu = $myMenu->create_menu("tabsJ");

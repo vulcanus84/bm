@@ -315,7 +315,7 @@ try
 		if($_GET['ajax']=='add_exam')
 		{
 			$d = $db->sql_query_with_fetch("SELECT * FROM exams WHERE exam_id='$_GET[exam_id]'");
-			$db->insert(array('exam2user_exam_id'=>$_GET['exam_id'],'exam2user_user_id'=>$_GET['user_id']),'exam2user');
+			$db->insert(array('exam2user_exam_id'=>$_GET['exam_id'],'exam2user_user_id'=>$_GET['user_id'],'exam2user_created_by'=>$_SESSION['login_user']->id),'exam2user');
 			$my_user = new user($_GET['user_id']);
 			$my_user->create_star_image();
 
