@@ -501,7 +501,7 @@ class user
 										ORDER BY location_name");
 		while($d = $db->get_next_res())
 		{
-			$x.= "	   <input type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if($d->location2user_id>0) { $x.= " checked='checked'"; } $x.= "/>".$d->location_name;
+			$x.= "	   <input style='width:20px;' type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if($d->location2user_id>0) { $x.= " checked='checked'"; } $x.= "/>".$d->location_name."<br/>";
 		}
 		$x.= " 		</td>";
 		$x.= " 	</tr>";
@@ -564,7 +564,7 @@ class user
 		$is_checked = false;
 		while($d = $db->get_next_res())
 		{
-			$x.= "	   <input type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if(!$is_checked) { $x.= " checked='checked'"; $is_checked = true; } $x.= "/>".$d->location_name."<br/>";
+			$x.= "	   <input style='width:20px;' type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if(!$is_checked) { $x.= " checked='checked'"; $is_checked = true; } $x.= "/>".$d->location_name."<br/>";
 		}
 		$x.= " 		</td>";
 		$x.= " 	</tr>";
