@@ -371,7 +371,7 @@ class tournament
 				{
 					$this->db->sql_query("SELECT * FROM location2user 
 											LEFT JOIN users ON location2user_user_id = users.user_id 
-											$w_str  AND YEAR(CURRENT_DATE) - YEAR(user_birthday) - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d'))='$data2->diff_years' ORDER BY user_account ASC");
+											$w_str  AND YEAR(CURRENT_DATE) - YEAR(user_birthday) - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d'))='$data2->diff_years' ORDER BY user_birthday DESC");
 				}
 				if($data2->diff_years=='')
 				{
