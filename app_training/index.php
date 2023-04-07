@@ -165,7 +165,7 @@ try
 										LEFT JOIN exams ON exam2user_exam_id = exams.exam_id
 										LEFT JOIN location2user ON location2user_user_id = exam2user_user_id
 										LEFT JOIN locations On location2user_location_id = locations.location_id
-										WHERE users.user_hide=0
+										$w_str
 										ORDER BY date_day_sort DESC, locations.location_name, users.user_account,exams.exam_category, exams.exam_level");
 					while($d = $db->get_next_res())
 					{
