@@ -283,7 +283,7 @@ class tournament
 		$x = "";
 		if($group_by=='alphabetical')
 		{
-			$this->db->sql_query("SELECT * FROM location2user 
+			$this->db->sql_query("SELECT DISTINCT user_id,user_account FROM location2user 
 									LEFT JOIN users ON location2user_user_id = users.user_id 
 									$w_str ORDER BY user_account ASC");
 			$x.= "<h1>Spieler (".$this->db->count().")</h1>";
@@ -297,7 +297,7 @@ class tournament
 
 		if($group_by=='gender')
 		{
-			$this->db->sql_query("SELECT * FROM location2user 
+			$this->db->sql_query("SELECT DISTINCT user_id, user_account FROM location2user 
 									LEFT JOIN users ON location2user_user_id = users.user_id 
 									$w_str AND user_gender='Frau' ORDER BY user_account ASC");
 			$x.= "<h1>Mädchen (".$this->db->count().")</h1>";
@@ -308,7 +308,7 @@ class tournament
 				$my_user = null;
 			}
 			$x.="<div style='clear:both;border-bottom:1px solid gray;'>&nbsp;</div>";
-			$this->db->sql_query("SELECT * FROM location2user 
+			$this->db->sql_query("SELECT DISTINCT user_id, user_account FROM location2user 
 									LEFT JOIN users ON location2user_user_id = users.user_id 
 									$w_str AND user_gender='Herr' ORDER BY user_account ASC");
 			$x.= "<h1>Jungs (".$this->db->count().")</h1>";
@@ -363,15 +363,16 @@ class tournament
 			{
 				if($data2->diff_years=='')
 				{
-					$this->db->sql_query("SELECT * FROM location2user 
+					$this->db->sql_query("SELECT DISTINCT user_id, user_account FROM location2user 
 											LEFT JOIN users ON location2user_user_id = users.user_id 
 											$w_str AND user_birthday IS NULL ORDER BY user_account ASC");
 				}
 				else
 				{
-					$this->db->sql_query("SELECT * FROM location2user 
+					$this->db->sql_query("SELECT DISTINCT user_id, user_account, user_birthday FROM location2user 
 											LEFT JOIN users ON location2user_user_id = users.user_id 
-											$w_str  AND YEAR(CURRENT_DATE) - YEAR(user_birthday) - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d'))='$data2->diff_years' ORDER BY user_birthday DESC");
+											$w_str  AND YEAR(CURRENT_DATE) - YEAR(user_birthday) - (DATE_FORMAT(CURRENT_DATE, '%m%d') < DATE_FORMAT(user_birthday, '%m%d'))='$data2->diff_years' 
+											ORDER BY user_birthday DESC");
 				}
 				if($data2->diff_years=='')
 				{
