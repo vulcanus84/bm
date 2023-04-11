@@ -590,16 +590,17 @@ class user
 	    $db->sql_query("SELECT * FROM exam2user WHERE exam2user_user_id='".$this->id."'");
 	    $anz_stars = $db->count();
 	    if($anz_stars > 0)
-      {
-        $im  = imagecreatefrompng($this->get_ori_pic_path());
+	    {
+        	$im  = imagecreatefrompng($this->get_ori_pic_path());
   			$img_width = imagesx($im);
   			$img_height = imagesy($im);
 
   			$img_star = imagecreatefrompng(level.'inc/imgs/star_full_big.png');
+  			$img_star_red = imagecreatefrompng(level.'inc/imgs/star_full_big_red.png');
   			$img_star_width = imagesx($img_star);
   			$img_star_height = imagesy($img_star);
 
-  			$pos_x[] = $img_width/2-$img_star_width/2; $pos_y[] = 5;
+  			//$pos_x[] = $img_width/2-$img_star_width/2; $pos_y[] = 5;
 
   			$pos_x[] = $img_width/1.5-$img_star_width/2; $pos_y[] = 25;
   			$pos_x[] = $img_width/3-$img_star_width/2; $pos_y[] = 25;
@@ -625,15 +626,21 @@ class user
 
   			$pos_x[] = $img_width/2-$img_star_width/2; $pos_y[] = 420;
 
+			$black = imagecolorallocate($im, 50, 50, 50);
+			$font = level."inc/CSM.ttf";
+			$font_size = 48;
+			list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $anz_stars);
+			imagettftext($im, $font_size, 0, 250-(($right-$left)/2), 70, $black, $font, $anz_stars);
 
-  			$i=0;
+			$i=0;
   			foreach($pos_x as $cur_pos_x)
   			{
-  				if($i>=$anz_stars) { break; }
-  				$cur_pos_y = $pos_y[$i];
-  				imagecopyresized($im, $img_star, $cur_pos_x, $cur_pos_y, 0, 0, $img_star_width, $img_star_height, $img_star_width, $img_star_height);
-  				$i++;
-  			}
+				if($i>=$anz_stars) { break; }
+				$cur_pos_y = $pos_y[$i];
+				if($anz_stars-16 < $i) { $curr_img = $img_star; } else { $curr_img = $img_star_red; }
+				imagecopyresized($im, $curr_img, $cur_pos_x, $cur_pos_y, 0, 0, $img_star_width, $img_star_height, $img_star_width, $img_star_height);
+				$i++;
+			}
 
   			imagepng($im,$myPath);
 
