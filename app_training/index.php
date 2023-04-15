@@ -299,7 +299,7 @@ try
 						$x.="<tr><td colspan='3' style='font-size:14pt;font-weight:bold;padding-top:10px;'>".$d->datum."</td></tr>";
 						$last_date = $d->datum;
 					}
-					$x.= "<tr><td style='font-size:12pt;font-weight:light;'>".$d->exam_title."</td><td style='font-size:10pt;font-style:italic;'>zugeteilt von ".$d->user_account."</td></tr>";
+					$x.= "<tr><td style='font-size:12pt;font-weight:light;'>".$d->exam_category." > ".$d->exam_title."</td><td style='font-size:10pt;font-style:italic;'>zugeteilt von ".$d->user_account."</td></tr>";
 				}
 				print $x;
 
