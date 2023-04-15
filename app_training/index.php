@@ -28,6 +28,17 @@ try
 	");
 	$myPage->add_js("
 
+		function show_user_info(id)
+		{
+			var my_url = '$_SERVER[link]&ajax=show_user_info&user_id=' + id
+			$.ajax({ url: my_url }).done(
+				function(data)
+				{
+					$('#myModalText').html(data); 
+					$('#myModal').show();
+				});
+		}
+
 		function show_filter()
 		{
 			var my_url = '$_SERVER[link]&ajax=show_filter'
@@ -221,7 +232,7 @@ try
 				$db->sql_query("SELECT MAX(exam_category) as cat, count(*) as anz FROM exams $cat_w_str GROUP BY exam_category ORDER BY MAX(exam_category) ASC");
 				while($d = $db->get_next_res())
 				{
-					$myPage->add_content("<td onclick=\"show_filter();\" colspan='$d->anz' style='font-size:14pt;text-align:center;border:1px solid black;border-top-left-radius:10px;border-top-right-radius:10px;padding:1vh;background-color:#DDEEDD'>$d->cat</td>");
+					$myPage->add_content("<td onclick=\"show_filter();\" colspan='$d->anz' style='cursor:pointer;font-size:14pt;text-align:center;border:1px solid black;border-top-left-radius:10px;border-top-right-radius:10px;padding:1vh;background-color:#DDEEDD'>$d->cat</td>");
 				}
 				$myPage->add_content("</tr><tr><td></td>");
 
@@ -242,7 +253,7 @@ try
 				while($d = $db->get_next_res())
 				{
 					$myPage->add_content("<tr>");
-					$myPage->add_content("<td style='border:1px solid black;border-top-left-radius:10px;border-bottom-left-radius:10px;padding-left:5px;background-color:#DDDDEE;font-size:3vh;'>$d->user_account</td>");
+					$myPage->add_content("<td onclick=\"show_user_info('$d->user_id');\" style='cursor:pointer;border:1px solid black;border-top-left-radius:10px;border-bottom-left-radius:10px;padding-left:5px;background-color:#DDDDEE;font-size:3vh;'>$d->user_account</td>");
 					$db2->sql_query("SELECT * FROM exams $cat_w_str ORDER BY exam_category, exam_level ASC");
 					while($d2 = $db2->get_next_res())
 					{
@@ -267,6 +278,33 @@ try
 		//************************************************************************************
 		//AJAX Handling
 		//************************************************************************************
+		if($_GET['ajax']=='show_user_info')
+		{
+			if(isset($_GET['user_id']))
+			{
+				$my_user = new user($_GET['user_id']);
+				$last_date = "";
+				$db->sql_query("SELECT *, DATE_FORMAT(exam2user_created_on,'%d.%m.%Y') as datum FROM exam2user 
+								LEFT JOIN exams ON exam2user_exam_id = exams.exam_id
+								LEFT JOIN users ON exam2user_created_by = users.user_id
+								WHERE exam2user_user_id = '$_GET[user_id]'
+								ORDER BY exam2user_created_on DESC");
+				$x = "<h1 style='margin-bottom:0px;'>".$my_user->fullname."</h1>";
+				if($db->count() != 1) { $x.= "<span style='font-style:italic;'>(".$db->count()." Sterne)</span>"; } else { $x.= "<span style='font-style:italic;'>(".$db->count()." Stern)</span>"; }
+				$x.= "<hr/><table style='width:100%;'>";
+				while($d = $db->get_next_res())
+				{
+					if($last_date != $d->datum)
+					{
+						$x.="<tr><td colspan='3' style='font-size:14pt;font-weight:bold;padding-top:10px;'>".$d->datum."</td></tr>";
+						$last_date = $d->datum;
+					}
+					$x.= "<tr><td style='font-size:12pt;font-weight:light;'>".$d->exam_title."</td><td style='font-size:10pt;font-style:italic;'>zugeteilt von ".$d->user_account."</td></tr>";
+				}
+				print $x;
+
+			} else { print "No user id"; }
+		}
 
 		if($_GET['ajax']=='show_filter')
 		{
