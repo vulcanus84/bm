@@ -187,7 +187,7 @@
 	      									LEFT JOIN courts ON court_game_id = games.game_id
 	      									LEFT JOIN groups ON game_group_id = group_id
 	      									WHERE game_status='New' AND game_duration is NULL AND court_no IS NULL
-	      									ORDER BY game_round ASC, group_title ASC 
+	      									ORDER BY game_round ASC, game_created_on ASC, group_title ASC 
 	      									LIMIT 30");
 	      while($d = $db->get_next_res())
 	      {
