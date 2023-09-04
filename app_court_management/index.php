@@ -188,7 +188,7 @@
 	      									LEFT JOIN groups ON game_group_id = group_id
 	      									WHERE game_status='New' AND game_duration is NULL AND court_no IS NULL
 	      									ORDER BY game_round ASC, group_title ASC 
-	      									LIMIT 10");
+	      									LIMIT 30");
 	      while($d = $db->get_next_res())
 	      {
 	      	if($last_tournament!=$d->group_title) 
@@ -214,7 +214,7 @@
 	      	else
 	      	{
 	      		$resttime_p1 = 9999;
-	      		$resttime_p1_txt = "--:--";
+	      		$resttime_p1_txt = "99:99";
 	      	}
 	      	$db2->sql_query("SELECT *,DATE_FORMAT(game_stopped_on,'%Y-%m-%d %H:%i:%s') as stopped,DATE_FORMAT(game_started_on,'%Y-%m-%d %H:%i:%s') as started FROM games
 	      										LEFT JOIN groups ON game_group_id = group_id
@@ -228,11 +228,11 @@
 	      	else
 	      	{
 	      		$resttime_p2 = 9999;
-	      		$resttime_p2_txt = "--:--";
+	      		$resttime_p2_txt = "99:99";
 	      	}
 	      	if($resttime_p1<900 OR $resttime_p2<900) { $zus_txt = 'background-color:orange;'; } else { $zus_txt = ''; }
-	      	print "<div class='draggable' style='border-radius:10px;margin-bottom:5px;$zus_txt' id='$d->game_id'>";
-	      	print "	<table><tr><td style='text-align:center;width:10%;'><img src='sleep.svg' style='width:100%;'/><br/>$resttime_p1_txt</td>";
+	      	print "<div class='draggable' style='border-radius:10px;padding:0px;margin-bottom:5px;$zus_txt' id='$d->game_id'>";
+	      	print "	<table style='border-spacing:0px;'><tr><td style='text-align:center;width:10%;'><img src='sleep.svg' style='width:100%;'/><br/>$resttime_p1_txt</td>";
 	      	print "	<td><img src='court.php?action=fill&game_id=$d->game_id' class='court'/></td>";
 	      	print "	<td style='text-align:center;width:10%;'><img src='sleep.svg' style='width:100%;'/><br/>$resttime_p2_txt</td></tr></table>";
 	      	print "</div>";	
@@ -283,7 +283,7 @@
   {
   	$court_no=-1;
   	$court_numbers = array(4,5,6,1,2,3);
-  	$x = "<div style='float:left;height:80vh;width:72vw;'>";
+  	$x = "<div style='float:right;height:50vh;width:72vw;position:fixed;right:10px;'>";
   	$x.= "<table style='width:100%;height:100%;'>";
   	for($i=0;$i<$rows;$i++)
   	{

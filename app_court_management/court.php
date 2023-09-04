@@ -35,8 +35,8 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 	$f1 = 150 / $user1_height;
 	$f2 = 150 / $user2_height;
 	
-	imagecopyresized($im, $user1, 72, 35, 0, 0, $user1_width*$f1, $user1_height*$f1, $user1_width, $user1_height);
-	imagecopyresized($im, $user2, 350, 80, 0, 0, $user2_width*$f2, $user2_height*$f2, $user2_width, $user2_height);
+	imagecopyresized($im, $user1, 72, 0, 0, 0, $user1_width*$f1, $user1_height*$f1, $user1_width, $user1_height);
+	imagecopyresized($im, $user2, 350, 40, 0, 0, $user2_width*$f2, $user2_height*$f2, $user2_width, $user2_height);
 
 	$text = $c_user1->login;
 	if($c_user1->gender=='Herr') { $color = $boy; } else { $color = $girl; } 
@@ -45,7 +45,7 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
   $left_offset = ($right - $left) / 2;
 	// Generate coordinates
   $x = 145 - $left_offset;
-	imagettftext($im, $font_size, 0, $x, 210, $color, $font, $text);
+	imagettftext($im, $font_size, 0, $x, 170, $color, $font, $text);
 
 	$text = $c_user2->login;
 	if($c_user2->gender=='Herr') { $color = $boy; } else { $color = $girl; } 
@@ -54,7 +54,7 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
   $left_offset = ($right - $left) / 2;
 	// Generate coordinates
   $x = 425 - $left_offset;
-	imagettftext($im, $font_size, 0, $x, 250, $color, $font, $text);
+	imagettftext($im, $font_size, 0, $x, 210, $color, $font, $text);
 
 	$img_crown = imagecreatefrompng(level.'inc/imgs/crown.png');
 	$img_crown_width = imagesx($img_crown);
