@@ -33,7 +33,7 @@
     $db->sql_query("SELECT *, user_account as trainer_fullname 
                     FROM location2user 
                     LEFT JOIN users ON location2user_user_id = users.user_id
-                    WHERE location2user_location_id = 8 
+                    WHERE location2user_location_id = 8 AND users.user_hide < '1'
                     ORDER BY user_account");
     $myCol = new column("exam2user_created_by","Trainer"); $myCol->set_selection_by_sql($db,'trainer_fullname','user_id'); $myCol->set_filter_column('trainer.user_account'); $myQuery->add_column($myCol);
 
