@@ -11,7 +11,13 @@
     $myQuery->set_sql_table("games");
     $sql_table = $myQuery->get_sql_table();
     $myQuery->set_edit_mode("full");
-    $myQuery->set_sql_select("SELECT *, p1.user_account as p1_fullname, p2.user_account as p2_fullname, p3.user_account as p3_fullname, p4.user_account as p4_fullname, winner.user_account as winner_fullname, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c
+    $myQuery->set_sql_select("SELECT *, p1.user_account as p1_fullname, 
+                                        p2.user_account as p2_fullname, 
+                                        p3.user_account as p3_fullname, 
+                                        p4.user_account as p4_fullname, 
+                                        winner.user_account as winner_fullname, 
+                                        winner2.user_account as winner2_fullname, 
+                                        DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c
         											FROM games
     													LEFT JOIN groups ON game_group_id = group_id
     													LEFT JOIN users as p1 ON game_player1_id = p1.user_id
@@ -19,6 +25,7 @@
     													LEFT JOIN users as p3 ON game_player3_id = p3.user_id
     													LEFT JOIN users as p4 ON game_player4_id = p4.user_id
     													LEFT JOIN users as winner ON game_winner_id = winner.user_id
+    													LEFT JOIN users as winner2 ON game_winner2_id = winner2.user_id
     													");
 
     $myCol = new column("group_title","Turnier");$myCol->set_edit_typ('not_editable'); $myQuery->add_column($myCol);
@@ -39,6 +46,9 @@
 
     $db->sql_query("SELECT *, user_account as winner_fullname FROM users ORDER BY user_account");
     $myCol = new column("game_winner_id","Gewinner"); $myCol->set_selection_by_sql($db,'winner_fullname','user_id'); $myCol->set_filter_column('winner.user_account'); $myQuery->add_column($myCol);
+
+    $db->sql_query("SELECT *, user_account as winner2_fullname FROM users ORDER BY user_account");
+    $myCol = new column("game_winner2_id","Gewinner 2"); $myCol->set_selection_by_sql($db,'winner2_fullname','user_id'); $myCol->set_filter_column('winner2.user_account'); $myQuery->add_column($myCol);
 
     $myCol = new column("game_location","Spielfeld"); $myCol->set_selection('1,2,3,4,5,6,7,8,9,10,11,12'); $myQuery->add_column($myCol);
     $myCol = new column("game_duration","Spielzeit [s]");  $myQuery->add_column($myCol);
