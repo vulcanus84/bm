@@ -406,7 +406,7 @@ class user
 						}
 						$txt.= "</span>";
 
-						if($data->game_winner_id==$_GET['user_id'])
+						if($data->game_winner_id==$_GET['user_id'] OR $data->game_winner2_id==$_GET['user_id'])
 						{
 							$x.= "<td style='text-align:center;'><h1 style='color:green;'>".$txt."</h1></td>";
 						}
