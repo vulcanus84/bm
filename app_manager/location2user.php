@@ -18,7 +18,7 @@
     													");
 
 
-    $myCol = new column("created_c","am"); $myCol->set_edit_typ('date'); $myCol->show_on_edit=false;  $myCol->set_filter_column('exam2user_created_on'); $myQuery->add_column($myCol);
+    $myCol = new column("created_c","am"); $myCol->set_edit_typ('date'); $myCol->show_on_edit=false;  $myCol->set_filter_column('location2user_created_on'); $myQuery->add_column($myCol);
     
     $db->sql_query("SELECT *  FROM locations ORDER BY location_name");
     $myCol = new column("location2user_location_id","Trainingsort"); $myCol->set_selection_by_sql($db,'location_name','location_id'); $myQuery->add_column($myCol);

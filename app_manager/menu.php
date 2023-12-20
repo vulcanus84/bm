@@ -1,6 +1,7 @@
 <?php
       $myMenu = new menu($db);
       $myMenu->add_item("Turniere","index.php");
+      $myMenu->add_item("Turniere zuweisen","group2user.php");
       $myMenu->add_item("Spiele","games.php");
       $myMenu->add_item("Kommentare","comments.php");
       $myMenu->add_item("News","news.php");
