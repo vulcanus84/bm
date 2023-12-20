@@ -477,19 +477,18 @@ class query
           if($col->get_edit_typ() =='date') { $element = $this->date2iso($element); }
           if($col->get_edit_typ() =='datetime') { $element = $this->date2iso($element); }
           if($col->get_edit_typ() =='checkbox') { $element = '1'; }
-          $prefix = '';
 					if(trim($element)!='')
 					{
 						//Escape single quotes for SQL
 						$element = str_replace("'","''",$element);
 					}
-					if($element=='NULL')
+					if($element=='NULL' OR $element=='')
 					{
-						$txt.= $col->get_save_column()."=".$prefix."NULL,";
+						$txt.= $col->get_save_column()."=NULL,";
 					}
 					else
 					{
-						$txt.= $col->get_save_column()."=".$prefix."'".$element."',";
+						$txt.= $col->get_save_column()."='".$element."',";
 					}
         }
         else
