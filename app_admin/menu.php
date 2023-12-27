@@ -6,4 +6,5 @@
       $myMenu->add_item("Texte übersetzen","translation.php");
       $myMenu->add_item("Log","log.php");
 			$myMenu->add_item("Passwort setzen","set_password.php");
+			$myMenu->add_item("Benutzer zusammenführen","combine_user.php");
       $myPage->menu = $myMenu->create_menu("tabsJ");

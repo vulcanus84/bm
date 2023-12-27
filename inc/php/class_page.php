@@ -104,9 +104,9 @@ class page
 		switch($setting_name)
 		{
 			case 'sql_user_selection':
-				return "SELECT *, CONCAT(user_lastname,' ',user_firstname) as user_fullname
+				return "SELECT *, CONCAT(COALESCE(user_firstname,''),' ',COALESCE(user_lastname,''),' (',COALESCE(user_account,''),')') as user_fullname
 								FROM users
-								ORDER BY user_lastname, user_firstname";
+								ORDER BY user_account, user_firstname, user_lastname";
 		}
 	}
 
