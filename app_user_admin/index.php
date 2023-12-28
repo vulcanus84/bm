@@ -115,6 +115,9 @@ try
 				$image_s = imagecrop($im, ['x' => $diff_x, 'y' => $diff_y, 'width' => $size, 'height' => $size]);
 				imagedestroy($im);
 
+				// $index = imagecolorclosest ( $image_s,  1,1,1 ); // get black color
+				// imagecolorset($image_s,$index,10,10,10); // SET NEW COLOR
+
 				//Round mask
 				$width = imagesx($image_s);
 				$height = imagesy($image_s);
@@ -126,17 +129,19 @@ try
 				imagealphablending($image, true);
 				imagecopyresampled($image, $image_s, 0, 0, 0, 0, $newwidth, $newheight, $width, $height);
 
-				//create masking
-				$mask = imagecreatetruecolor($newwidth, $newheight);
 
+				//Create mask (filled transparent circle)
+				$mask = imagecreatetruecolor($newwidth, $newheight);
 				$transparent = imagecolorallocate($mask, 255, 0, 0);
 				imagecolortransparent($mask,$transparent);
+				imagefilledellipse($mask, $newwidth/2, $newheight/2, $newwidth-5, $newheight-5, $transparent);
 
-				imagefilledellipse($mask, $newwidth/2, $newheight/2, $newwidth, $newheight, $transparent);
-
-				$red = imagecolorallocate($mask, 0, 0, 0);
+                //Merge player picture in the mask with the transparent circle
 				imagecopymerge($image, $mask, 0, 0, 0, 0, $newwidth, $newheight, 100);
+                //Define another color for transparency
+                $red = imagecolorallocate($mask, 255, 0, 0);
 				imagecolortransparent($image,$red);
+                //Fill it from the top left corner (like a fill function in a drawing app)
 				imagefill($image, 0, 0, $red);
 
 				$exif = exif_read_data($filename);
