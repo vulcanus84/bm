@@ -13,9 +13,6 @@ $(function() {
   $('#containment-wrapper').on('mousedown', function(e) { add_arrow(e); });
   init();
   update_file_infos();
-  canvas = document.getElementById('canvas');
-  context = canvas.getContext('2d');
-  context.lineWidth = 2;
   $('#freehand').addClass('active');
   $('#color_' + curr_color).addClass('active');
 
@@ -24,6 +21,32 @@ $(function() {
   canvas.onmousemove = draw;
 
 });
+
+
+function write_div_to_canvas(_callback)
+{
+  const drawing = [];
+  var i = 0; var j = 0;
+  canvas = document.getElementById('canvas2');
+  context = canvas.getContext('2d');
+  $( "div.draggable" ).each(function( index ) 
+  {
+    drawing[index] = new Image();
+    i++;
+    drawing[index].src = $(this).find('img').attr('src');
+    var x = $(this).css('left').replace('px','');
+    var y = $( this ).css('top').replace('px','');
+    drawing[index].onload = function() 
+    {
+      j++
+      canvas = document.getElementById('canvas2');
+      context = canvas.getContext('2d');
+      context.drawImage(drawing[index],x,y);
+      if(j==i) { _callback(); } 
+    };
+  });
+  _callback();
+}
 
 function show_modal()
 {
@@ -92,6 +115,10 @@ function init()
   { 
     if(e.target.id != 'canvas') { $(this).remove(); }
   });
+  canvas = document.getElementById('canvas');
+  context = canvas.getContext('2d');
+  context.lineWidth = 2;
+
 }
 
 function add_player()

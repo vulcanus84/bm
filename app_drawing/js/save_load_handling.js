@@ -1,30 +1,66 @@
 function save_pic()
 {
+  //Get all movable information on drawing with coordinates
   const players = [];
   $( "div.draggable" ).each(function( index ) {
     let player = { posX : $(this).css('left') , posY : $( this ).css('top'), id : $(this).attr('id') };
     players.unshift(player);
   });
   const json = JSON.stringify(players);
+
+  //Send pure draw as base64 encoded string
   var dataURL = document.getElementById('canvas').toDataURL();
-  $.ajax({
-    type: 'POST',
-    url: 'save_image.php',
-    data: { 
-      dataURL: dataURL,
-      drawing_id: curr_drawing_id,
-      bg_image : $('#bg_image').val(),
-      players: json
-    }
-  }).done(function(o) {
-    curr_drawing_id = o;
-    update_file_infos();
-  });
+  
+  //Get temporary canvas to generate preview image
+  var destCanvas = document.getElementById('canvas2');
+  ctx = destCanvas.getContext('2d');
+
+  //Get Background and fill it
+  if($('#bg_image').val() == 'Badmintonfeld') { path = 'imgs/badminton_court.jpg';  }
+  if($('#bg_image').val() == 'Skizze') { path = 'imgs/line_paper.png';  }
+  var img1 = new Image();
+    img1.onload = function () 
+    {
+      //draw background image
+      ctx.globalCompositeOperation='source-over';
+      ctx.drawImage(img1, 0, 0);
+
+      //Get current canvas with drawing and copy to temporary canvas
+      sourceCanvas = document.getElementById('canvas') ;
+      ctx.drawImage(sourceCanvas, 0, 0);
+
+      //Write all movable elements to pixels in canvas
+      write_div_to_canvas(function() 
+      {
+        var dataURL_preview = document.getElementById('canvas2').toDataURL();
+        $.ajax({
+          type: 'POST',
+          url: 'save_image.php',
+          data: 
+          { 
+            dataURL: dataURL,
+            dataURL_preview: dataURL_preview,
+            drawing_id: curr_drawing_id,
+            bg_image : $('#bg_image').val(),
+            players: json
+          }
+        }).done(function(data) 
+        {
+          var jsonData = JSON.parse(data);
+          curr_drawing_id = jsonData.drawing_id;
+          path = jsonData.path;    
+          update_file_infos();
+          init();
+        });
+      });
+    };
+    img1.src = path;
 }
 
 function load_pic(path,id)
 {
   hide_modal();
+  remove_draggables();
   curr_drawing_id = id;
   var canvas = document.getElementById('canvas');
   if (canvas.getContext) {
@@ -44,7 +80,6 @@ function load_pic(path,id)
       };
       img1.src = path;
   }
-
   load_excercise_details(id)
   load_draggables(id);
   update_file_infos();

@@ -29,6 +29,7 @@
       $myPage->add_content("<div id='containment-wrapper' style=\"position:relative;width:1000px;height:500px;border:1px solid gray;background-image:url('imgs/badminton_court.jpg');background-size: cover;\">");
       $myPage->add_content("<canvas id='canvas' width='1000' height='500'></canvas>");
       $myPage->add_content("</div>");
+      $myPage->add_content("<canvas style='display:none;border:5px solid green;' id='canvas2' width='1000' height='500'></canvas>");
       $myHTML = new html($db);
 
       $myPage->add_content("<div style='margin-top:10px;'>");
@@ -39,7 +40,7 @@
                       WHERE (location_name LIKE 'BCZ 2' OR location_name ='_TRAINER') AND user_firstname != '' AND user_hide!='1'
                       ORDER BY user_fullname");
       $myPage->add_content("<td>".$myHTML->get_selection($db,'user1','user_id','user_fullname','')."<br/><button id='add_player' onclick='add_player();'>Einfügen</button></td>");
-      // $myPage->add_content("<td><button id='add_player' onclick='add_player();'>Einfügen</button></td>");
+      $myPage->add_content("<td><button id='add_player' onclick='test();'>Test</button></td>");
       $myPage->add_content("<td style='border-right:3px solid black;'>&nbsp;</td>");
       $myPage->add_content("<td><img src='imgs/icon_erase.png' style='height:30px;' id='erase' onclick='erase();'/></td>");
       $myPage->add_content("<td><img src='imgs/icon_draw.png' style='height:30px;' id='freehand' onclick='freehand();'/></td>");
@@ -94,7 +95,7 @@
         $db->sql_query("SELECT * FROM excercises");
         while($d = $db->get_next_res())
         {
-          print "<img style='float:left;width:15vw;border:1px solid gray;margin:3px;' src='".$d->excercise_pic_path."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/>";
+          print "<img style='float:left;width:15vw;border:1px solid gray;margin:3px;' src='".str_replace('.png','_preview.png',$d->excercise_pic_path)."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/>";
         }
         print "</div>";
         print "</div>";
@@ -111,7 +112,7 @@
                         WHERE excercise2user_user_id='".$_GET['user_id']."'");
         while($d = $db->get_next_res())
         {
-          print "<img style='float:left;width:15vw;border:1px solid gray;' src='".$d->excercise_pic_path."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/>";
+          print "<img style='float:left;width:15vw;border:1px solid gray;' src='".str_replace('.png','_preview.png',$d->excercise_pic_path)."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/>";
         }
       }
 
