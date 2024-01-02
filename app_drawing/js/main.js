@@ -81,6 +81,7 @@ function change_color(color)
   $('#color_' + curr_color).removeClass('active');
   $('#color_' + color).addClass('active');
   curr_color = color;
+  freehand()
 }
 
 function init()
