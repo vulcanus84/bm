@@ -103,6 +103,14 @@ try
 	if(!IS_AJAX)
 	{
 		//Display page
+		$myPage->add_content("<!-- The Modal -->");
+		$myPage->add_content("<div id='myModal' class='modal'>");
+		$myPage->add_content("  <!-- Modal content -->");
+		$myPage->add_content("  <div class='modal-content'>");
+		$myPage->add_content("    <span onclick=\"$('#myModal').hide();\" class='close'>&times;</span>");
+		$myPage->add_content("    <p id='myModalText'>Some text in the Modal..</p>");
+		$myPage->add_content("  </div>");
+		$myPage->add_content("</div>");
 		$myPage->add_content("<div style='float:left;margin-top:2vw;margin-bottom:2vw;' id='sort_div'>");
 
 		//Check permissions
