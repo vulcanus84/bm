@@ -36,7 +36,7 @@
       $db->sql_query("SELECT DISTINCT CONCAT(user_firstname,' ', user_lastname) as user_fullname, user_id FROM users 
                       LEFT JOIN location2user ON location2user_user_id = user_id 
                       LEFT JOIN locations ON location2user_location_id = location_id
-                      WHERE (location_name LIKE 'BCZ%' OR location_name ='_TRAINER') AND user_firstname != ''
+                      WHERE (location_name LIKE 'BCZ 2' OR location_name ='_TRAINER') AND user_firstname != '' AND user_hide!='1'
                       ORDER BY user_fullname");
       $myPage->add_content("<td>".$myHTML->get_selection($db,'user1','user_id','user_fullname','')."<br/><button id='add_player' onclick='add_player();'>Einfügen</button></td>");
       // $myPage->add_content("<td><button id='add_player' onclick='add_player();'>Einfügen</button></td>");
