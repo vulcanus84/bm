@@ -1,5 +1,5 @@
-app_user_admin/uploads
-app_user_admin/user_pics
-app_drawing/saved_excercises
+app_user_admin/uploads/*
+app_user_admin/user_pics/*
+app_drawing/saved_excercises/*
 temp
 .DS_Store
