@@ -170,7 +170,7 @@ function add_player()
     $.ajax({ url: my_url }).done(
       function(pic_path)
       {
-        $('#containment-wrapper').append("<div id='" + id + "' style='position:absolute;left:100px;top:100px;' class='draggable' /><img style='width:120px;'  src='" + pic_path + "' /></div>");
+        $('#containment-wrapper').append("<div id='" + id + "' style='position:absolute;left:100px;top:100px;' class='draggable player' /><img style='width:120px;'  src='" + pic_path + "' /></div>");
         init();
         set_as_changed();
       });
