@@ -1,10 +1,10 @@
 function startDrawing(e) {
   var pos = getMousePos(document.getElementById('canvas'),e);
-  if($('#freehand').hasClass('active'))
+  if(curr_edit_mode=='freehand')
   {
     isDrawing = true; isErasing = false;
   }
-  if($('#erase').hasClass('active'))
+  if(curr_edit_mode=='erase')
   {
     isErasing = true; isDrawing = false;
   }
@@ -30,21 +30,6 @@ function draw(e) {
 
 function stopDrawing() {
    isDrawing = false;
+   isErasing = false;
    set_as_changed();
- }
-
- function freehand()
- {
-   $('#add_arrow_btn').removeClass('active');
-   $('#erase').removeClass('active');
-   $('#freehand').addClass('active');
-   curr_func = null;
- }
-
- function erase()
- {
-   $('#add_arrow_btn').removeClass('active');
-   $('#freehand').removeClass('active');
-   $('#erase').addClass('active');
-   curr_func = null;
  }

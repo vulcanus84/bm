@@ -2,11 +2,21 @@ function save_pic()
 {
   //Get all movable information on drawing with coordinates
   const players = [];
-  $( "div.draggable" ).each(function( index ) {
-    let player = { posX : $(this).css('left') , posY : $( this ).css('top'), id : $(this).attr('id') };
-    players.unshift(player);
+  const textfields = [];
+  $( "div.draggable").each(function( index ) {
+    if($(this).attr('id').substring(0,5)=='text_')
+    {
+      let textfield = { posX : $(this).css('left') , posY : $( this ).css('top'), width : $( this ).css('width'), height : $( this ).css('height'), mytext : $(this).text() };
+      textfields.unshift(textfield);
+    }
+    else
+    {
+      let player = { posX : $(this).css('left') , posY : $( this ).css('top'), id : $(this).attr('id') };
+      players.unshift(player);
+    }
   });
-  const json = JSON.stringify(players);
+  const json_players = JSON.stringify(players);
+  const json_textfields = JSON.stringify(textfields);
 
   //Send pure draw as base64 encoded string
   var dataURL = document.getElementById('canvas').toDataURL();
@@ -42,10 +52,12 @@ function save_pic()
             dataURL_preview: dataURL_preview,
             drawing_id: curr_drawing_id,
             bg_image : $('#bg_image').val(),
-            players: json
+            players: json_players,
+            textfields: json_textfields
           }
         }).done(function(data) 
         {
+          console.log(data);
           var jsonData = JSON.parse(data);
           curr_drawing_id = jsonData.drawing_id;
           path = jsonData.path;    
@@ -55,6 +67,53 @@ function save_pic()
       });
     };
     img1.src = path;
+    if(log) { console.log('Set img path'); }
+  }
+
+function write_div_to_canvas(_callback)
+{
+  const drawing = [];
+  var load_users = false;
+  var i = 0; var j = 0;
+  canvas = document.getElementById('canvas2');
+  context = canvas.getContext('2d');
+  $( "div.draggable" ).each(function( index ) 
+  {
+    if($(this).attr('id').substring(0,5)=='text_')
+    {
+      //Textfield
+      txt = $(this).find('span').text();
+      var x = $(this).css('left').replace('px','');
+      var y = $( this ).css('top').replace('px','');
+      y = parseInt(y);
+      y = y + 20;
+      canvas = document.getElementById('canvas2');
+      context = canvas.getContext('2d');
+      context.font = "16pt Arial";
+      context.fillText(txt, x, y);
+    }
+    else
+    {
+      load_users = true;
+      //Player
+      drawing[index] = new Image();
+      i++;
+      drawing[index].src = $(this).find('img').attr('src');
+      var x = $(this).css('left').replace('px','');
+      var y = $( this ).css('top').replace('px','');
+      drawing[index].onload = function() 
+      {
+        j++
+        canvas = document.getElementById('canvas2');
+        context = canvas.getContext('2d');
+        context.drawImage(drawing[index],x,y);
+        //After all images are loaded, call callback-function
+        if(j==i) { _callback(); } 
+      };
+    }
+  });
+  //if no users have to be loaded, call callback function, otherwise it will be called after all images are loaded
+  if(!load_users) { _callback(); } 
 }
 
 function load_pic(path,id)
@@ -81,6 +140,7 @@ function load_pic(path,id)
       img1.src = path;
   }
   load_excercise_details(id)
+  load_players(id);
   load_draggables(id);
   update_file_infos();
   curr_arrow_no = 1;
@@ -100,9 +160,9 @@ function load_excercise_details(excercise_id)
 }
 
 
-function load_draggables(excercise_id)
+function load_players(excercise_id)
 {
-  var my_url = 'index.php?ajax=get_draggables&excercise_id='+ excercise_id;
+  var my_url = 'index.php?ajax=get_players&excercise_id='+ excercise_id;
   $.ajax({ url: my_url }).done(
     function(data)
     {
@@ -114,9 +174,26 @@ function load_draggables(excercise_id)
             function(data)
             {
               var obj = $.parseJSON(data)
-              $('#containment-wrapper').append("<div id='" + obj[3] + "' style='position:absolute;left:" + obj[1] + "px;top:" + obj[2] + "px;' class='draggable'/><img style='width:120px;' src='" + obj[0] + "' /></div>");
+              $('#containment-wrapper').append("<div id='" + obj[3] + "' style='position:absolute;left:" + obj[1] + "px;top:" + obj[2] + "px;' class='draggable player'/><img style='width:120px;' src='" + obj[0] + "' /></div>");
               init();
             });
+      }
+    });
+}
+
+function load_draggables(excercise_id)
+{
+  var my_url = 'index.php?ajax=get_draggables&excercise_id='+ excercise_id;
+  $.ajax({ url: my_url }).done(
+    function(data)
+    {
+      var jsonData = JSON.parse(data);
+      for (var i = 0; i < jsonData.length; i++) {
+          var obj = jsonData[i];
+          console.log(obj);
+          $('#containment-wrapper').append("<div id='text_" + i + "' style='font-size:16pt;border-radius:10px;padding:5px;background-color:rgba(0, 0, 0, 0.05);width:" + obj.width + "px;height:" + obj.height + "px;position:absolute;left:" + obj.posx + "px;top:" + obj.posy + "px;' class='draggable'/><span>" + obj.text + "</span></div>");
+          $('#text_' + i).resizable();
+          init();
       }
     });
 }
@@ -129,9 +206,7 @@ function del_pic()
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   curr_arrow_no = 1;
   $('#arrow_no').val(curr_arrow_no);
-  $('#add_arrow_btn').removeClass('active');
-  $('#erase').removeClass('active');
-  $('#freehand').addClass('active');
+  set_edit_mode('player')
 }
 
 function show_pics()
@@ -143,7 +218,7 @@ function show_pics()
     del_pic();
     update_file_infos();
     remove_draggables();
-    curr_func = null;
+    curr_arrow_func = null;
   }
   else
   {

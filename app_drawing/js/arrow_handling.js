@@ -1,9 +1,6 @@
 function start_arrow()
 {
-  curr_func = 'start';
-  $('#freehand').removeClass('active');
-  $('#erase').removeClass('active');
-  $('#add_arrow_btn').addClass('active');
+  curr_arrow_func = 'start';
 }
 
 function getMousePos(canvas, evt) {
@@ -17,10 +14,10 @@ function getMousePos(canvas, evt) {
 function add_arrow(e)
 {
   var pos = getMousePos(document.getElementById('canvas'),e);
-  if(curr_func=='end') { curr_func = 'draw'; endX = pos.x; endY = pos.y; }
-  if(curr_func=='start') { curr_func = 'end'; startX = pos.x; startY = pos.y; }
+  if(curr_arrow_func=='end') { curr_arrow_func = 'draw'; endX = pos.x; endY = pos.y; }
+  if(curr_arrow_func=='start') { curr_arrow_func = 'end'; startX = pos.x; startY = pos.y; }
   
-  if(curr_func=='draw')
+  if(curr_arrow_func=='draw')
   {
     var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
@@ -29,7 +26,7 @@ function add_arrow(e)
     canvas_arrow(ctx, startX, startY, endX, endY,curr_color,curr_arrow_no);
     ctx.stroke();
     
-    curr_func = 'start';
+    curr_arrow_func = 'start';
     startX = null;
     startY = null;
     endX = null;

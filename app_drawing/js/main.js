@@ -1,6 +1,6 @@
 var startX = null;
 var startY = null;
-var curr_func = null;
+var curr_arrow_func = null;
 var endX = null;
 var endY = null;
 var curr_arrow_no = 1;
@@ -8,44 +8,68 @@ var curr_color = 'black';
 var isDrawing = false;
 var isErasing = false;
 var curr_drawing_id = null;
+var curr_edit_mode = null;
 
 $(function() { 
-  $('#containment-wrapper').on('mousedown', function(e) { add_arrow(e); });
   init();
   update_file_infos();
-  $('#freehand').addClass('active');
   $('#color_' + curr_color).addClass('active');
-
-  canvas.onmousedown = startDrawing;
-  canvas.onmouseup = stopDrawing;
-  canvas.onmousemove = draw;
-
+  set_edit_mode('player');
 });
 
-
-function write_div_to_canvas(_callback)
+function set_edit_mode(mode = 'player')
 {
-  const drawing = [];
-  var i = 0; var j = 0;
-  canvas = document.getElementById('canvas2');
-  context = canvas.getContext('2d');
-  $( "div.draggable" ).each(function( index ) 
-  {
-    drawing[index] = new Image();
-    i++;
-    drawing[index].src = $(this).find('img').attr('src');
-    var x = $(this).css('left').replace('px','');
-    var y = $( this ).css('top').replace('px','');
-    drawing[index].onload = function() 
-    {
-      j++
-      canvas = document.getElementById('canvas2');
-      context = canvas.getContext('2d');
-      context.drawImage(drawing[index],x,y);
-      if(j==i) { _callback(); } 
-    };
-  });
-  _callback();
+  //remove active class from all functions
+  $('#player').removeClass('active');
+  $('#freehand').removeClass('active');
+  $('#erase').removeClass('active');
+  $('#text').removeClass('active');
+  $('#arrow').removeClass('active');
+  curr_arrow_func = null;
+  curr_edit_mode = mode;
+  $('#arrow_no_picker').hide();
+  $('#player_picker').hide();
+  $('#color_picker').hide();
+
+  canvas.removeEventListener("mousedown", startDrawing, false);
+  canvas.removeEventListener("mouseup", stopDrawing, false);
+  canvas.removeEventListener("mousemove", draw, false);
+  canvas.removeEventListener("mousedown", add_arrow, false);
+  canvas.removeEventListener("mousedown", startTextBox, false);
+
+  //add active class to current function
+  switch(mode) {
+    case 'player':
+      $('#player').addClass('active');
+      $('#player_picker').show();
+      break;
+    case 'freehand':
+      canvas.addEventListener("mousedown", startDrawing, false);
+      canvas.addEventListener("mouseup", stopDrawing, false);
+      canvas.addEventListener("mousemove", draw, false);
+      $('#freehand').addClass('active');
+      $('#color_picker').show();
+      break;
+    case 'erase':
+      canvas.addEventListener("mousedown", startDrawing, false);
+      canvas.addEventListener("mouseup", stopDrawing, false);
+      canvas.addEventListener("mousemove", draw, false);
+      $('#erase').addClass('active');
+      $('#color_picker').show();
+      break;
+    case 'text':
+      canvas.addEventListener("mousedown", startTextBox, false);
+      $('#text').addClass('active');
+      $('#color_picker').show();
+      break;
+    case 'arrow':
+      canvas.addEventListener("mousedown", add_arrow, false);
+      $('#arrow').addClass('active');
+      $('#color_picker').show();
+      $('#arrow_no_picker').show();
+      start_arrow();
+      break;
+  }
 }
 
 function show_modal()
@@ -104,20 +128,28 @@ function change_color(color)
   $('#color_' + curr_color).removeClass('active');
   $('#color_' + color).addClass('active');
   curr_color = color;
-  freehand()
+  if(curr_edit_mode=='erase') { set_edit_mode('freehand'); }
 }
 
 function init()
 {
   $('.draggable').draggable({ containment: '#containment-wrapper', scroll: false });
-  $('.draggable').on('mouseup', function(e) { set_as_changed(); if(curr_func=='end') { curr_func='start'; }; });
-  $('.draggable').on('dblclick', function(e)
-  { 
-    if(e.target.id != 'canvas') { $(this).remove(); }
+  $('.draggable').on('mouseup', function(e) { set_as_changed(); if(curr_arrow_func=='end') { curr_arrow_func='start'; }; });
+  $('.draggable.player').on('dblclick', function(e) {  $(this).remove(); });
+
+  $('.draggable').on('click', function(e)
+  {
+    $('#myModalText').html(get_modal_txt_for_textfield(e.target.id)); 
+    show_modal();
   });
   canvas = document.getElementById('canvas');
   context = canvas.getContext('2d');
   context.lineWidth = 2;
+}
+
+function select_player()
+{
+  show_modal();
 
 }
 
@@ -130,7 +162,6 @@ function add_player()
       {
         $('#containment-wrapper').append("<div id='" + id + "' style='position:absolute;left:100px;top:100px;' class='draggable' /><img style='width:120px;'  src='" + pic_path + "' /></div>");
         init();
-        $('#save_pic').text('Speichern');
-        $('#save_pic').css('background-color','orange');
+        set_as_changed();
       });
 }

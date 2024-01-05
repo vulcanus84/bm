@@ -44,8 +44,24 @@
     $id = $player->id;
     $posX = str_replace('px','',$player->posX);
     $posY = str_replace('px','',$player->posY);
-    $txt = $id."->".$posX."->".$posY."->\n";
     $db->insert(array('excercise2user_user_id'=>$id,'excercise2user_excercise_id'=>$_POST['drawing_id'],'excercise2user_posx'=>$posX,'excercise2user_posy'=>$posY),'excercise2user');
   }
 
+  $arr = json_decode($_POST['textfields']);
+  $db->sql_query("DELETE FROM excercise2draggables WHERE excercise2draggable_excercise_id='$_POST[drawing_id]'");
+  foreach($arr as $textfield)
+  {
+    $posX = str_replace('px','',$textfield->posX);
+    $posY = str_replace('px','',$textfield->posY);
+    $width = str_replace('px','',$textfield->width);
+    $height = str_replace('px','',$textfield->height);
+
+    $db->insert(array('excercise2draggable_excercise_id'=>$_POST['drawing_id'],
+                      'excercise2draggable_typ'=>'textfield',
+                      'excercise2draggable_posx'=>$posX,
+                      'excercise2draggable_posy'=>$posY,
+                      'excercise2draggable_width'=>$width,
+                      'excercise2draggable_height'=>$height,
+                      'excercise2draggable_text'=>$textfield->mytext),'excercise2draggables');
+  }
 ?>

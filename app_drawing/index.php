@@ -14,7 +14,8 @@
       $myPage->set_title("Badminton Academy");
       $myPage->set_subtitle("Übungen zeichnen");
       $myPage->add_css("
-                      .active { border:5px solid orange; }
+                      .active { border-bottom:5px solid #AAAAFF;border-top:5px solid #AAAAFF; }
+                      .inactive { border:5px solid white; }
                       ");
 
       $myPage->add_content("<!-- The Modal -->");
@@ -26,33 +27,35 @@
       $myPage->add_content("  </div>");
       $myPage->add_content("</div>");
                   
-      $myPage->add_content("<div id='containment-wrapper' style=\"position:relative;width:1000px;height:500px;border:1px solid gray;background-image:url('imgs/badminton_court.jpg');background-size: cover;\">");
+      $myPage->add_content("<div id='containment-wrapper' style=\"position:relative;border:1px solid blue;width:1000px;height:500px;border:1px solid gray;background-image:url('imgs/badminton_court.jpg');background-size: contain;background-repeat: no-repeat;\">");
       $myPage->add_content("<canvas id='canvas' width='1000' height='500'></canvas>");
       $myPage->add_content("</div>");
       $myPage->add_content("<canvas style='display:none;border:5px solid green;' id='canvas2' width='1000' height='500'></canvas>");
       $myHTML = new html($db);
 
-      $myPage->add_content("<div style='margin-top:10px;'>");
+      $myPage->add_content("<div>");
       $myPage->add_content("<table><tr>");
-      $db->sql_query("SELECT DISTINCT CONCAT(user_firstname,' ', user_lastname) as user_fullname, user_id FROM users 
-                      LEFT JOIN location2user ON location2user_user_id = user_id 
-                      LEFT JOIN locations ON location2user_location_id = location_id
-                      WHERE (location_name LIKE 'BCZ 2' OR location_name ='_TRAINER') AND user_firstname != '' AND user_hide!='1'
-                      ORDER BY user_fullname");
-      $myPage->add_content("<td>".$myHTML->get_selection($db,'user1','user_id','user_fullname','')."<br/><button id='add_player' onclick='add_player();'>Einfügen</button></td>");
-      $myPage->add_content("<td><button id='add_player' onclick='test();'>Test</button></td>");
+      $myPage->add_content("<td><img src='imgs/icon_player.png' style='height:30px;' id='player' onclick='set_edit_mode(\"player\");'/></td>");
+      $myPage->add_content("<td><img src='imgs/icon_draw.png' style='height:30px;' id='freehand' onclick='set_edit_mode(\"freehand\");'/></td>");
+      $myPage->add_content("<td><img src='imgs/icon_erase.png' style='height:30px;' id='erase' onclick='set_edit_mode(\"erase\");'/></td>");
+      $myPage->add_content("<td><img src='imgs/icon_arrow.png' style='height:30px;' id='arrow' onclick='set_edit_mode(\"arrow\");'/></td>");
+      $myPage->add_content("<td><img src='imgs/icon_text.png' style='height:30px;' id='text' onclick='set_edit_mode(\"text\");'/></td>");
       $myPage->add_content("<td style='border-right:3px solid black;'>&nbsp;</td>");
-      $myPage->add_content("<td><img src='imgs/icon_erase.png' style='height:30px;' id='erase' onclick='erase();'/></td>");
-      $myPage->add_content("<td><img src='imgs/icon_draw.png' style='height:30px;' id='freehand' onclick='freehand();'/></td>");
-      $myPage->add_content("<td><img src='imgs/icon_arrow.png' style='height:30px;' id='add_arrow_btn' onclick='start_arrow();'/></td>");
-      $myPage->add_content("<td>".$myHTML->get_selection_with_array('1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20','arrow_no','onchange=change_arrow_no()')."</td>");
-      $myPage->add_content("<td style='border-right:3px solid black;'>&nbsp;</td>");
+      $myPage->add_content("<td id='color_picker' style='border-right:3px solid black;'><table><tr>");
+      $myPage->add_content("<td id='arrow_no_picker'>".$myHTML->get_selection_with_array('1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20','arrow_no','onchange=change_arrow_no()')."</td>");
       $array_color = array('black','green','red','blue','purple','orange','yellow');
       foreach($array_color as $color)
       {
         $myPage->add_content("<td><span id='color_".$color."'  style='height: 25px;width: 25px;background-color:".$color.";border-radius: 50%;display: inline-block;' onclick='change_color(\"".$color."\");'></span></td>");
       }
-      $myPage->add_content("<td style='border-right:3px solid black;'>&nbsp;</td>");
+      $myPage->add_content("</tr></table></td>");
+      $db->sql_query("SELECT DISTINCT CONCAT(user_firstname,' ', user_lastname) as user_fullname, user_id FROM users 
+                      LEFT JOIN location2user ON location2user_user_id = user_id 
+                      LEFT JOIN locations ON location2user_location_id = location_id
+                      WHERE (location_name LIKE 'BCZ 2' OR location_name ='_TRAINER') AND user_firstname != '' AND user_hide!='1'
+                      ORDER BY user_fullname");
+      $myPage->add_content("<td id='player_picker' style='border-right:3px solid black;'>".$myHTML->get_selection($db,'user1','user_id','user_fullname','')."<button id='add_player' onclick='add_player();'>Einfügen</button></td>");
+
       $myPage->add_content("<td>".$myHTML->get_selection_with_array('Badmintonfeld,Skizze', 'bg_image', 'onchange=change_background();')."</td>");
       $myPage->add_content("<td style='border-right:3px solid black;'>&nbsp;</td>");
       $myPage->add_content("<td><button id='save_pic' style='background-color:orange'  onclick='save_pic();'>Speichern</button></td>");
@@ -62,11 +65,14 @@
       $myPage->add_content("</div>");
 
       if(isset($_SESSION['login_user'])) { $myPage->add_js_link(level."inc/js/jquery.ui.touch.js"); }
+
+      $myPage->add_css_link(level.'inc/css/jquery-ui.min.css');
       $myPage->add_js_link('js/main.js');  
       $myPage->add_js_link('js/modal_functions.js');  
       $myPage->add_js_link('js/arrow_handling.js');
       $myPage->add_js_link('js/save_load_handling.js');
       $myPage->add_js_link('js/draw_handling.js');  
+      $myPage->add_js_link('js/text_handling.js');  
 
       print $myPage->get_html_code();
     }
@@ -138,16 +144,29 @@
       {
         $d = $db->sql_query_with_fetch("SELECT * FROM excercises WHERE excercise_id='".$_POST['id']."'");
         if(file_exists($d->excercise_pic_path)) { unlink($d->excercise_pic_path); }
+        $preview_path = str_replace('.png','_preview.png',$d->excercise_pic_path);
+        if(file_exists($preview_path)) { unlink($preview_path); }
         $db->delete('excercises','excercise_id',$_POST['id']); 
       }
 
-      if($_GET['ajax']=='get_draggables') 
+      if($_GET['ajax']=='get_players') 
       {
         $arr_json_data = array();
         $db->sql_query("SELECT * FROM excercise2user WHERE excercise2user_excercise_id='".$_GET['excercise_id']."'");
         while($d=$db->get_next_res())
         {
           $arr_json_data[] = array('user_id' => $d->excercise2user_user_id, 'posx' => $d->excercise2user_posx,'posy' => $d->excercise2user_posy);
+        }
+        print(json_encode($arr_json_data));
+      }
+
+      if($_GET['ajax']=='get_draggables') 
+      {
+        $arr_json_data = array();
+        $db->sql_query("SELECT * FROM excercise2draggables WHERE excercise2draggable_excercise_id='".$_GET['excercise_id']."'");
+        while($d=$db->get_next_res())
+        {
+          $arr_json_data[] = array('text' => $d->excercise2draggable_text, 'posx' => $d->excercise2draggable_posx,'posy' => $d->excercise2draggable_posy, 'width' => $d->excercise2draggable_width,'height' => $d->excercise2draggable_height);
         }
         print(json_encode($arr_json_data));
       }
