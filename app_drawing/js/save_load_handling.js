@@ -57,17 +57,16 @@ function save_pic()
           }
         }).done(function(data) 
         {
-          console.log(data);
           var jsonData = JSON.parse(data);
           curr_drawing_id = jsonData.drawing_id;
-          path = jsonData.path;    
+          path = jsonData.path; 
+          curr_drawing_preview_path = path.replace('.png','_preview.png');
           update_file_infos();
           init();
         });
       });
     };
     img1.src = path;
-    if(log) { console.log('Set img path'); }
   }
 
 function write_div_to_canvas(_callback)
@@ -85,12 +84,16 @@ function write_div_to_canvas(_callback)
       txt = $(this).find('span').text();
       var x = $(this).css('left').replace('px','');
       var y = $( this ).css('top').replace('px','');
+      var width = $( this ).css('width').replace('px','');
       y = parseInt(y);
       y = y + 20;
       canvas = document.getElementById('canvas2');
       context = canvas.getContext('2d');
       context.font = "16pt Arial";
-      context.fillText(txt, x, y);
+      let wrappedText = wrapText(context, txt, x, y, width, 23);
+      wrappedText.forEach(function(item) {
+          ctx.fillText(item[0], item[1], item[2]); 
+      })
     }
     else
     {
@@ -121,6 +124,7 @@ function load_pic(path,id)
   hide_modal();
   remove_draggables();
   curr_drawing_id = id;
+  curr_drawing_preview_path = path.replace('.png','_preview.png');
   var canvas = document.getElementById('canvas');
   if (canvas.getContext) {
 
@@ -190,7 +194,6 @@ function load_draggables(excercise_id)
       var jsonData = JSON.parse(data);
       for (var i = 0; i < jsonData.length; i++) {
           var obj = jsonData[i];
-          console.log(obj);
           $('#containment-wrapper').append("<div id='text_" + i + "' style='font-size:16pt;border-radius:10px;padding:5px;background-color:rgba(0, 0, 0, 0.05);width:" + obj.width + "px;height:" + obj.height + "px;position:absolute;left:" + obj.posx + "px;top:" + obj.posy + "px;' class='draggable'/><span>" + obj.text + "</span></div>");
           $('#text_' + i).resizable();
           init();
@@ -206,7 +209,7 @@ function del_pic()
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   curr_arrow_no = 1;
   $('#arrow_no').val(curr_arrow_no);
-  set_edit_mode('player')
+  set_edit_mode('freehand')
 }
 
 function show_pics()
@@ -267,6 +270,8 @@ function update_file_infos()
     $('#load_pic').text('Schliessen');
     $('#save_pic').css('background-color','green');
     $('#del_pic').show();
+    $('#preview_link').attr("href", curr_drawing_preview_path);
+    $('#preview_link_container').show();
   }
   else
   {
@@ -274,6 +279,7 @@ function update_file_infos()
     $('#save_pic').text('Speichern');
     $('#load_pic').text('Laden');
     $('#save_pic').css('background-color','orange');
+    $('#preview_link_container').hide();
   }
 }
 

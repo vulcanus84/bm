@@ -14,7 +14,7 @@ $(function() {
   init();
   update_file_infos();
   $('#color_' + curr_color).addClass('active');
-  set_edit_mode('player');
+  set_edit_mode('freehand');
 });
 
 function set_edit_mode(mode = 'player')
@@ -104,6 +104,8 @@ function set_as_changed()
 {
   $('#save_pic').text('Speichern');
   $('#save_pic').css('background-color','orange');
+  $('#preview_link_container').hide();
+
 }
 
 function change_arrow_no()
@@ -142,6 +144,14 @@ function init()
     $('#myModalText').html(get_modal_txt_for_textfield(e.target.id)); 
     show_modal();
   });
+
+  $('.draggable').find('span').on('click', function(e)
+  {
+    $('#myModalText').html(get_modal_txt_for_textfield(e.target.parentNode.id)); 
+    show_modal();
+  });
+
+  
   canvas = document.getElementById('canvas');
   context = canvas.getContext('2d');
   context.lineWidth = 2;

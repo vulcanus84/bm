@@ -19,7 +19,7 @@
                       ");
 
       $myPage->add_content("<!-- The Modal -->");
-      $myPage->add_content("<div id='myModal' class='modal'>");
+      $myPage->add_content("<div id='myModal' class='modal' style='z-index:9999;'>");
       $myPage->add_content("  <!-- Modal content -->");
       $myPage->add_content("  <div class='modal-content'>");
       $myPage->add_content("    <span onclick=\"hide_modal();\" class='close'>&times;</span>");
@@ -52,7 +52,7 @@
       $db->sql_query("SELECT DISTINCT CONCAT(user_firstname,' ', user_lastname) as user_fullname, user_id FROM users 
                       LEFT JOIN location2user ON location2user_user_id = user_id 
                       LEFT JOIN locations ON location2user_location_id = location_id
-                      WHERE (location_name LIKE 'BCZ 2' OR location_name ='_TRAINER') AND user_firstname != '' AND user_hide!='1'
+                      WHERE user_firstname != '' AND user_hide!='1'
                       ORDER BY user_fullname");
       $myPage->add_content("<td id='player_picker' style='border-right:3px solid black;'>".$myHTML->get_selection($db,'user1','user_id','user_fullname','')."<button id='add_player' onclick='add_player();'>Einfügen</button></td>");
 
@@ -61,6 +61,7 @@
       $myPage->add_content("<td><button id='save_pic' style='background-color:orange'  onclick='save_pic();'>Speichern</button></td>");
       $myPage->add_content("<td><button id='load_pic' style='background-color:blue;' onclick='show_pics();'>Laden</button></td>");
       $myPage->add_content("<td><button id='del_pic' style='background-color:red;' onclick='show_del_warning();'>Löschen</button></td>");
+      $myPage->add_content("<td id='preview_link_container' style='border-left:3px solid black;padding-left:10px;font-size:20pt;'><a id='preview_link' href='' target='_blank'/><img style='height:30px;' src='imgs/icon_preview_pic.png' alt='Preview'/></a></td>");
       $myPage->add_content("</tr></table>");
       $myPage->add_content("</div>");
 
@@ -95,7 +96,7 @@
           print "<div style='float:left;margin:3px;text-align:center;'>".$my_user->get_picture(false,'filter_user','80px',true)."<br/><span style='font-size:9pt;'>".$my_user->firstname."</span></div>";
         }
         print "</div>";
-        print "<div id='excersises' style='width:50vw;float:left;overflow:auto;margin:5px;'>";
+        print "<div id='excersises' style='width:50vw;float:left;overflow:auto;height:50vh;margin:5px;'>";
         print "<h1 style='margin-top:0;'>Übungen</h1>";
 
         $db->sql_query("SELECT * FROM excercises");
