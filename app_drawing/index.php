@@ -52,7 +52,7 @@
       $db->sql_query("SELECT DISTINCT CONCAT(user_firstname,' ', user_lastname) as user_fullname, user_id FROM users 
                       LEFT JOIN location2user ON location2user_user_id = user_id 
                       LEFT JOIN locations ON location2user_location_id = location_id
-                      WHERE user_firstname != '' AND user_hide!='1'
+                      WHERE user_firstname != '' AND user_hide!='1' AND user_id>1
                       ORDER BY user_fullname");
       $myPage->add_content("<td id='player_picker' style='border-right:3px solid black;'>".$myHTML->get_selection($db,'user1','user_id','user_fullname','')."<button id='add_player' onclick='add_player();'>Einfügen</button></td>");
 
