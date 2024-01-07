@@ -2,10 +2,11 @@
   define("level","../");                              //define the structur to to root directory (e.g. "../", for files in root set "")
   require_once(level."inc/standard_includes.php");    //Load all necessary files (DB-Connection, User-Login, etc.)
 
+  print "<style>a.link { margin:0 auto;width:90vw;font-size:48pt;color:black;display:block;border:1px solid gray;padding:2vw;border-radius:50px;background-color:#DDD; }</style>";
   print "<div style='text-align:center;width:100vw;'>";
+  if(isset($_GET['action']) && $_GET['action']=='logout') { session_destroy(); header("Location: excercises.php"); }
   if(isset($_POST['pw']) && $_POST['pw']=='bczofingen')
   {
-    print "Hello";
     $_SESSION['pw'] = 'bczofingen';
     header('Location: excercises.php');
   }
@@ -25,7 +26,7 @@
       {
         print "<a href='".str_replace('.png','_preview.png',$d->excercise_pic_path)."'><img style='width:90vw;border:1px solid gray;' src='".str_replace('.png','_preview.png',$d->excercise_pic_path)."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/></a>";
       }
-      print "<hr style='clear:both;'/>><a style='font-size:36pt;' href='excercises.php'>Zurück</a>";
+      print "<hr style='clear:both;'/>><a class='link' href='excercises.php'>Zurück</a>";
     }
     else
     {
@@ -37,8 +38,9 @@
       while($d = $db->get_next_res())
       {
         $my_user = new user($d->user_id);
-        print "<div style='float:left;margin:3px;text-align:center;'><a href='excercises.php?user_id=".$my_user->id."'>".$my_user->get_picture(false,'','300px',true)."</a><br/><span style='font-size:9pt;'>".$my_user->firstname."</span></div>";
+        print "<div style='float:left;margin:3px;text-align:center;'><a href='excercises.php?user_id=".$my_user->id."'>".$my_user->get_picture(false,'','300px',true)."</a><br/><span style='font-size:36pt;'>".$my_user->firstname."</span></div>";
       }
+      print "<hr style='clear:both;'/><a class='link' href='excercises.php?action=logout'>Logout</a>";
     }
   }
   else {
