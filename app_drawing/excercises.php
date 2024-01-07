@@ -45,8 +45,8 @@
   }
   else {
     print "<form id='login' method='POST' target='excercises.php'>
-      <span style='font-size:48pt;'>Bitte Passwort eingeben:</span><br/>
-      <input type='password' name='pw' style='width:90vw;height:100px;font-size:48pt;'/><br/>
+      <span style='font-size:48pt;'>Bitte Passwort eingeben:</span><p/>
+      <input type='password' name='pw' style='width:90vw;height:100px;font-size:48pt;'/><p/>
       <input type='submit' style='font-size:48pt;'/>
       </form>";
   }
