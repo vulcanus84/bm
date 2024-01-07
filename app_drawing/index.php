@@ -13,6 +13,7 @@
       //Display page
       $myPage->set_title("Badminton Academy");
       $myPage->set_subtitle("Übungen zeichnen");
+
       $myPage->add_css("
                       .active { border-bottom:5px solid #AAAAFF;border-top:5px solid #AAAAFF; }
                       .inactive { border:5px solid white; }
@@ -27,7 +28,7 @@
       $myPage->add_content("  </div>");
       $myPage->add_content("</div>");
                   
-      $myPage->add_content("<div id='containment-wrapper' style=\"position:relative;border:1px solid blue;width:1000px;height:500px;border:1px solid gray;background-image:url('imgs/badminton_court.jpg');background-size: contain;background-repeat: no-repeat;\">");
+      $myPage->add_content("<div id='containment-wrapper' style=\"position:relative;border:1px solid blue;width:1000px;height:500px;border:1px solid gray;background-image:url('');background-size: contain;background-repeat: no-repeat;\">");
       $myPage->add_content("<canvas id='canvas' width='1000' height='500'></canvas>");
       $myPage->add_content("</div>");
       $myPage->add_content("<canvas style='display:none;border:5px solid green;' id='canvas2' width='1000' height='500'></canvas>");
@@ -35,11 +36,15 @@
 
       $myPage->add_content("<div>");
       $myPage->add_content("<table><tr>");
+      $myPage->add_content("<input style='display:none;' type='file' id='cameraInput'></input>");
       $myPage->add_content("<td><img src='imgs/icon_player.png' style='height:30px;' id='player' onclick='set_edit_mode(\"player\");'/></td>");
       $myPage->add_content("<td><img src='imgs/icon_draw.png' style='height:30px;' id='freehand' onclick='set_edit_mode(\"freehand\");'/></td>");
       $myPage->add_content("<td><img src='imgs/icon_erase.png' style='height:30px;' id='erase' onclick='set_edit_mode(\"erase\");'/></td>");
       $myPage->add_content("<td><img src='imgs/icon_arrow.png' style='height:30px;' id='arrow' onclick='set_edit_mode(\"arrow\");'/></td>");
       $myPage->add_content("<td><img src='imgs/icon_text.png' style='height:30px;' id='text' onclick='set_edit_mode(\"text\");'/></td>");
+      $myPage->add_content("<td style='border-right:3px solid black;'>&nbsp;</td>");
+      $myPage->add_content("<td><img src='imgs/icon_image.png' style='height:30px;' id='text' onclick='get_image_library();'/></td>");
+      $myPage->add_content("<td><img src='imgs/icon_camera.png' style='height:30px;' onclick=\"$('#cameraInput').trigger('click');\"/></td>");
       $myPage->add_content("<td style='border-right:3px solid black;'>&nbsp;</td>");
       $myPage->add_content("<td id='color_picker' style='border-right:3px solid black;'><table><tr>");
       $myPage->add_content("<td id='arrow_no_picker'>".$myHTML->get_selection_with_array('1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20','arrow_no','onchange=change_arrow_no()')."</td>");
@@ -56,7 +61,7 @@
                       ORDER BY user_fullname");
       $myPage->add_content("<td id='player_picker' style='border-right:3px solid black;'>".$myHTML->get_selection($db,'user1','user_id','user_fullname','')."<button id='add_player' onclick='add_player();'>Einfügen</button></td>");
 
-      $myPage->add_content("<td>".$myHTML->get_selection_with_array('Badmintonfeld,Skizze', 'bg_image', 'onchange=change_background();')."</td>");
+      $myPage->add_content("<td><select id='select_bg' onchange='change_background();'></select></td>");
       $myPage->add_content("<td style='border-right:3px solid black;'>&nbsp;</td>");
       $myPage->add_content("<td><button id='save_pic' style='background-color:orange'  onclick='save_pic();'>Speichern</button></td>");
       $myPage->add_content("<td><button id='load_pic' style='background-color:blue;' onclick='show_pics();'>Laden</button></td>");
@@ -74,6 +79,7 @@
       $myPage->add_js_link('js/save_load_handling.js');
       $myPage->add_js_link('js/draw_handling.js');  
       $myPage->add_js_link('js/text_handling.js');  
+      $myPage->add_js_link('js/image_handling.js');  
 
       print $myPage->get_html_code();
     }
@@ -167,7 +173,7 @@
         $db->sql_query("SELECT * FROM excercise2draggables WHERE excercise2draggable_excercise_id='".$_GET['excercise_id']."'");
         while($d=$db->get_next_res())
         {
-          $arr_json_data[] = array('text' => $d->excercise2draggable_text, 'posx' => $d->excercise2draggable_posx,'posy' => $d->excercise2draggable_posy, 'width' => $d->excercise2draggable_width,'height' => $d->excercise2draggable_height);
+          $arr_json_data[] = array('typ'=>$d->excercise2draggable_typ,'text' => $d->excercise2draggable_text,'pic_path' => $d->excercise2draggable_pic_path, 'posx' => $d->excercise2draggable_posx,'posy' => $d->excercise2draggable_posy, 'width' => $d->excercise2draggable_width,'height' => $d->excercise2draggable_height);
         }
         print(json_encode($arr_json_data));
       }
@@ -177,6 +183,22 @@
         $d = $db->sql_query_with_fetch("SELECT * FROM excercises WHERE excercise_id='".$_GET['excercise_id']."'");
         $arr_json_data = array('bg_image' => $d->excercise_bg_image);
         print(json_encode($arr_json_data));
+      }
+
+      if($_GET['ajax']=='get_image_library') 
+      {
+        if ($handle = opendir('img_library')) 
+        {
+          while (false !== ($entry = readdir($handle))) 
+          {
+              if ($entry != "." && $entry != "..") 
+              {
+                print "<img onclick=\"add_from_img_library('img_library/".$entry."')\" src='img_library/".$entry."' style='float:left;height:100px;margin:5px;' />";
+              }
+          }
+          print "<hr style='clear:both'/>";
+          closedir($handle);
+      }
       }
     }
   }

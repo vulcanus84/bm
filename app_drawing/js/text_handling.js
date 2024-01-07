@@ -4,7 +4,7 @@ var curr_text_no = 1;
 function startTextBox(e)
 {
   var pos = getMousePos(document.getElementById('canvas'),e);
-  $('#containment-wrapper').append("<div id='text_"+ curr_text_no + "' style='font-size:16pt;border-radius:10px;padding:5px;background-color:rgba(0, 0, 0, 0.05);width:100px;height:100px;position:absolute;left:" + pos.x + "px;top:" + pos.y + "px;' class='draggable' /><span>Neuer Text</span></div>");
+  $('#containment-wrapper').append("<div id='text_"+ curr_text_no + "' style='font-size:16pt;border-radius:10px;padding:5px;background-color:rgba(0, 0, 0, 0.05);width:100px;height:100px;position:absolute;left:" + pos.x + "px;top:" + pos.y + "px;' class='draggable texts' /><span>Neuer Text</span></div>");
   $('#text_' + curr_text_no).resizable();
   curr_text_no++;
   init();

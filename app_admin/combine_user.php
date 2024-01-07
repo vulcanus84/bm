@@ -51,12 +51,10 @@
         }
         
         var my_url = '$_SERVER[link]?ajax=assign_pic&source_user_id=' + source_user_id + '&target_user_id=' + target_user_id;
-        console.log(my_url);
         $.ajax({ url: my_url }).done(
         function(data)
         {
           show_infos('from'); show_infos('to');
-          console.log(data);
         });
       }
 
@@ -74,12 +72,10 @@
         }
         
         var my_url = '$_SERVER[link]?ajax=assign_tournaments&source_user_id=' + source_user_id + '&target_user_id=' + target_user_id;
-        console.log(my_url);
         $.ajax({ url: my_url }).done(
         function(data)
         {
           show_infos('from'); show_infos('to');
-          console.log(data);
         });
       }
 
@@ -97,12 +93,10 @@
         }
         
         var my_url = '$_SERVER[link]?ajax=assign_stars&source_user_id=' + source_user_id + '&target_user_id=' + target_user_id;
-        console.log(my_url);
         $.ajax({ url: my_url }).done(
         function(data)
         {
           show_infos('from'); show_infos('to');
-          console.log(data);
         });
       }
 

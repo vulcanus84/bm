@@ -64,4 +64,21 @@
                       'excercise2draggable_height'=>$height,
                       'excercise2draggable_text'=>$textfield->mytext),'excercise2draggables');
   }
+
+  $arr = json_decode($_POST['imgs']);
+  foreach($arr as $myimg)
+  {
+    $posX = str_replace('px','',$myimg->posX);
+    $posY = str_replace('px','',$myimg->posY);
+    $width = str_replace('px','',$myimg->width);
+    $height = str_replace('px','',$myimg->height);
+
+    $db->insert(array('excercise2draggable_excercise_id'=>$_POST['drawing_id'],
+                      'excercise2draggable_typ'=>'img',
+                      'excercise2draggable_posx'=>$posX,
+                      'excercise2draggable_posy'=>$posY,
+                      'excercise2draggable_width'=>$width,
+                      'excercise2draggable_height'=>$height,
+                      'excercise2draggable_pic_path'=>$myimg->img_path),'excercise2draggables');
+  }
 ?>

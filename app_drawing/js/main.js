@@ -9,13 +9,48 @@ var isDrawing = false;
 var isErasing = false;
 var curr_drawing_id = null;
 var curr_edit_mode = null;
+var drag_allowed = true;
+
+const backgrounds = [
+  {
+    'name' : 'Badmintonfeld',
+    'path' : 'imgs/bg_badminton_court.jpg'
+  },
+  {
+    'name' : '3D Badmintonfeld',
+    'path' : 'imgs/bg_court_3d.jpg'
+  },
+  {
+    'name' : 'Liniert',
+    'path' : 'imgs/bg_line_paper.png'
+  },
+  {
+    'name' : 'Weiss',
+    'path' : 'imgs/bg_white_paper.png'
+  }
+];
 
 $(function() { 
   init();
   update_file_infos();
   $('#color_' + curr_color).addClass('active');
   set_edit_mode('freehand');
+  document.getElementById('cameraInput').onchange = function(e) {
+    readFile(e.srcElement.files[0]);
+  };
+  backgrounds.forEach(fill_bg_select);  
+  change_background(backgrounds[0].name);
 });
+
+function fill_bg_select(item)
+{
+    var opt = document.createElement("option");
+    opt.value= item.name;
+    opt.innerHTML = item.name; // whatever property it has
+
+    // then append it to the select element
+    $('#select_bg').append(opt);
+}
 
 function set_edit_mode(mode = 'player')
 {
@@ -76,12 +111,14 @@ function show_modal()
 {
   deactivate_touch_events();
   $('#myModal').show();
+  drag_allowed =false;
 }
 
 function hide_modal()
 {
   activate_touch_events();
   $('#myModal').hide();
+  drag_allowed =true;
 }
 
 function deactivate_touch_events()
@@ -116,8 +153,14 @@ function change_arrow_no()
 
 function change_background(without_change=false)
 {
-  if($('#bg_image').val() == 'Badmintonfeld') { $('#containment-wrapper')[0].style.backgroundImage="url('imgs/badminton_court.jpg')";  }
-  if($('#bg_image').val() == 'Skizze') { $('#containment-wrapper')[0].style.backgroundImage="url('imgs/line_paper.png')";  }
+  backgrounds.forEach(
+    function(item)
+    { 
+      if(item.name==$('#select_bg').val()) 
+      { 
+        $('#containment-wrapper')[0].style.backgroundImage="url('" + item.path + "')";  
+      }
+    });
   if(!without_change)
   {
     $('#save_pic').text('Speichern');
@@ -135,32 +178,36 @@ function change_color(color)
 
 function init()
 {
-  $('.draggable').draggable({ containment: '#containment-wrapper', scroll: false });
+  $('.draggable').draggable({ containment: '#containment-wrapper', scroll: false, drag: function() { if(!drag_allowed) { return false; } } });
   $('.draggable').on('mouseup', function(e) { set_as_changed(); if(curr_arrow_func=='end') { curr_arrow_func='start'; }; });
   $('.draggable.player').on('dblclick', function(e) {  $(this).remove(); });
 
-  $('.draggable').on('click', function(e)
+  $('.draggable.texts').on('dblclick', function(e)
   {
     $('#myModalText').html(get_modal_txt_for_textfield(e.target.id)); 
     show_modal();
   });
 
-  $('.draggable').find('span').on('click', function(e)
+  $('.draggable.texts').find('span').on('dblclick', function(e)
   {
     $('#myModalText').html(get_modal_txt_for_textfield(e.target.parentNode.id)); 
     show_modal();
   });
+  $('.draggable.images').find('img').on('click', function(e)
+  {
+    $('#'+e.target.parentNode.id).width($('#'+e.target.id).width());
+  });
 
-  
+  $('.draggable.images').find('img').on('dblclick', function(e)
+  {
+    $('#'+e.target.parentNode.id).width($('#'+e.target.id).width());
+    $('#myModalText').html(get_modal_txt_for_img(e.target.parentNode.id)); 
+    show_modal();
+  });
+
   canvas = document.getElementById('canvas');
   context = canvas.getContext('2d');
   context.lineWidth = 2;
-}
-
-function select_player()
-{
-  show_modal();
-
 }
 
 function add_player()

@@ -1,8 +1,10 @@
 function save_pic()
 {
+  var save_ok = true;
   //Get all movable information on drawing with coordinates
   const players = [];
   const textfields = [];
+  const imgs = [];
   $( "div.draggable").each(function( index ) {
     if($(this).attr('id').substring(0,5)=='text_')
     {
@@ -11,63 +13,85 @@ function save_pic()
     }
     else
     {
-      let player = { posX : $(this).css('left') , posY : $( this ).css('top'), id : $(this).attr('id') };
-      players.unshift(player);
+      if($(this).attr('id').substring(0,4)=='img_')
+      {
+        let myimg = { posX : $(this).css('left') , posY : $( this ).css('top'), width : $( this ).css('width'), height : $( this ).css('height'), img_path : $(this).find('img').attr('src') };
+        imgs.unshift(myimg);
+      }
+      else
+      {
+        if($(this).attr('id').substring(0,4)=='cam_')
+        {
+          alert('Kamerabilder müssen vor dem Speichern definitiv eingefügt werden');
+          save_ok = false;
+        }
+        else
+        {
+          let player = { posX : $(this).css('left') , posY : $( this ).css('top'), id : $(this).attr('id') };
+          players.unshift(player);
+        }
+      }
     }
   });
   const json_players = JSON.stringify(players);
   const json_textfields = JSON.stringify(textfields);
+  const json_imgs = JSON.stringify(imgs);
+  if(save_ok)
+  {
+//Send pure draw as base64 encoded string
+var dataURL = document.getElementById('canvas').toDataURL();
+//Get temporary canvas to generate preview image
+var destCanvas = document.getElementById('canvas2');
+ctx = destCanvas.getContext('2d');
 
-  //Send pure draw as base64 encoded string
-  var dataURL = document.getElementById('canvas').toDataURL();
-  
-  //Get temporary canvas to generate preview image
-  var destCanvas = document.getElementById('canvas2');
-  ctx = destCanvas.getContext('2d');
+//Get Background and fill it
+backgrounds.forEach(function(item) { if(item.name==$('#select_bg').val()) { path = item.path; }} );
+var img1 = new Image();
+  img1.onload = function () 
+  {
+    //draw background image
+    ctx.globalCompositeOperation='source-over';
+    ctx.drawImage(img1, 0, 0);
 
-  //Get Background and fill it
-  if($('#bg_image').val() == 'Badmintonfeld') { path = 'imgs/badminton_court.jpg';  }
-  if($('#bg_image').val() == 'Skizze') { path = 'imgs/line_paper.png';  }
-  var img1 = new Image();
-    img1.onload = function () 
+    //Get current canvas with drawing and copy to temporary canvas
+    sourceCanvas = document.getElementById('canvas') ;
+    ctx.drawImage(sourceCanvas, 0, 0);
+
+    //Write all movable elements to pixels in canvas
+    write_div_to_canvas(function() 
     {
-      //draw background image
-      ctx.globalCompositeOperation='source-over';
-      ctx.drawImage(img1, 0, 0);
-
-      //Get current canvas with drawing and copy to temporary canvas
-      sourceCanvas = document.getElementById('canvas') ;
-      ctx.drawImage(sourceCanvas, 0, 0);
-
-      //Write all movable elements to pixels in canvas
-      write_div_to_canvas(function() 
+      var dataURL_preview = document.getElementById('canvas2').toDataURL();
+      $.ajax({
+        type: 'POST',
+        url: 'save_image.php',
+        data: 
+        { 
+          dataURL: dataURL,
+          dataURL_preview: dataURL_preview,
+          drawing_id: curr_drawing_id,
+          bg_image : $('#select_bg').val(),
+          players: json_players,
+          textfields: json_textfields,
+          imgs: json_imgs
+        }
+      }).done(function(data) 
       {
-        var dataURL_preview = document.getElementById('canvas2').toDataURL();
-        $.ajax({
-          type: 'POST',
-          url: 'save_image.php',
-          data: 
-          { 
-            dataURL: dataURL,
-            dataURL_preview: dataURL_preview,
-            drawing_id: curr_drawing_id,
-            bg_image : $('#bg_image').val(),
-            players: json_players,
-            textfields: json_textfields
-          }
-        }).done(function(data) 
-        {
-          var jsonData = JSON.parse(data);
-          curr_drawing_id = jsonData.drawing_id;
-          path = jsonData.path; 
-          curr_drawing_preview_path = path.replace('.png','_preview.png');
-          update_file_infos();
-          init();
-        });
+        console.log(data);
+        var jsonData = JSON.parse(data);
+        curr_drawing_id = jsonData.drawing_id;
+        path = jsonData.path; 
+        curr_drawing_preview_path = path.replace('.png','_preview.png');
+        update_file_infos();
+        init();
       });
-    };
-    img1.src = path;
+    });
+  };
+  img1.src = path;
+
+
+
   }
+}
 
 function write_div_to_canvas(_callback)
 {
@@ -97,22 +121,45 @@ function write_div_to_canvas(_callback)
     }
     else
     {
-      load_users = true;
-      //Player
-      drawing[index] = new Image();
-      i++;
-      drawing[index].src = $(this).find('img').attr('src');
-      var x = $(this).css('left').replace('px','');
-      var y = $( this ).css('top').replace('px','');
-      drawing[index].onload = function() 
+      if($(this).attr('id').substring(0,4)=='img_')
       {
-        j++
-        canvas = document.getElementById('canvas2');
-        context = canvas.getContext('2d');
-        context.drawImage(drawing[index],x,y);
-        //After all images are loaded, call callback-function
-        if(j==i) { _callback(); } 
-      };
+        //Image
+        drawing[index] = new Image();
+        i++;
+        drawing[index].src = $(this).find('img').attr('src');
+        var x = $(this).css('left').replace('px','');
+        var y = $( this ).css('top').replace('px','');
+        var w = $( this ).css('width').replace('px','');
+        var h = $( this ).css('height').replace('px','');
+        drawing[index].onload = function() 
+        {
+          j++
+          canvas = document.getElementById('canvas2');
+          context = canvas.getContext('2d');
+          context.drawImage(drawing[index],x,y,w,h);
+          //After all images are loaded, call callback-function
+          if(j==i) { _callback(); } 
+        };
+      }
+      else
+      {
+        load_users = true;
+        //Player
+        drawing[index] = new Image();
+        i++;
+        drawing[index].src = $(this).find('img').attr('src');
+        var x = $(this).css('left').replace('px','');
+        var y = $( this ).css('top').replace('px','');
+        drawing[index].onload = function() 
+        {
+          j++
+          canvas = document.getElementById('canvas2');
+          context = canvas.getContext('2d');
+          context.drawImage(drawing[index],x,y);
+          //After all images are loaded, call callback-function
+          if(j==i) { _callback(); } 
+        };
+      }
     }
   });
   //if no users have to be loaded, call callback function, otherwise it will be called after all images are loaded
@@ -158,7 +205,7 @@ function load_excercise_details(excercise_id)
     function(data)
     {
       var jsonData = JSON.parse(data);
-      $('#bg_image').val(jsonData.bg_image);
+      $('#select_bg').val(jsonData.bg_image);
       change_background(true);
     });
 }
@@ -194,8 +241,16 @@ function load_draggables(excercise_id)
       var jsonData = JSON.parse(data);
       for (var i = 0; i < jsonData.length; i++) {
           var obj = jsonData[i];
-          $('#containment-wrapper').append("<div id='text_" + i + "' style='font-size:16pt;border-radius:10px;padding:5px;background-color:rgba(0, 0, 0, 0.05);width:" + obj.width + "px;height:" + obj.height + "px;position:absolute;left:" + obj.posx + "px;top:" + obj.posy + "px;' class='draggable'/><span>" + obj.text + "</span></div>");
-          $('#text_' + i).resizable();
+          if(obj.typ=='textfield')
+          {
+            $('#containment-wrapper').append("<div id='text_" + i + "' style='font-size:16pt;border-radius:10px;padding:5px;background-color:rgba(0, 0, 0, 0.05);width:" + obj.width + "px;height:" + obj.height + "px;position:absolute;left:" + obj.posx + "px;top:" + obj.posy + "px;' class='draggable texts'/><span>" + obj.text + "</span></div>");
+            $('#text_' + i).resizable();
+          }
+          if(obj.typ=='img')
+          {
+            $('#containment-wrapper').append("<div id='img_"+ i + "' style='width:" + obj.width +"px;height:" + obj.height +"px;position:absolute;left:" + obj.posx +"px;top:" + obj.posy +"px;' class='draggable images'><img src='" + obj.pic_path + "' id='imgtag_"+ i + "' style='height:100%;' /></div>");
+            $('#img_' + i).resizable();
+          }
           init();
       }
     });
