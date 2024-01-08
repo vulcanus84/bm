@@ -133,7 +133,11 @@
 
       if($_GET['ajax']=='del_warning') 
       { 
-        print "Wirklich löschen?<p/><button style='background-color:red;' onclick='del_from_db()'>Ja</button><button onclick='$(\"#myModal\").hide();'>Nein</button>";
+        print "Wollen sie diese Zeichnung wirklich löschen?<p/>
+                <button style='background-color:red;' onclick='del_from_db()'>Ja</button>
+                <button onclick='$(\"#myModal\").hide();'>Nein</button>
+                <button style='background-color:purple;' onclick='close_pic()'>Nur Arbeitsfläche löschen</button>
+                ";
       }
 
       if($_GET['ajax']=='del_changes_warning') 

@@ -66,7 +66,6 @@ function save_pic()
       //Write all movable elements to pixels in canvas
       write_div_to_canvas(function() 
       {
-        console.log('Write to Canvas');
         var dataURL_preview = document.getElementById('canvas2').toDataURL();
         $.ajax({
           type: 'POST',
@@ -341,45 +340,45 @@ function show_del_warning()
 
 function update_file_infos()
 {
-  if(isChanged)
-  {
-    $('#save_pic').show();
-    $('#save_pic').css('background-color','orange');
-    $('#save_pic').text('Speichern');
-    $('#load_pic').text('Laden');
-  }
-  else
-  {
-    $('#save_pic').hide();
-    $('#save_copy').hide();
-  }
 
   if(curr_drawing_id > 0)
   {
-    if(isChanged)
-    {
-      $('#save_copy').show();
-    }
     $('#load_pic').text('Schliessen');
     $('#del_pic').show();
-    $('#preview_link').attr("href", curr_drawing_preview_path);
-    $('#preview_link_container').show();
+    if(isChanged)
+    {
+      $('#save_pic').show();
+      $('#save_copy').show();
+      $('#preview_link_container').hide();
+    }
+    else
+    {
+      $('#save_pic').hide();
+      $('#save_copy').hide();
+      $('#preview_link').attr("href", curr_drawing_preview_path);
+      $('#preview_link_container').show();
+      $('#erase_pic').hide();
+      $('#load_pic').show();
+    }
   }
   else
   {
+    $('#del_pic').hide();
+    $('#preview_link_container').hide();
     if(isChanged)
     {
+      $('#save_pic').show();
       $('#load_pic').hide();
       $('#erase_pic').show();
     }
     else
     {
+      $('#save_pic').hide();
+      $('#save_copy').hide();
       $('#erase_pic').hide();
       $('#load_pic').text('Laden');
       $('#load_pic').show();
     }
-    $('#del_pic').hide();
-    $('#preview_link_container').hide();
   }
 }
 
