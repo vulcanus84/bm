@@ -14,12 +14,12 @@ function get_image_library()
 
 function add_from_img_library(path)
 {
-  $('#containment-wrapper').append("<div id='img_"+ curr_img_no + "' style='width:100px;height:100px;position:absolute;left:100px;top:100px;' class='draggable images'><img src='" + path + "' id='imgtag_"+ curr_img_no + "' style='height:100%;' /></div>");
+  $('#containment-wrapper').append("<div id='img_"+ curr_img_no + "' style='width:100px;height:100px;position:absolute;left:100px;top:100px;' class='draggable images'><img src='" + path + "' id='imgtag_"+ curr_img_no + "' style='width:100%;' /></div>");
   $('#img_' + curr_img_no).resizable({aspectRatio: true });
   curr_img_no++;
   init();
   set_as_changed();
-  $('#img_' + curr_img_no).width($('#imgtag_' + curr_img_no).width());
+  $('#img_' + curr_img_no).height($('#imgtag_' + curr_img_no).height());
   hide_modal();
 }
 

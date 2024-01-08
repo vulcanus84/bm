@@ -196,7 +196,7 @@ function init()
   });
   $('.draggable.images').find('img').on('click', function(e)
   {
-    $('#'+e.target.parentNode.id).width($('#'+e.target.id).width());
+    $('#'+e.target.parentNode.id).height($('#'+e.target.id).height());
   });
 
   $('.draggable.images').find('img').on('dblclick', function(e)
