@@ -51,6 +51,7 @@ function insert_img(img_id)
   {
     canvas = document.getElementById('canvas');
     context = canvas.getContext('2d');
+    context.globalCompositeOperation='source-over';
     context.drawImage(drawing,x,y,w,h);
     $('#'+img_id).remove();
     hide_modal();
