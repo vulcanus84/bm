@@ -8,6 +8,7 @@ var curr_color = 'black';
 var isDrawing = false;
 var isErasing = false;
 var curr_drawing_id = null;
+var isChanged = false;
 var curr_edit_mode = null;
 var drag_allowed = true;
 
@@ -139,11 +140,8 @@ function activate_touch_events()
 
 function set_as_changed()
 {
-  $('#save_pic').text('Speichern');
-  $('#save_pic').css('background-color','orange');
-  $('#preview_link_container').hide();
-  $('#save_copy').show();
-
+  isChanged = true;
+  update_file_infos();
 }
 
 function change_arrow_no()

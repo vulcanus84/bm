@@ -87,6 +87,7 @@ function save_pic()
           curr_drawing_id = jsonData.drawing_id;
           path = jsonData.path; 
           curr_drawing_preview_path = path.replace('.png','_preview.png');
+          isChanged = false;
           update_file_infos();
           init();
         });
@@ -270,27 +271,45 @@ function del_pic()
   $('#arrow_no').val(curr_arrow_no);
 }
 
+function close_pic()
+{
+  hide_modal();
+  curr_drawing_id = null;
+  isChanged = false;
+  del_pic();
+  update_file_infos();
+  remove_draggables();
+  curr_arrow_func = null;
+}
 function show_pics()
 {
-  if(curr_drawing_id>0)
+  if(isChanged)
   {
-    //Close drawing
-    curr_drawing_id = null;
-    del_pic();
-    update_file_infos();
-    remove_draggables();
-    curr_arrow_func = null;
-  }
-  else
-  {
-    var my_url = 'index.php?ajax=load_pictures';
+    var my_url = 'index.php?ajax=del_changes_warning';
     $.ajax({ url: my_url }).done(
       function(data)
       {
         $('#myModalText').html(data); 
         show_modal();
       });
+  }
+  else
+  {
+    if(curr_drawing_id>0)
+    {
+      close_pic();
     }
+    else
+    {
+      var my_url = 'index.php?ajax=load_pictures';
+      $.ajax({ url: my_url }).done(
+        function(data)
+        {
+          $('#myModalText').html(data); 
+          show_modal();
+        });
+    }
+  }
 }
 function del_from_db()
 {
@@ -322,23 +341,44 @@ function show_del_warning()
 
 function update_file_infos()
 {
-  if(curr_drawing_id > 0)
+  if(isChanged)
   {
-    $('#save_pic').text('Gespeichert');
-    $('#load_pic').text('Schliessen');
-    $('#save_pic').css('background-color','green');
-    $('#del_pic').show();
-    $('#preview_link').attr("href", curr_drawing_preview_path);
-    $('#preview_link_container').show();
-    $('#save_copy').hide();
+    $('#save_pic').show();
+    $('#save_pic').css('background-color','orange');
+    $('#save_pic').text('Speichern');
+    $('#load_pic').text('Laden');
   }
   else
   {
-    $('#del_pic').hide();
+    $('#save_pic').hide();
     $('#save_copy').hide();
-    $('#save_pic').text('Speichern');
-    $('#load_pic').text('Laden');
-    $('#save_pic').css('background-color','orange');
+  }
+
+  if(curr_drawing_id > 0)
+  {
+    if(isChanged)
+    {
+      $('#save_copy').show();
+    }
+    $('#load_pic').text('Schliessen');
+    $('#del_pic').show();
+    $('#preview_link').attr("href", curr_drawing_preview_path);
+    $('#preview_link_container').show();
+  }
+  else
+  {
+    if(isChanged)
+    {
+      $('#load_pic').hide();
+      $('#erase_pic').show();
+    }
+    else
+    {
+      $('#erase_pic').hide();
+      $('#load_pic').text('Laden');
+      $('#load_pic').show();
+    }
+    $('#del_pic').hide();
     $('#preview_link_container').hide();
   }
 }

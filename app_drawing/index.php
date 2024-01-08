@@ -35,7 +35,7 @@
       $myHTML = new html($db);
 
       $myPage->add_content("<div>");
-      $myPage->add_content("<table><tr>");
+      $myPage->add_content("<table cellspacing='0'><tr>");
       $myPage->add_content("<input style='display:none;' type='file' id='cameraInput'></input>");
       $myPage->add_content("<td><img src='imgs/icon_player.png' style='height:30px;' id='player' onclick='set_edit_mode(\"player\");'/></td>");
       $myPage->add_content("<td><img src='imgs/icon_draw.png' style='height:30px;' id='freehand' onclick='set_edit_mode(\"freehand\");'/></td>");
@@ -63,9 +63,10 @@
 
       $myPage->add_content("<td><select id='select_bg' onchange='change_background();'></select></td>");
       $myPage->add_content("<td style='border-right:3px solid black;'>&nbsp;</td>");
-      $myPage->add_content("<td><button id='save_pic' style='background-color:orange'  onclick='save_pic();'>Speichern</button></td>");
+      $myPage->add_content("<td><button id='erase_pic' style='background-color:red;' onclick='close_pic();'>Zeichnung löschen</button></td>");
       $myPage->add_content("<td><button id='load_pic' style='background-color:blue;' onclick='show_pics();'>Laden</button></td>");
       $myPage->add_content("<td><button id='del_pic' style='background-color:red;' onclick='show_del_warning();'>Löschen</button></td>");
+      $myPage->add_content("<td><button id='save_pic' style='background-color:orange'  onclick='save_pic();'>Speichern</button></td>");
       $myPage->add_content("<td><button id='save_copy' style='background-color:purple'  onclick='save_copy();'>Kopie</button></td>");
       $myPage->add_content("<td id='preview_link_container' style='border-left:3px solid black;padding-left:10px;font-size:20pt;'><a id='preview_link' href='' target='_blank'/><img style='height:30px;' src='imgs/icon_preview_pic.png' alt='Preview'/></a></td>");
       $myPage->add_content("</tr></table>");
@@ -133,6 +134,11 @@
       if($_GET['ajax']=='del_warning') 
       { 
         print "Wirklich löschen?<p/><button style='background-color:red;' onclick='del_from_db()'>Ja</button><button onclick='$(\"#myModal\").hide();'>Nein</button>";
+      }
+
+      if($_GET['ajax']=='del_changes_warning') 
+      { 
+        print "Es gibt ungespeicherte Änderungen. Wollen Sie die Zeichnung wirklich schliessen?<p/><button style='background-color:red;' onclick='close_pic()'>Ja</button><button onclick='$(\"#myModal\").hide();'>Nein</button>";
       }
 
       if($_GET['ajax']=='get_pic_path') 
