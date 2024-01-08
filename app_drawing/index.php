@@ -66,6 +66,7 @@
       $myPage->add_content("<td><button id='save_pic' style='background-color:orange'  onclick='save_pic();'>Speichern</button></td>");
       $myPage->add_content("<td><button id='load_pic' style='background-color:blue;' onclick='show_pics();'>Laden</button></td>");
       $myPage->add_content("<td><button id='del_pic' style='background-color:red;' onclick='show_del_warning();'>Löschen</button></td>");
+      $myPage->add_content("<td><button id='save_copy' style='background-color:purple'  onclick='save_copy();'>Kopie</button></td>");
       $myPage->add_content("<td id='preview_link_container' style='border-left:3px solid black;padding-left:10px;font-size:20pt;'><a id='preview_link' href='' target='_blank'/><img style='height:30px;' src='imgs/icon_preview_pic.png' alt='Preview'/></a></td>");
       $myPage->add_content("</tr></table>");
       $myPage->add_content("</div>");

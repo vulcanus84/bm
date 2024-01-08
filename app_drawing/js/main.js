@@ -142,6 +142,7 @@ function set_as_changed()
   $('#save_pic').text('Speichern');
   $('#save_pic').css('background-color','orange');
   $('#preview_link_container').hide();
+  $('#save_copy').show();
 
 }
 

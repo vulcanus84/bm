@@ -1,3 +1,9 @@
+function save_copy()
+{
+  curr_drawing_id = null;
+  save_pic();
+}
+
 function save_pic()
 {
   var save_ok = true;
@@ -38,65 +44,62 @@ function save_pic()
   const json_imgs = JSON.stringify(imgs);
   if(save_ok)
   {
-//Send pure draw as base64 encoded string
-var dataURL = document.getElementById('canvas').toDataURL();
-//Get temporary canvas to generate preview image
-var destCanvas = document.getElementById('canvas2');
-ctx = destCanvas.getContext('2d');
+    //Send pure draw as base64 encoded string
+    var dataURL = document.getElementById('canvas').toDataURL();
+    //Get temporary canvas to generate preview image
+    var destCanvas = document.getElementById('canvas2');
+    ctx = destCanvas.getContext('2d');
 
-//Get Background and fill it
-backgrounds.forEach(function(item) { if(item.name==$('#select_bg').val()) { path = item.path; }} );
-var img1 = new Image();
-  img1.onload = function () 
-  {
-    //draw background image
-    ctx.globalCompositeOperation='source-over';
-    ctx.drawImage(img1, 0, 0);
-
-    //Get current canvas with drawing and copy to temporary canvas
-    sourceCanvas = document.getElementById('canvas') ;
-    ctx.drawImage(sourceCanvas, 0, 0);
-
-    //Write all movable elements to pixels in canvas
-    write_div_to_canvas(function() 
+    //Get Background and fill it
+    backgrounds.forEach(function(item) { if(item.name==$('#select_bg').val()) { path = item.path; }} );
+    var img1 = new Image();
+    img1.onload = function () 
     {
-      var dataURL_preview = document.getElementById('canvas2').toDataURL();
-      $.ajax({
-        type: 'POST',
-        url: 'save_image.php',
-        data: 
-        { 
-          dataURL: dataURL,
-          dataURL_preview: dataURL_preview,
-          drawing_id: curr_drawing_id,
-          bg_image : $('#select_bg').val(),
-          players: json_players,
-          textfields: json_textfields,
-          imgs: json_imgs
-        }
-      }).done(function(data) 
+      //draw background image
+      ctx.globalCompositeOperation='source-over';
+      ctx.drawImage(img1, 0, 0);
+
+      //Get current canvas with drawing and copy to temporary canvas
+      sourceCanvas = document.getElementById('canvas') ;
+      ctx.drawImage(sourceCanvas, 0, 0);
+
+      //Write all movable elements to pixels in canvas
+      write_div_to_canvas(function() 
       {
-        console.log(data);
-        var jsonData = JSON.parse(data);
-        curr_drawing_id = jsonData.drawing_id;
-        path = jsonData.path; 
-        curr_drawing_preview_path = path.replace('.png','_preview.png');
-        update_file_infos();
-        init();
+        console.log('Write to Canvas');
+        var dataURL_preview = document.getElementById('canvas2').toDataURL();
+        $.ajax({
+          type: 'POST',
+          url: 'save_image.php',
+          data: 
+          { 
+            dataURL: dataURL,
+            dataURL_preview: dataURL_preview,
+            drawing_id: curr_drawing_id,
+            bg_image : $('#select_bg').val(),
+            players: json_players,
+            textfields: json_textfields,
+            imgs: json_imgs
+          }
+        }).done(function(data) 
+        {
+          var jsonData = JSON.parse(data);
+          curr_drawing_id = jsonData.drawing_id;
+          path = jsonData.path; 
+          curr_drawing_preview_path = path.replace('.png','_preview.png');
+          update_file_infos();
+          init();
+        });
       });
-    });
-  };
-  img1.src = path;
-
-
-
+    };
+    img1.src = path;
   }
 }
 
 function write_div_to_canvas(_callback)
 {
   const drawing = [];
-  var load_users = false;
+  var load_pics = false;
   var i = 0; var j = 0;
   canvas = document.getElementById('canvas2');
   context = canvas.getContext('2d');
@@ -121,6 +124,7 @@ function write_div_to_canvas(_callback)
     }
     else
     {
+      load_pics = true;
       if($(this).attr('id').substring(0,4)=='img_')
       {
         //Image
@@ -143,7 +147,6 @@ function write_div_to_canvas(_callback)
       }
       else
       {
-        load_users = true;
         //Player
         drawing[index] = new Image();
         i++;
@@ -163,11 +166,12 @@ function write_div_to_canvas(_callback)
     }
   });
   //if no users have to be loaded, call callback function, otherwise it will be called after all images are loaded
-  if(!load_users) { _callback(); } 
+  if(!load_pics) { _callback(); } 
 }
 
 function load_pic(path,id)
 {
+  set_edit_mode('freehand')
   hide_modal();
   remove_draggables();
   curr_drawing_id = id;
@@ -264,7 +268,6 @@ function del_pic()
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   curr_arrow_no = 1;
   $('#arrow_no').val(curr_arrow_no);
-  set_edit_mode('freehand')
 }
 
 function show_pics()
@@ -327,10 +330,12 @@ function update_file_infos()
     $('#del_pic').show();
     $('#preview_link').attr("href", curr_drawing_preview_path);
     $('#preview_link_container').show();
+    $('#save_copy').hide();
   }
   else
   {
     $('#del_pic').hide();
+    $('#save_copy').hide();
     $('#save_pic').text('Speichern');
     $('#load_pic').text('Laden');
     $('#save_pic').css('background-color','orange');
