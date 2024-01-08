@@ -252,7 +252,7 @@ function load_draggables(excercise_id)
           }
           if(obj.typ=='img')
           {
-            $('#containment-wrapper').append("<div id='img_"+ i + "' style='width:" + obj.width +"px;height:" + obj.height +"px;position:absolute;left:" + obj.posx +"px;top:" + obj.posy +"px;' class='draggable images'><img src='" + obj.pic_path + "' id='imgtag_"+ i + "' style='height:100%;' /></div>");
+            $('#containment-wrapper').append("<div id='img_"+ i + "' style='width:" + obj.width +"px;height:" + obj.height +"px;position:absolute;left:" + obj.posx +"px;top:" + obj.posy +"px;' class='draggable images'><img src='" + obj.pic_path + "' id='imgtag_"+ i + "' style='width:100%;' /></div>");
             $('#img_' + i).resizable();
           }
           init();
