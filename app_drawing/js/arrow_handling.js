@@ -25,6 +25,7 @@ function add_arrow(e)
     context.strokeStyle = curr_color;
     canvas_arrow(ctx, startX, startY, endX, endY,curr_color,curr_arrow_no);
     ctx.stroke();
+    isChanged =true;
     
     curr_arrow_func = 'start';
     startX = null;
