@@ -26,6 +26,7 @@ function add_arrow(e)
     canvas_arrow(ctx, startX, startY, endX, endY,curr_color,curr_arrow_no);
     ctx.stroke();
     isChanged =true;
+    update_file_infos();
     
     curr_arrow_func = 'start';
     startX = null;

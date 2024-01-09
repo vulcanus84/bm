@@ -212,12 +212,15 @@ function init()
 function add_player()
 {
     var id = $('#user1').val();
-    var my_url = 'index.php?ajax=get_pic_path&user_id=' + id;
-    $.ajax({ url: my_url }).done(
-      function(pic_path)
-      {
-        $('#containment-wrapper').append("<div id='" + id + "' style='position:absolute;left:100px;top:100px;' class='draggable player' /><img style='width:120px;'  src='" + pic_path + "' /></div>");
-        init();
-        set_as_changed();
-      });
+    if(id>0)
+    {
+      var my_url = 'index.php?ajax=get_pic_path&user_id=' + id;
+      $.ajax({ url: my_url }).done(
+        function(pic_path)
+        {
+          $('#containment-wrapper').append("<div id='" + id + "' style='position:absolute;left:100px;top:100px;' class='draggable player' /><img style='width:120px;'  src='" + pic_path + "' /></div>");
+          init();
+          set_as_changed();
+        });
+    }
 }

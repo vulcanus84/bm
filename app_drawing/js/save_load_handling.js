@@ -279,6 +279,7 @@ function close_pic()
   update_file_infos();
   remove_draggables();
   curr_arrow_func = null;
+  set_edit_mode('freehand');
 }
 function show_pics()
 {
