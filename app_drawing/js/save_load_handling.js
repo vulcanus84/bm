@@ -276,6 +276,7 @@ function close_pic()
   hide_modal();
   curr_drawing_id = null;
   isChanged = false;
+  isPublished = false;
   del_pic();
   update_file_infos();
   remove_draggables();
