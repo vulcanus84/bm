@@ -54,10 +54,24 @@
         $myPage->add_content("<td><span id='color_".$color."'  style='height: 25px;width: 25px;background-color:".$color.";border-radius: 50%;display: inline-block;' onclick='change_color(\"".$color."\");'></span></td>");
       }
       $myPage->add_content("</tr></table></td>");
+
+      //Check permissions
+      $db->sql_query("SELECT * FROM location_permissions
+                            LEFT JOIN locations ON loc_permission_loc_id = location_id
+                            WHERE loc_permission_user_id='".$_SESSION['login_user']->id."'");
+      $w_str = " AND (";
+      $i=0;
+      while($d = $db->get_next_res())
+      {
+        if($i==0) { $w_str.= "location2user_location_id='$d->location_id'"; } else { $w_str.= " OR location2user_location_id='$d->location_id'"; }
+        $i++;
+      }
+      $w_str.= ")";
+
       $db->sql_query("SELECT DISTINCT CONCAT(user_firstname,' ', user_lastname) as user_fullname, user_id FROM users 
                       LEFT JOIN location2user ON location2user_user_id = user_id 
                       LEFT JOIN locations ON location2user_location_id = location_id
-                      WHERE user_firstname != '' AND user_hide!='1' AND user_id>1
+                      WHERE user_firstname != '' AND user_hide!='1' AND user_id>1 $w_str
                       ORDER BY user_fullname");
       $myPage->add_content("<td id='player_picker' style='border-right:3px solid black;'>".$myHTML->get_selection($db,'user1','user_id','user_fullname','')."<button id='add_player' onclick='add_player();'>Einfügen</button></td>");
 
