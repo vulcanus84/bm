@@ -21,7 +21,7 @@
                       DISTINCT(excercise2user_excercise_id),excercise_id,excercise_pic_path 
                       FROM excercise2user
                       LEFT JOIN excercises ON excercise2user_excercise_id = excercise_id
-                      WHERE excercise2user_user_id='".$_GET['user_id']."'");
+                      WHERE excercise2user_user_id='".$_GET['user_id']."' AND excercise_status = 'Published'");
       while($d = $db->get_next_res())
       {
         print "<a href='".str_replace('.png','_preview.png',$d->excercise_pic_path)."'><img style='width:90vw;border:1px solid gray;' src='".str_replace('.png','_preview.png',$d->excercise_pic_path)."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/></a>";
