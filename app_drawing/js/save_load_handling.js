@@ -177,8 +177,8 @@ function load_pic(path,id)
   curr_drawing_id = id;
   curr_drawing_preview_path = path.replace('.png','_preview.png');
   var canvas = document.getElementById('canvas');
-  if (canvas.getContext) {
-
+  if (canvas.getContext) 
+  {
       ctx = canvas.getContext('2d');
 
       //Loading of the home test image - img1
@@ -197,7 +197,6 @@ function load_pic(path,id)
   load_excercise_details(id)
   load_players(id);
   load_draggables(id);
-  update_file_infos();
   curr_arrow_no = 1;
   $('#arrow_no').val(curr_arrow_no);
 }
@@ -210,7 +209,9 @@ function load_excercise_details(excercise_id)
     {
       var jsonData = JSON.parse(data);
       $('#select_bg').val(jsonData.bg_image);
+      if(jsonData.publish_status == 'Published') { isPublished = true; } else { isPublished = false; };
       change_background(true);
+      update_file_infos();
     });
 }
 
@@ -341,19 +342,21 @@ function show_del_warning()
 
 function update_file_infos()
 {
-
   if(curr_drawing_id > 0)
   {
     $('#load_pic').text('Schliessen');
+    if(isPublished) { $('#publish_pic').text('Öffentlich'); } else { $('#publish_pic').text('Privat'); }
     $('#del_pic').show();
     if(isChanged)
     {
       $('#save_pic').show();
       $('#save_copy').show();
+      $('#publish_pic').hide();
       $('#preview_link_container').hide();
     }
     else
     {
+      $('#publish_pic').show();
       $('#save_pic').hide();
       $('#save_copy').hide();
       $('#preview_link').attr("href", curr_drawing_preview_path);
@@ -366,6 +369,7 @@ function update_file_infos()
   {
     $('#del_pic').hide();
     $('#preview_link_container').hide();
+    $('#publish_pic').hide();
     if(isChanged)
     {
       $('#save_pic').show();
@@ -388,5 +392,20 @@ function remove_draggables()
   $('div').remove('.draggable');
 }
 
-
-
+function publish_pic()
+{
+  if(isPublished) { pub_status = 'Draft'; } else { pub_status = 'Published'; }
+  isPublished = !isPublished;
+  console.log(pub_status);  
+  $.ajax({
+    type: 'POST',
+    url: 'index.php?ajax=publish_pic',
+    data: { 
+       id: curr_drawing_id,
+       pub_status: pub_status
+    }
+  }).done(function() {
+    hide_modal();
+    update_file_infos();
+  });
+}

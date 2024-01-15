@@ -67,8 +67,9 @@
       $myPage->add_content("<td><button id='load_pic' style='background-color:blue;' onclick='show_pics();'>Laden</button></td>");
       $myPage->add_content("<td><button id='del_pic' style='background-color:red;' onclick='show_del_warning();'>Löschen</button></td>");
       $myPage->add_content("<td><button id='save_pic' style='background-color:orange'  onclick='save_pic();'>Speichern</button></td>");
+      $myPage->add_content("<td><button id='publish_pic' style='background-color:green;' onclick='publish_pic();'>Publizieren</button></td>");
       $myPage->add_content("<td><button id='save_copy' style='background-color:purple'  onclick='save_copy();'>Kopie</button></td>");
-      $myPage->add_content("<td id='preview_link_container' style='border-left:3px solid black;padding-left:10px;font-size:20pt;'><a id='preview_link' href='' target='_blank'/><img style='height:30px;' src='imgs/icon_preview_pic.png' alt='Preview'/></a></td>");
+      $myPage->add_content("<td id='preview_link_container' style='border-left:3px solid black;padding-left:5px;padding-right:5px;font-size:20pt;'><a id='preview_link' href='' target='_blank'/><img style='height:30px;' src='imgs/icon_preview_pic.png' alt='Preview'/></a></td>");
       $myPage->add_content("</tr></table>");
       $myPage->add_content("</div>");
 
@@ -98,6 +99,7 @@
                         LEFT JOIN users ON excercise2user.excercise2user_user_id = users.user_id 
                         GROUP BY excercise2user_user_id 
                         ORDER BY user_firstname");
+        print "<div style='float:left;margin:3px;text-align:center;'><div onclick='filter_user(0);' style='width:80px;height:80px;border:1px solid gray;border-radius:40px;background-color:#EEE;cursor:pointer;font-size:20pt;display: table-cell; vertical-align: middle;'>Alle</div><span style='font-size:9pt;'>Alle</span></div>";
         while($d = $db->get_next_res())
         {
           $my_user = new user($d->user_id);
@@ -105,30 +107,14 @@
         }
         print "</div>";
         print "<div id='excersises' style='width:50vw;float:left;overflow:auto;height:50vh;margin:5px;'>";
-        print "<h1 style='margin-top:0;'>Übungen</h1>";
-
-        $db->sql_query("SELECT * FROM excercises");
-        while($d = $db->get_next_res())
-        {
-          print "<img style='float:left;width:15vw;border:1px solid gray;margin:3px;' src='".str_replace('.png','_preview.png',$d->excercise_pic_path)."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/>";
-        }
+        print get_excercises($db,0);
         print "</div>";
         print "</div>";
       }
 
       if($_GET['ajax']=='get_excercises') 
       { 
-        print "<h1 style='margin-top:0;'>Übungen</h1>";
-
-        $db->sql_query("SELECT 
-                        DISTINCT(excercise2user_excercise_id),excercise_id,excercise_pic_path 
-                        FROM excercise2user
-                        LEFT JOIN excercises ON excercise2user_excercise_id = excercise_id
-                        WHERE excercise2user_user_id='".$_GET['user_id']."'");
-        while($d = $db->get_next_res())
-        {
-          print "<img style='float:left;width:15vw;border:1px solid gray;' src='".str_replace('.png','_preview.png',$d->excercise_pic_path)."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/>";
-        }
+        print get_excercises($db,$_GET['user_id']);
       }
 
       if($_GET['ajax']=='del_warning') 
@@ -167,6 +153,15 @@
         $db->delete('excercises','excercise_id',$_POST['id']); 
       }
 
+      if($_GET['ajax']=='publish_pic')
+      {
+        $db->sql_query("SELECT * FROM excercises WHERE excercise_id='".$_POST['id']."'");
+        if($db->count()=='1')
+        {
+          $db->update(array('excercise_status'=>$_POST['pub_status']),'excercises','excercise_id',$_POST['id']);
+        }
+      }
+
       if($_GET['ajax']=='get_players') 
       {
         $arr_json_data = array();
@@ -192,7 +187,7 @@
       if($_GET['ajax']=='get_excercise_details') 
       {
         $d = $db->sql_query_with_fetch("SELECT * FROM excercises WHERE excercise_id='".$_GET['excercise_id']."'");
-        $arr_json_data = array('bg_image' => $d->excercise_bg_image);
+        $arr_json_data = array('bg_image' => $d->excercise_bg_image,'publish_status'=>$d->excercise_status);
         print(json_encode($arr_json_data));
       }
 
@@ -219,4 +214,27 @@
     $myPage->error_text = $e->getMessage();
     print $myPage->get_html_code();
   }
+
+function get_excercises($db,$user_id)
+{
+  $txt = "<h1 style='margin-top:0;'>Übungen</h1>";
+  if($user_id>0)
+  {
+    $db->sql_query("SELECT 
+    DISTINCT(excercise2user_excercise_id),excercise_id,excercise_pic_path 
+    FROM excercise2user
+    LEFT JOIN excercises ON excercise2user_excercise_id = excercise_id
+    WHERE excercise2user_user_id='".$user_id."'");
+  }
+  else
+  {
+    $db->sql_query("SELECT * FROM excercises");
+  }
+  while($d = $db->get_next_res())
+  {
+    $txt.= "<img style='float:left;width:15vw;border:1px solid gray;margin:0px 5px 5px 0px;' src='".str_replace('.png','_preview.png',$d->excercise_pic_path)."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/>";
+  }
+  return $txt;
+}
+
 ?>

@@ -11,6 +11,7 @@ var curr_drawing_id = null;
 var isChanged = false;
 var curr_edit_mode = null;
 var drag_allowed = true;
+var isPublished = false;
 
 const backgrounds = [
   {
@@ -160,11 +161,7 @@ function change_background(without_change=false)
         $('#containment-wrapper')[0].style.backgroundImage="url('" + item.path + "')";  
       }
     });
-  if(!without_change)
-  {
-    $('#save_pic').text('Speichern');
-    $('#save_pic').css('background-color','orange');
-  }
+  if(!without_change) { set_as_changed(); }
 }
 
 function change_color(color)

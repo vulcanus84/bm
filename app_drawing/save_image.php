@@ -28,7 +28,7 @@
 }
   else
   {
-    $db->insert(array('excercise_name'=>$_SESSION['login_user']->login.'_'.date('Y-m-d H:i:s'),'excercise_pic_path'=>$fileName,'excercise_bg_image'=>$_POST['bg_image']),'excercises');
+    $db->insert(array('excercise_name'=>$_SESSION['login_user']->login.'_'.date('Y-m-d H:i:s'),'excercise_pic_path'=>$fileName,'excercise_bg_image'=>$_POST['bg_image'],'excercise_created_by'=>$_SESSION['login_user']->id),'excercises');
     $arr_json_data = array('drawing_id' => $db->last_inserted_id,'path'=>$fileName);
     print(json_encode($arr_json_data));
     $_POST['drawing_id'] = $db->last_inserted_id;

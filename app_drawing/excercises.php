@@ -26,19 +26,25 @@
       {
         print "<a href='".str_replace('.png','_preview.png',$d->excercise_pic_path)."'><img style='width:90vw;border:1px solid gray;' src='".str_replace('.png','_preview.png',$d->excercise_pic_path)."' onclick='load_pic(\"".$d->excercise_pic_path."\",\"".$d->excercise_id."\")'/></a>";
       }
-      print "<hr style='clear:both;'/>><a class='link' href='excercises.php'>Zurück</a>";
+      print "<hr style='clear:both;'/><a class='link' href='excercises.php'>Zurück</a>";
     }
     else
     {
       $db->sql_query("SELECT MAX(excercise2user_user_id) as user_id 
       FROM excercise2user 
       LEFT JOIN users ON excercise2user.excercise2user_user_id = users.user_id 
+      LEFT JOIN excercises ON excercise2user.excercise2user_excercise_id = excercises.excercise_id
+      WHERE excercise_status = 'Published'
       GROUP BY excercise2user_user_id 
       ORDER BY user_firstname");
       while($d = $db->get_next_res())
       {
         $my_user = new user($d->user_id);
-        print "<div style='float:left;margin:3px;text-align:center;'><a href='excercises.php?user_id=".$my_user->id."'>".$my_user->get_picture(false,'','300px',true)."</a><br/><span style='font-size:36pt;'>".$my_user->firstname."</span></div>";
+        print "<div style='float:left;margin:3px;text-align:center;'><a href='excercises.php?user_id=".$my_user->id."'>".$my_user->get_picture(false,'','300px',false)."</a><br/><span style='font-size:36pt;'>".$my_user->firstname."</span></div>";
+      }
+      if($db->count()==0)
+      {
+        print "<span style='font-size:36pt;'>Keine Übungen vorhanden</span>";
       }
       print "<hr style='clear:both;'/><a class='link' href='excercises.php?action=logout'>Logout</a>";
     }
