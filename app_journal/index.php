@@ -155,8 +155,11 @@ try
 		$myPage->add_content("  </div>");
 		$myPage->add_content("</div>");
 
-
 		$db->sql_query("SELECT *, DATE_FORMAT(journal_created_on,'%d.%m.%Y') as curr_date FROM journal ORDER BY journal_created_on DESC");
+
+		if($db->count() < 1) {
+			$myPage->add_content("<div style='float:right;' onclick='add_entry();'><img style='height:25px;' src='../inc/imgs/query/add.png'/></div>"); 
+		}
 
 		while($d = $db->get_next_res())
 		{
