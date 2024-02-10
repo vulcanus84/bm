@@ -7,7 +7,6 @@ try
 	$myPage = new page();
 	$page->change_parameter('x','1');
 	$_SERVER['link'] = $page->get_link();
-	$myPage->add_js_link('functions.js');
 	$myPage->add_js("
 
 		function edit_text(id)
@@ -27,8 +26,7 @@ try
 			$.ajax({ url: my_url }).done(
 				function(data)
 				{
-					$('#text_' + id).html(nl2br($('#textarea').val(),false));
-					$('#myModal').hide();
+					location.reload();
 				});
 		}
 
