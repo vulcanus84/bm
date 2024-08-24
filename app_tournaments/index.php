@@ -57,13 +57,14 @@ try
 		{
 			$tournament_id = $_POST['tournament_id'];
 			$db->update(array('group_title'=>$_POST['tournament_title'],'group_description'=>$_POST['tournament_description'],'group_system'=>$_POST['tournament_system'],'group_counting'=>$_POST['tournament_counting'],'group_created_by_location'=>$_POST['created_by_location']),'groups','group_id',$tournament_id);
+			header("Location: index.php");
 		}
 		else
 		{
 			$db->insert(array('group_title'=>$_POST['tournament_title'],'group_description'=>$_POST['tournament_description'],'group_system'=>$_POST['tournament_system'],'group_counting'=>$_POST['tournament_counting'],'group_created_by_location'=>$_POST['created_by_location']),'groups');
 			$tournament_id = $db->last_inserted_id;
+			header("Location: index.php?tournament_id=".$tournament_id);
 		}
-		header("Location: index.php");
 	}
 
 	//Javascript links need at least one parameter because of the &param
@@ -548,8 +549,6 @@ try
 				function(data)
 				{
 					window.location = 'index.php?tournament_id='+data;
-					$('#left_col').html('<h1>'+ $('#tournament_name').val()+'</h1>');
-					$('#right_col').html('');
 				});
 			}
 
