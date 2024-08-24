@@ -18,6 +18,14 @@ try
 		$myTournament = new tournament($db);
 	}
 
+	if(isset($_GET['action']) && $_GET['action']=='change_location_filter') 
+	{ 
+		$page->change_parameter('location_filter',$_POST['location']);
+		$page->remove_parameter('action');
+		header("Location: ".$page->get_link());
+	}
+
+
 	if(!isset($_GET['order_by'])) { $_GET['order_by']='location'; }
 
 	//Delete tournament
@@ -58,7 +66,9 @@ try
 		header("Location: index.php");
 	}
 
-	$page->change_parameter('x','1');
+	//Javascript links need at least one parameter because of the &param
+	if(!isset($_GET['tournament_id'])) { $page->change_parameter('x','1'); }
+	
 	$_SERVER['link'] = $page->get_link();
 	if(PLATFORM=='IPHONE') { $tmp = "$('#left_col').hide();"; } else { $tmp=''; }
 
@@ -81,7 +91,7 @@ try
 						$.ajax({ url: my_url }).done(
 						function(data)
 						{
-							window.location = '$_SERVER[link]&tournament_id=$_GET[tournament_id]';
+							window.location = '$_SERVER[link]';
 						});
 					}
 				}
@@ -109,7 +119,7 @@ try
 					$.ajax({ url: my_url }).done(
 					function(data)
 					{
-						window.location = '$_SERVER[link]&tournament_id=$_GET[tournament_id]';
+						window.location = '$_SERVER[link]';
 						$('#left_col').append($('#user'+user_id));
 					});
 				}
@@ -133,7 +143,7 @@ try
 				{
 					if(data=='OK')
 					{
-						window.location = '$_SERVER[link]&tournament_id=$_GET[tournament_id]';
+						window.location = '$_SERVER[link]';
 					}
 					else
 					{
@@ -150,7 +160,7 @@ try
 				{
 					if(data=='OK')
 					{
-						window.location = '$_SERVER[link]&tournament_id=$_GET[tournament_id]&round=1';
+						window.location = '$_SERVER[link]&round=1';
 					}
 					else
 					{
@@ -166,7 +176,7 @@ try
 				{
 					if(data.substring(0, 2)=='OK')
 					{
-						window.location = '$_SERVER[link]&tournament_id=$_GET[tournament_id]';
+						window.location = '$_SERVER[link]';
 					}
 					else
 					{
@@ -222,7 +232,7 @@ try
 				{
 					if(data=='OK')
 					{
-						window.location = '$_SERVER[link]&tournament_id=$_GET[tournament_id]&round=1';
+						window.location = '$_SERVER[link]';
 					}
 					else
 					{
@@ -239,7 +249,7 @@ try
 				{
 					if(data=='OK')
 					{
-						window.location = '$_SERVER[link]&tournament_id=$_GET[tournament_id]&round=1';
+						window.location = '$_SERVER[link]';
 					}
 					else
 					{
@@ -492,7 +502,9 @@ try
 					{
 						if(data.substring(0, 2)=='OK')
 						{
-							window.location = '$_SERVER[link]&tournament_id=$_GET[tournament_id]&round='+ data.substring(3);
+							var myNewUrl = '$_SERVER[link]';
+							myNewUrl = myNewUrl.replace('round=$_GET[round]','round='+ data.substring(3));
+							window.location = myNewUrl;
 						}
 						else
 						{
@@ -509,7 +521,7 @@ try
 					{
 						if(data.substring(0, 2)=='OK')
 						{
-							window.location = '$_SERVER[link]&tournament_id=$_GET[tournament_id]&round='+ data.substring(3);
+							window.location = '$_SERVER[link]';
 						}
 						else
 						{
@@ -699,9 +711,28 @@ try
 				$myPage->add_content("<a href='".$page->change_parameter('order_by','age')."'><img style='height:48px;' src='".level."inc/imgs/sort_by_age.png' title='Alter' alt='Alter' /></a>");
 				$myPage->add_content("<a href='".$page->change_parameter('order_by','location')."'><img style='height:48px;' src='".level."inc/imgs/sort_by_location.png' title='Trainingsort' alt='Trainingsort' /></a>");
 				$myPage->add_content("<hr>");
-				$myPage->add_content("<div id='left_col'>");
-				$myPage->add_content($myTournament->get_all_users('add_user',$_GET['order_by']));
-				$myPage->add_content("</div>");
+				$page->reset();
+				$db->sql_query("SELECT * FROM location_permissions
+												LEFT JOIN locations ON loc_permission_loc_id = location_id
+												WHERE loc_permission_user_id='".$_SESSION['login_user']->id."'
+												ORDER BY location_name");
+				if($db->count()>1)
+				{
+					$myPage->add_content("<form id='change_location_filter' action='".$page->change_parameter('action','change_location_filter')."' method='POST'>");
+					$myPage->add_content("<select name='location' style='width:95%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">");
+					$myPage->add_content("<option value=''>-- Alle Standorte --</option>");
+					while ($d=$db->get_next_res())
+					{
+						$myPage->add_content("<option");
+						if(isset($_GET['location_filter']) && $_GET['location_filter']==$d->location_id) {$myPage->add_content(" selected='1'"); }
+						$myPage->add_content(" value='".$d->location_id."'>".$d->location_name."</option>");
+					}
+					$myPage->add_content("</select>");
+					$myPage->add_content("</form>");
+					$myPage->add_content("<hr style='margin:0px;'>");
+					$myPage->add_content($myTournament->get_all_users('add_user',$_GET['order_by']));
+					$myPage->add_content("</div>");
+				}				
 			}
 		}
 		else
@@ -1415,7 +1446,6 @@ try
 				$new_round = $_GET['round']+1;
 				$db->update(array('group_round'=>$new_round),'groups','group_id',$_GET['tournament_id']);
 				$myTournament->calc_BHZ();
-
 				print "OK;".$new_round;
 			}
 			else

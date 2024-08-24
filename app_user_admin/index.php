@@ -18,7 +18,6 @@ try
 
 	if(isset($_GET['action']) && isset($_POST['user_account']))
 	{
-		die();
 		$folder = 'user_pics/';
 		$username = $_POST['user_account'];
 		//Check if account exist
@@ -249,8 +248,10 @@ try
 		header("Location: ".$page->get_link());
 	}
 
-	$page->change_parameter('x','1');
+	//Javascript links need at least one parameter because of the &param
+	if(!isset($_GET['user_id'])) { $page->change_parameter('x','1'); }
 	$_SERVER['link'] = $page->get_link();
+	
 	if(PLATFORM=='IPHONE') { $tmp = "$('#left_col').hide();"; } else { $tmp=''; }
 
 	if(isset($_GET['user_id']))
