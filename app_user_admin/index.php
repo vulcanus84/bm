@@ -7,11 +7,18 @@ try
 {
 	$myPage = new page();
 	$myTournament = new tournament($db);
+	if(isset($_GET['action']) && $_GET['action']=='change_location_filter') 
+	{ 
+		$page->change_parameter('location_filter',$_POST['location']);
+		$page->remove_parameter('action');
+		header("Location: ".$page->get_link());
+	}
 
 	if(!isset($_GET['order_by'])) { $_GET['order_by']='location'; }
 
 	if(isset($_GET['action']) && isset($_POST['user_account']))
 	{
+		die();
 		$folder = 'user_pics/';
 		$username = $_POST['user_account'];
 		//Check if account exist
@@ -383,6 +390,28 @@ try
 			$page->reset();
 			$myPage->add_content("<a href='".$page->change_parameter('show_hidden',$val)."'><img style='width:4vw;border-left:1px solid black;' src='".level."inc/imgs/hidden.png' title='Versteckte einblenden' alt='Versteckte einblenden' /></a>");
 			$myPage->add_content("<hr style='margin:0px;'>");
+			$page->reset();
+			$db->sql_query("SELECT * FROM location_permissions
+											LEFT JOIN locations ON loc_permission_loc_id = location_id
+											WHERE loc_permission_user_id='".$_SESSION['login_user']->id."'
+											ORDER BY location_name");
+			if($db->count()>1)
+			{
+				$myPage->add_content("<form id='change_location_filter' action='".$page->change_parameter('action','change_location_filter')."' method='POST'>");
+				$myPage->add_content("<div>");
+				$myPage->add_content("<select name='location' style='width:95%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">");
+				$myPage->add_content("<option value=''>-- Alle Standorte --</option>");
+				while ($d=$db->get_next_res())
+				{
+					$myPage->add_content("<option");
+					if(isset($_GET['location_filter']) && $_GET['location_filter']==$d->location_id) {$myPage->add_content(" selected='1'"); }
+					$myPage->add_content(" value='".$d->location_id."'>".$d->location_name."</option>");
+				}
+				$myPage->add_content("</select>");
+				$myPage->add_content("</div>");
+				$myPage->add_content("</form>");
+				$myPage->add_content("<hr style='margin:0px;'>");
+			}
 			$myPage->add_content("<div id='left_col' onscroll='sessionStorage.scrollTop = $(this).scrollTop();'>");
 			$myPage->add_content($myTournament->get_all_users('show_infos',$_GET['order_by']));
 			$myPage->add_content("</div>");

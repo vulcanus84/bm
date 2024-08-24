@@ -258,18 +258,27 @@ class tournament
 			$w_str = "WHERE user_id!='1' AND user_hide<1";
 		}
 
+
 		//Check permissions
 		$this->db->sql_query("SELECT * FROM location_permissions
 													LEFT JOIN locations ON loc_permission_loc_id = location_id
 													WHERE loc_permission_user_id='".$_SESSION['login_user']->id."'");
 		if($this->db->count()==0) { $w_str.= " AND user_id=0"; } else { $w_str.= " AND ("; }
-		$i=0;
-		while($d = $this->db->get_next_res())
+
+		if(isset($_GET['location_filter']) && is_numeric($_GET['location_filter']))
 		{
-			if($i==0) { $w_str.= "location2user_location_id='$d->location_id'"; } else { $w_str.= " OR location2user_location_id='$d->location_id'"; }
-			$i++;
+			$w_str.= "location2user_location_id=".$_GET['location_filter'].")";
 		}
-		if($this->db->count()>0) { $w_str.= ")"; }
+		else
+		{
+			$i=0;
+			while($d = $this->db->get_next_res())
+			{
+				if($i==0) { $w_str.= "location2user_location_id='$d->location_id'"; } else { $w_str.= " OR location2user_location_id='$d->location_id'"; }
+				$i++;
+			}
+			if($this->db->count()>0) { $w_str.= ")"; }
+		}
 
 		if($this->id!=null)
 		{
