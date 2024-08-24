@@ -251,7 +251,7 @@ try
 	//Javascript links need at least one parameter because of the &param
 	if(!isset($_GET['user_id'])) { $page->change_parameter('x','1'); }
 	$_SERVER['link'] = $page->get_link();
-	
+
 	if(PLATFORM=='IPHONE') { $tmp = "$('#left_col').hide();"; } else { $tmp=''; }
 
 	if(isset($_GET['user_id']))
@@ -392,7 +392,7 @@ try
 		{
 			$myPage->add_content("<form id='change_location_filter' action='".$page->change_parameter('action','change_location_filter')."' method='POST'>");
 			$myPage->add_content("<div>");
-			$myPage->add_content("<select name='location' style='width:95%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">");
+			$myPage->add_content("<select name='location' style='width:90%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">");
 			$myPage->add_content("<option value=''>-- Alle Standorte --</option>");
 			while ($d=$db->get_next_res())
 			{
