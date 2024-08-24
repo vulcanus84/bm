@@ -359,16 +359,6 @@ try
 			$myPage->add_content("<a href='".$page->change_parameter('order_by','gender')."'><img style='height:48px;' src='".level."inc/imgs/male_female.png' title='Geschlecht' alt='Geschlecht' /></a>");
 			$myPage->add_content("<a href='".$page->change_parameter('order_by','age')."'><img style='height:48px;' src='".level."inc/imgs/sort_by_age.png' title='Alter' alt='Alter' /></a>");
 			$myPage->add_content("<a href='".$page->change_parameter('order_by','location')."'><img style='height:48px;' src='".level."inc/imgs/sort_by_location.png' title='Trainingsort' alt='Trainingsort' /></a>");
-			if(isset($_GET['show_hidden']) && $_GET['show_hidden']=='1') { $val = '0'; } else { $val = '1'; }
-			$page->reset();
-			$myPage->add_content("<a href='".$page->change_parameter('show_hidden',$val)."'><img style='height:48px;border-left:1px solid black;' src='".level."inc/imgs/hidden.png' title='Versteckte einblenden' alt='Versteckte einblenden' /></a>");
-			$myPage->add_content("<hr style='margin:0px;'>");
-			$myPage->add_content("<div id='left_col' onscroll='sessionStorage.scrollTop = $(this).scrollTop();'>");
-			$myPage->add_content($myTournament->get_all_users('show_infos',$_GET['order_by']));
-			$myPage->add_content("</div>");
-			$myPage->add_content("</div>");
-			$myPage->add_content("<div id='right_col'>");
-			$myPage->add_content("</div>");
 		}
 		else
 		{
@@ -386,39 +376,40 @@ try
 			$myPage->add_content("<a href='".$page->change_parameter('order_by','gender')."'><img style='width:4vw;' src='".level."inc/imgs/male_female.png' title='Geschlecht' alt='Geschlecht' /></a>");
 			$myPage->add_content("<a href='".$page->change_parameter('order_by','age')."'><img style='width:4vw;' src='".level."inc/imgs/sort_by_age.png' title='Alter' alt='Alter' /></a>");
 			$myPage->add_content("<a href='".$page->change_parameter('order_by','location')."'><img style='width:4vw;' src='".level."inc/imgs/sort_by_location.png' title='Trainingsort' alt='Trainingsort' /></a>");
-			if(isset($_GET['show_hidden']) && $_GET['show_hidden']=='1') { $val = '0'; } else { $val = '1'; }
-			$page->reset();
-			$myPage->add_content("<a href='".$page->change_parameter('show_hidden',$val)."'><img style='width:4vw;border-left:1px solid black;' src='".level."inc/imgs/hidden.png' title='Versteckte einblenden' alt='Versteckte einblenden' /></a>");
-			$myPage->add_content("<hr style='margin:0px;'>");
-			$page->reset();
-			$db->sql_query("SELECT * FROM location_permissions
-											LEFT JOIN locations ON loc_permission_loc_id = location_id
-											WHERE loc_permission_user_id='".$_SESSION['login_user']->id."'
-											ORDER BY location_name");
-			if($db->count()>1)
-			{
-				$myPage->add_content("<form id='change_location_filter' action='".$page->change_parameter('action','change_location_filter')."' method='POST'>");
-				$myPage->add_content("<div>");
-				$myPage->add_content("<select name='location' style='width:95%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">");
-				$myPage->add_content("<option value=''>-- Alle Standorte --</option>");
-				while ($d=$db->get_next_res())
-				{
-					$myPage->add_content("<option");
-					if(isset($_GET['location_filter']) && $_GET['location_filter']==$d->location_id) {$myPage->add_content(" selected='1'"); }
-					$myPage->add_content(" value='".$d->location_id."'>".$d->location_name."</option>");
-				}
-				$myPage->add_content("</select>");
-				$myPage->add_content("</div>");
-				$myPage->add_content("</form>");
-				$myPage->add_content("<hr style='margin:0px;'>");
-			}
-			$myPage->add_content("<div id='left_col' onscroll='sessionStorage.scrollTop = $(this).scrollTop();'>");
-			$myPage->add_content($myTournament->get_all_users('show_infos',$_GET['order_by']));
-			$myPage->add_content("</div>");
-			$myPage->add_content("</div>");
-			$myPage->add_content("<div id='right_col'>");
-			$myPage->add_content("</div>");
 		}
+
+		if(isset($_GET['show_hidden']) && $_GET['show_hidden']=='1') { $val = '0'; } else { $val = '1'; }
+		$page->reset();
+		$myPage->add_content("<a href='".$page->change_parameter('show_hidden',$val)."'><img style='width:4vw;border-left:1px solid black;' src='".level."inc/imgs/hidden.png' title='Versteckte einblenden' alt='Versteckte einblenden' /></a>");
+		$myPage->add_content("<hr style='margin:0px;'>");
+		$page->reset();
+		$db->sql_query("SELECT * FROM location_permissions
+										LEFT JOIN locations ON loc_permission_loc_id = location_id
+										WHERE loc_permission_user_id='".$_SESSION['login_user']->id."'
+										ORDER BY location_name");
+		if($db->count()>1)
+		{
+			$myPage->add_content("<form id='change_location_filter' action='".$page->change_parameter('action','change_location_filter')."' method='POST'>");
+			$myPage->add_content("<div>");
+			$myPage->add_content("<select name='location' style='width:95%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">");
+			$myPage->add_content("<option value=''>-- Alle Standorte --</option>");
+			while ($d=$db->get_next_res())
+			{
+				$myPage->add_content("<option");
+				if(isset($_GET['location_filter']) && $_GET['location_filter']==$d->location_id) {$myPage->add_content(" selected='1'"); }
+				$myPage->add_content(" value='".$d->location_id."'>".$d->location_name."</option>");
+			}
+			$myPage->add_content("</select>");
+			$myPage->add_content("</div>");
+			$myPage->add_content("</form>");
+			$myPage->add_content("<hr style='margin:0px;'>");
+		}
+		$myPage->add_content("<div id='left_col' onscroll='sessionStorage.scrollTop = $(this).scrollTop();'>");
+		$myPage->add_content($myTournament->get_all_users('show_infos',$_GET['order_by']));
+		$myPage->add_content("</div>");
+		$myPage->add_content("</div>");
+		$myPage->add_content("<div id='right_col'>");
+		$myPage->add_content("</div>");		
 		print $myPage->get_html_code();
 	}
 	else
