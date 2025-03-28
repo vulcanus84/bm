@@ -229,8 +229,8 @@
 					while($d = $db->get_next_res())
 					{
 						$myUser = new user($d->group2user_user_id);
-						$arr_table[0][$i] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,true)."<br/>".$myUser->login."</td>";	
-						$arr_table[$i][0] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,true)."<br/>".$myUser->login."</td>";	
+						$arr_table[0][$i] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,false)."<br/>".$myUser->login."</td>";	
+						$arr_table[$i][0] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,false)."<br/>".$myUser->login."</td>";	
 						$arr_players[$i] = $d->group2user_user_id;
 						$i++;
 					}
