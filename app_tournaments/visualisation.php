@@ -22,17 +22,19 @@
 
       //Display page
       $myPage->add_content("<div style='float:left;'><img src='".level."inc/imgs/bcz_logo.jpg' style='height:50px;padding-right:15px;padding-left:5px;'/></div><div id='title' style='float:left;'></div>");
-      $myPage->add_content("<div id='left_side' style='clear:both;float:left;width:23vw;min-height:80vh;'>");
-      $myPage->add_content("<div id='xx' style='float:left;padding-bottom:10px;'><button>Teilnehmer</button></div>");
-      $myPage->add_content("<div id='users' style='float:left;width:20vw;min-height:80vh;border:10px solid #DDD;padding:10px;border-radius:20px;'></div>");
+      $myPage->add_content("<div style='width:100%;clear:both;'>");
+      $myPage->add_content("<div id='left_side' style='float:left;width:20%;'>");
+      $myPage->add_content("	<div id='xx' style='float:left;padding-bottom:10px;'><button>Teilnehmer</button></div>");
+      $myPage->add_content("	<div id='users' style='box-sizing:border-box;width:100%;float:left;min-height:calc(100vh - 120px);border:10px solid #DDD;padding:10px;border-radius:20px;'></div>");
       $myPage->add_content("</div>");
-      $myPage->add_content("<div id='middle_side' style='float:left;width:52vw;min-height:80vh;'>");
-      $myPage->add_content("<div id='rounds' style='padding-bottom:10px;margin-left:10px;'></div>");
-      $myPage->add_content("<div id='all_courts' style='width:92%;float:left;min-height:80vh;border:10px solid #DDD;padding:10px;margin-left:10px;border-radius:20px;'></div>");
+      $myPage->add_content("<div id='middle_side' style='float:left;margin-left:10px;width:54%;'>");
+      $myPage->add_content("	<div id='rounds' style='padding-bottom:10px;'></div>");
+      $myPage->add_content("	<div id='all_courts' style='box-sizing:border-box;width:100%;float:left;min-height:calc(100vh - 120px);border:10px solid #DDD;padding:10px;10px;border-radius:20px;'></div>");
       $myPage->add_content("</div>");
-      $myPage->add_content("<div id='right_side' style='margin-left:10px;float:left;min-height:80vh;width:20vw;'>");
-      $myPage->add_content("<div id='xxx' style='padding-bottom:10px;'><button>Neuigkeiten</button></div>");
-      $myPage->add_content("<div id='news' style='overflow:auto;float:left;width:20vw;height:80vh;border:10px solid #DDD;padding:10px;border-radius:20px;'></div>");
+      $myPage->add_content("<div id='right_side' style='float:left;margin-left:10px;min-height:100%;width:25%;'>");
+      $myPage->add_content("	<div id='xxx' style='padding-bottom:10px;'><button>Neuigkeiten</button></div>");
+      $myPage->add_content("	<div id='news' style='box-sizing:border-box;width:100%;overflow:auto;float:left;height:calc(100vh - 120px);border:10px solid #DDD;padding:10px;border-radius:20px;'></div>");
+      $myPage->add_content("</div>");
       $myPage->add_content("</div>");
       $myPage->add_js(" var rounds=0;
                         var curr_round = 0;
