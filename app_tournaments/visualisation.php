@@ -25,11 +25,11 @@
       $myPage->add_content("<div style='width:100%;clear:both;'>");
       $myPage->add_content("<div id='left_side' style='float:left;width:20%;'>");
       $myPage->add_content("	<div id='xx' style='float:left;padding-bottom:10px;'><button>Teilnehmer</button></div>");
-      $myPage->add_content("	<div id='users' style='box-sizing:border-box;width:100%;float:left;min-height:calc(100vh - 120px);border:10px solid #DDD;padding:10px;border-radius:20px;'></div>");
+      $myPage->add_content("	<div id='users' style='box-sizing:border-box;width:100%;float:left;height:calc(100vh - 120px);border:10px solid #DDD;padding:10px;border-radius:20px;'></div>");
       $myPage->add_content("</div>");
       $myPage->add_content("<div id='middle_side' style='float:left;margin-left:10px;width:54%;'>");
       $myPage->add_content("	<div id='rounds' style='padding-bottom:10px;'></div>");
-      $myPage->add_content("	<div id='all_courts' style='box-sizing:border-box;width:100%;float:left;min-height:calc(100vh - 120px);border:10px solid #DDD;padding:10px;10px;border-radius:20px;'></div>");
+      $myPage->add_content("	<div id='all_courts' style='box-sizing:border-box;width:100%;float:left;height:calc(100vh - 120px);border:10px solid #DDD;padding:10px;10px;border-radius:20px;'></div>");
       $myPage->add_content("</div>");
       $myPage->add_content("<div id='right_side' style='float:left;margin-left:10px;min-height:100%;width:25%;'>");
       $myPage->add_content("	<div id='xxx' style='padding-bottom:10px;'><button>Neuigkeiten</button></div>");
@@ -110,7 +110,7 @@
       	foreach($arr_tournaments as $tournament)
       	{
 	        $myTournament = new tournament(clone($db),$tournament);
-	        if($_GET['curr_id']==$tournament)
+	        if(isset($_GET['curr_id'])&& $_GET['curr_id']==$tournament)
 	        {
 		        print "<div style='border-left:5px solid gray;padding:5px 20px 5px 20px;float:left;background-color:#CCC;font-size:24pt;font-weight:bold;'>".$myTournament->get_title()."</div>";      
 	        }
@@ -218,7 +218,7 @@
 					$arr_table[0][0] = "<td></td>";
 					for($i;$i<$anz;$i++)
 					{
-						$arr_table[$i][$i] = "<td style='background: repeating-linear-gradient(45deg, transparent, #CCC 10px);'></td>";
+						$arr_table[$i][$i] = "<td style='border:1px solid gray;background: repeating-linear-gradient(45deg, transparent, #CCC 10px);'></td>";
 					}
 					
 					//Fill Players
@@ -229,8 +229,8 @@
 					while($d = $db->get_next_res())
 					{
 						$myUser = new user($d->group2user_user_id);
-						$arr_table[0][$i] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,false)."<br/>".$myUser->login."</td>";	
-						$arr_table[$i][0] = "<td style='text-align:center;'>".$myUser->get_picture(false,'show_user_games',$pic_width,false)."<br/>".$myUser->login."</td>";	
+						$arr_table[0][$i] = "<td style='text-align:center;border-style:solid;border-color:gray;border-width:0px 0px 1px 1px;'>".$myUser->get_picture(false,'show_user_games',$pic_width,false)."<br/>".$myUser->login."</td>";	
+						$arr_table[$i][0] = "<td style='text-align:center;border-style:solid;border-color:gray;border-width:1px 1px 0px 0px;'>".$myUser->get_picture(false,'show_user_games',$pic_width,false)."<br/>".$myUser->login."</td>";	
 						$arr_players[$i] = $d->group2user_user_id;
 						$i++;
 					}
@@ -250,7 +250,7 @@
 								{
 									if($temp->game_winner_id=='')
 									{
-										$arr_table[$i][$j] = "<td style='text-align:center;'>Spiel in Runde<br/><span style='font-weight:bold;'>".$temp->game_round."</span></td>";
+										$arr_table[$i][$j] = "<td style='font-size:14pt;border:1px solid gray;text-align:center;'>Spiel in Runde<br/><span style='font-weight:bold;font-size:20pt;'>".$temp->game_round."</span></td>";
 									}
 									else
 									{
@@ -259,11 +259,11 @@
 											if($temp->game_set1_p1<1 AND $temp->game_set1_p2<1)
 											{
 												$myUser = new user($temp->game_winner_id);
-												$txt = "<span style='font-size:16pt;font-weight:bold;'>".$myUser->login."</span><br/>hat gewonnen";
+												$txt = "<span style='font-size:20pt;font-weight:bold;'>".$myUser->login."</span><br/>hat gewonnen";
 											}
 											else
 											{
-												$txt = "<span style='font-size:16pt;font-weight:bold;'>".$temp->game_set1_p1.":".$temp->game_set1_p2;
+												$txt = "<span style='font-size:20pt;font-weight:bold;'>".$temp->game_set1_p1.":".$temp->game_set1_p2;
 												if($temp->game_set2_p1>0 OR $temp->game_set2_p2>0) {  $txt .= "<br/>".$temp->game_set2_p1.":".$temp->game_set2_p2; }
 												if($temp->game_set3_p1>0 OR $temp->game_set3_p2>0) {  $txt .= "<br/>".$temp->game_set3_p1.":".$temp->game_set3_p2; }
 												$txt.= "</span>";
@@ -274,18 +274,18 @@
 											if($temp->game_set1_p1<1 AND $temp->game_set1_p2<1)
 											{
 												$myUser = new user($temp->game_winner_id);
-												$txt = "<span style='font-size:16pt;font-weight:bold;'>".$myUser->login."</span><br/>hat gewonnen";
+												$txt = "<span style='font-size:20pt;font-weight:bold;'>".$myUser->login."</span><br/>hat gewonnen";
 											}
 											else
 											{
-												$txt = "<span style='font-size:16pt;font-weight:bold;'>".$temp->game_set1_p2.":".$temp->game_set1_p1;
+												$txt = "<span style='font-size:20pt;font-weight:bold;'>".$temp->game_set1_p2.":".$temp->game_set1_p1;
 												if($temp->game_set2_p1>0 OR $temp->game_set2_p2>0) {  $txt .= "<br/>".$temp->game_set2_p2.":".$temp->game_set2_p1; }
 												if($temp->game_set3_p1>0 OR $temp->game_set3_p2>0) {  $txt .= "<br/>".$temp->game_set3_p2.":".$temp->game_set3_p1; }
 												$txt.= "</span>";
 											}
 										}
 										
-										$arr_table[$i][$j] = "<td style='text-align:center;'>".$txt."</td>";
+										$arr_table[$i][$j] = "<td style='text-align:center;border:1px solid gray;'>".$txt."</td>";
 								}
 								}
 								$j++;
@@ -294,7 +294,7 @@
 						$i++;
 					}
 					//Print array as table
-					$x = "<table border='0' style='width:100%;'>";
+					$x = "<table border='0' style='border-collapse: collapse;width:100%;height:100%;'>";
 					foreach($arr_table as $row)
 					{
 						$x.= "<tr>";
