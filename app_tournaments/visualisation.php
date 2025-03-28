@@ -27,7 +27,7 @@
       $myPage->add_content("	<div id='xx' style='float:left;padding-bottom:10px;'><button>Teilnehmer</button></div>");
       $myPage->add_content("	<div id='users' style='box-sizing:border-box;width:100%;float:left;height:calc(100vh - 120px);border:10px solid #DDD;padding:10px;border-radius:20px;'></div>");
       $myPage->add_content("</div>");
-      $myPage->add_content("<div id='middle_side' style='float:left;margin-left:10px;width:54%;'>");
+      $myPage->add_content("<div id='middle_side' style='float:left;margin-left:10px;width:calc(55% - 20px);'>");
       $myPage->add_content("	<div id='rounds' style='padding-bottom:10px;'></div>");
       $myPage->add_content("	<div id='all_courts' style='box-sizing:border-box;width:100%;float:left;height:calc(100vh - 120px);border:10px solid #DDD;padding:10px;10px;border-radius:20px;'></div>");
       $myPage->add_content("</div>");
