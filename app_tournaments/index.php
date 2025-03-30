@@ -618,7 +618,9 @@ try
 						if(isset($_GET['round'])) { if($d->game_round==$_GET['round']) { $zus_txt = "style='background-color:orange;'"; } }
 						$myPage->add_content("<div class='menu_item'><button ".$zus_txt." onclick='window.location=\"index.php?tournament_id=$_GET[tournament_id]&round=$d->game_round\"';'>Runde $d->game_round</button></div>");
 					}
+					$myPage->add_content("<div class='menu_item'><button style='background-color:olive;' onclick='window.location=\"index.php?tournament_id=$_GET[tournament_id]&mode=details\"';'>Turnierbericht</button></div>");
 				}
+
 			}
 
 			//Loaded tournament is started...
@@ -794,84 +796,161 @@ try
 			{
 				if(!isset($_GET['round']))
 				{
-					$x = "<h1>Siegerehrung</h1>";
-					$i = 0;
-					$p = array();
-
-					if($t_data->group_system=='Doppel_fix')
+					if(isset($_GET['mode']))
 					{
-						$limit = 6;
-				  	$db->sql_query("SELECT * FROM group2user
-				  												LEFT JOIN users ON group2user_user_id = user_id
-				  												WHERE group2user_group_id = '$_GET[tournament_id]'
-				  												ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_birthday DESC LIMIT $limit");
-						$arr_displayed = array();
-						$curr_pos=1;
+						$x = "<h1>Rangliste</h1>";
+						$db->sql_query("SELECT *, 
+															CONCAT(user_firstname,' ',user_lastname) as user_full
+														FROM group2user
+														LEFT JOIN users ON group2user_user_id = user_id
+														WHERE group2user_group_id = '$_GET[tournament_id]'
+														ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_birthday DESC");
+
+						$x.= "<table style='width:100%; border-collapse: collapse;'>";
+						$x.= "<tr>";
+						$x.= "<th style='text-align:left;'>Rang</th>";
+						$x.= "<th style='text-align:left;'>Spieler</th>";
+						$x.= "<th style='text-align:left;'>Siege</th>";
+						if($t_data->group_system=='Gruppenspiele')
+						{
+							$x.= "<th style='text-align:left;'>Satzdifferenz</th>";
+							$x.= "<th style='text-align:left;'>Punktedifferenz</th>";
+						}
+						else
+						{
+							$x.= "<th style='text-align:left;'>BHZ</th>";
+							$x.= "<th style='text-align:left;'>FBHZ</th>";
+						}
+						$x.= "</tr>";
+						$rang = 1;
 						while($d = $db->get_next_res())
 						{
-							$i++;
-			  			if(!in_array($d->group2user_user_id,$p))
-							{
-								$p[] = $d->group2user_user_id;
-								$p[] = $d->group2user_partner_id;
-							}
+							$x.= "<tr>";
+							$x.= "<td style='border-bottom:1px solid black;padding:5px;'>".$rang."</td>";
+							$x.= "<td style='border-bottom:1px solid black;'>".$d->user_full."</td>";
+							$x.= "<td style='border-bottom:1px solid black;'>".$d->group2user_wins."</td>";
+							$x.= "<td style='border-bottom:1px solid black;'>".$d->group2user_BHZ."</td>";
+							$x.= "<td style='border-bottom:1px solid black;'>".$d->group2user_FBHZ."</td>";
+							$x.= "</tr>";
+							$rang++;
 						}
+						$x.= "</table>";
+
+						$x.= "<h1>Details</h1>";
+						$db->sql_query("SELECT *, 
+															CONCAT(p1.user_firstname,' ',p1.user_lastname) as p1_user,
+															CONCAT(p2.user_firstname,' ',p2.user_lastname) as p2_user 	 
+														FROM games
+															LEFT JOIN users as p1 ON game_player1_id = p1.user_id
+															LEFT JOIN users as p2 ON game_player2_id = p2.user_id
+															WHERE game_group_id = '$_GET[tournament_id]'
+															ORDER BY game_round ASC, p1.user_account");
+
+						$x.= "<table style='width:100%;'>";
+						$x.= "<th style='text-align:left;'>Spieler 1</th>";
+						$x.= "<th style='text-align:left;'>Spieler 2</th>";
+						$x.= "<th style=''>Satz 1</th>";
+						$x.= "<th style=''>Satz 2</th>";
+						$x.= "<th style=''>Satz 3</th>";
+						$last_round = 0;
+						while($d = $db->get_next_res())
+						{
+							if($last_round!=$d->game_round)
+							{
+								$x.= "<tr><td colspan='5' style='text-align:center;background-color:#DDD;font-size:12pt;border:1px solid black;'>Runde ".$d->game_round."</td></tr>";
+								$last_round = $d->game_round;
+							}
+							$x.= "<tr>";
+							if($d->game_winner_id == $d->game_player1_id) {$x.= "<td><img style='height:15px;' src='".level."inc/imgs/crone.png'><b>&nbsp;".$d->p1_user."</b></td>";} else { $x.= "<td>".$d->p1_user."</td>"; }
+							if($d->game_winner_id == $d->game_player2_id) {$x.= "<td><img style='height:15px;' src='".level."inc/imgs/crone.png'><b>&nbsp;".$d->p2_user."</b></td>";} else { $x.= "<td>".$d->p2_user."</td>"; }
+							$x.= "<td style='text-align:center;'>".$d->game_set1_p1.":".$d->game_set1_p2."</td>";
+							$x.= "<td style='text-align:center;'>".$d->game_set2_p1.":".$d->game_set2_p2."</td>";
+							if($d->game_set3_p1>0) { $x.= "<td style='text-align:center;'>".$d->game_set3_p1.":".$d->game_set3_p2."</td>"; }
+							$x.= "</tr>";
+
+						}
+						$x.= "</table>";
 					}
 					else
 					{
-						$limit = 3;
-				  	$db->sql_query("SELECT * FROM group2user
-				  												LEFT JOIN users ON group2user_user_id = user_id
-				  												WHERE group2user_group_id = '$_GET[tournament_id]'
-				  												ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_birthday DESC LIMIT $limit");
+						$x = "<h1>Siegerehrung</h1>";
+						$i = 0;
+						$p = array();
+	
+						if($t_data->group_system=='Doppel_fix')
+						{
+							$limit = 6;
+							$db->sql_query("SELECT * FROM group2user
+																		LEFT JOIN users ON group2user_user_id = user_id
+																		WHERE group2user_group_id = '$_GET[tournament_id]'
+																		ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_birthday DESC LIMIT $limit");
+							$arr_displayed = array();
+							$curr_pos=1;
+							while($d = $db->get_next_res())
+							{
+								$i++;
+								if(!in_array($d->group2user_user_id,$p))
+								{
+									$p[] = $d->group2user_user_id;
+									$p[] = $d->group2user_partner_id;
+								}
+							}
+						}
+						else
+						{
+							$limit = 3;
+							$db->sql_query("SELECT * FROM group2user
+																		LEFT JOIN users ON group2user_user_id = user_id
+																		WHERE group2user_group_id = '$_GET[tournament_id]'
+																		ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_birthday DESC LIMIT $limit");
+							while($d = $db->get_next_res())
+							{
+								$p[] = $d->group2user_user_id;
+							}
+							//
+							$p[3] = null; $p[4] = null; $p[5] = null;
+						}
+	
+	
+						$i=3;
+						$x.= "<div style='width:100%;'><img style='width:100%;' src='podest.php?p1=$p[0]&p2=$p[1]&p3=$p[2]&p4=$p[3]&p5=$p[4]&p6=$p[5]'/>";
+						$x.= "</div><div style='clear:both;margin-left:5vw;'>";
+	
+						$db->sql_query("SELECT * FROM group2user
+																	LEFT JOIN users ON group2user_user_id = user_id
+																	WHERE group2user_group_id = '$_GET[tournament_id]'
+																	ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_birthday DESC LIMIT $limit,100");
 						while($d = $db->get_next_res())
 						{
-							$p[] = $d->group2user_user_id;
-						}
-						//
-						$p[3] = null; $p[4] = null; $p[5] = null;
-					}
-
-
-					$i=3;
-					$x.= "<div style='width:100%;'><img style='width:100%;' src='podest.php?p1=$p[0]&p2=$p[1]&p3=$p[2]&p4=$p[3]&p5=$p[4]&p6=$p[5]'/>";
-					$x.= "</div><div style='clear:both;margin-left:5vw;'>";
-
-			  	$db->sql_query("SELECT * FROM group2user
-			  												LEFT JOIN users ON group2user_user_id = user_id
-			  												WHERE group2user_group_id = '$_GET[tournament_id]'
-			  												ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_birthday DESC LIMIT $limit,100");
-					while($d = $db->get_next_res())
-					{
-						$my_user = new user($d->group2user_user_id);
-
-						if($t_data->group_system=='Doppel_fix')
-			  		{
-			  			if(!in_array($my_user->id,$arr_displayed))
-			  			{
+							$my_user = new user($d->group2user_user_id);
+	
+							if($t_data->group_system=='Doppel_fix')
+							{
+								if(!in_array($my_user->id,$arr_displayed))
+								{
+									$i++;
+									$db2 = clone($db);
+									$d2 = $db2->sql_query_with_fetch("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id='$my_user->id'");
+									$partner = new user($d2->group2user_partner_id);
+									$x.= "<div style='float:left;text-align:center;margin:10px;'><b>Rang ".$i."</b><br/>".$my_user->get_picture(false,null,'90px',true).$partner->get_picture(false,null,'90px',true)."<br/>".$my_user->login." & ".$partner->login."</div>";
+									$arr_displayed[] = $my_user->id;
+									$arr_displayed[] = $partner->id;
+								}
+							}
+							else
+							{
 								$i++;
-				  			$db2 = clone($db);
-				  			$d2 = $db2->sql_query_with_fetch("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id='$my_user->id'");
-				  			$partner = new user($d2->group2user_partner_id);
-								$x.= "<div style='float:left;text-align:center;margin:10px;'><b>Rang ".$i."</b><br/>".$my_user->get_picture(false,null,'90px',true).$partner->get_picture(false,null,'90px',true)."<br/>".$my_user->login." & ".$partner->login."</div>";
-					  		$arr_displayed[] = $my_user->id;
-					  		$arr_displayed[] = $partner->id;
-			  			}
-			  		}
-			  		else
-			  		{
-							$i++;
-							$x.= "<div class='ranking'><b>Rang ".$i."</b><br/>".$my_user->get_picture(true,null,false,false)."</div>";
-			  		}
-						$my_user = null;
+								$x.= "<div class='ranking'><b>Rang ".$i."</b><br/>".$my_user->get_picture(true,null,false,false)."</div>";
+							}
+							$my_user = null;
+						}
+						$x.= "</div>";
 					}
-					$x.= "</div>";
-
 					$myPage->add_content($x);
 				}
 			}
 
-			if(!isset($_GET['round']))
+			if(!isset($_GET['round']) && !isset($_GET['mode']))
 			{
 				if($myTournament->get_status()=='Started' OR $myTournament->get_status()=='Closed')
 				{

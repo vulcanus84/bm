@@ -217,30 +217,23 @@ class tournament
   		}
 
   		$my_user = new user($d->group2user_user_id);
-  		if($this->get_system()=='Schoch' OR $this->get_system()=='Doppel_dynamisch')
-  		{
-	  		$x.= "<div class='user_mit_BHZ' onclick='show_user_games($my_user->id);'>".$my_user->get_picture(false,null,'80px',true)."<br/>".$my_user->login."<br/>".$d->group2user_BHZ.".".$d->group2user_FBHZ."</div>";
-  		}
-  		else
-  		{
-	  		if($this->get_system()=='Doppel_fix')
-	  		{
-	  			if(!in_array($my_user->id,$arr_displayed))
-	  			{
-		  			$db2 = clone($this->db);
-		  			$d2 = $db2->sql_query_with_fetch("SELECT * FROM group2user WHERE group2user_group_id='".$this->id."' AND group2user_user_id='$my_user->id'");
-		  			$partner = new user($d2->group2user_partner_id);
-			  		$x.= "<div class='user_mit_BHZ' onclick='show_user_games($my_user->id);'>".$my_user->get_picture(false,null,'80px',true).$partner->get_picture(false,null,'80px',true)."<br/>".$my_user->login." & ".$partner->login."<br/>".$d->group2user_BHZ.".".$d->group2user_FBHZ."</div>";
-			  		$arr_displayed[] = $my_user->id;
-			  		$arr_displayed[] = $partner->id;
-	  			}
-	  		}
-	  		else
-	  		{
-		  		$x.= "<div class='user_mit_BHZ' onclick='show_user_games($my_user->id);'>".$my_user->get_picture(false,null,'80px',true)."<br/>".$my_user->login."<br/>".$d->group2user_BHZ.".".$d->group2user_FBHZ."</div>";
-	  		}
-  		}
-  		$my_user = null;
+			if($this->get_system()=='Doppel_fix')
+			{
+				if(!in_array($my_user->id,$arr_displayed))
+				{
+					$db2 = clone($this->db);
+					$d2 = $db2->sql_query_with_fetch("SELECT * FROM group2user WHERE group2user_group_id='".$this->id."' AND group2user_user_id='$my_user->id'");
+					$partner = new user($d2->group2user_partner_id);
+					$x.= "<div class='user_mit_BHZ' onclick='show_user_games($my_user->id);'>".$my_user->get_picture(false,null,'80px',false).$partner->get_picture(false,null,'80px',true)."<br/>".$my_user->login." & ".$partner->login."<br/>".$d->group2user_BHZ.".".$d->group2user_FBHZ."</div>";
+					$arr_displayed[] = $my_user->id;
+					$arr_displayed[] = $partner->id;
+				}
+			}
+			else
+			{
+				$x.= "<div class='user_mit_BHZ' style='margin:0.1vw' onclick='show_user_games($my_user->id);'>".$my_user->get_picture(false,null,'5.5vw',false)."<br/>".$my_user->login."<br/>".$d->group2user_BHZ.".".$d->group2user_FBHZ."</div>";
+			}
+		$my_user = null;
   		$last_wins = $d->group2user_wins;
   	}
   	if($mode=='narrow') { $x.= "</div>"; }
