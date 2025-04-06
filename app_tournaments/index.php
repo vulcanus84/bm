@@ -799,12 +799,26 @@ try
 					if(isset($_GET['mode']))
 					{
 						$x = "<h1>Rangliste</h1>";
-						$db->sql_query("SELECT *, 
-															CONCAT(user_firstname,' ',user_lastname) as user_full
-														FROM group2user
-														LEFT JOIN users ON group2user_user_id = user_id
-														WHERE group2user_group_id = '$_GET[tournament_id]'
-														ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_birthday DESC");
+						if($t_data->group_system=='Doppel_fix')
+						{
+							$db->sql_query("SELECT MAX(group2user_wins) as group2user_wins,MAX(group2user_BHZ) as group2user_BHZ,MAX(group2user_FBHZ) as group2user_FBHZ,
+																GROUP_CONCAT(COALESCE(user_firstname,''),' ',COALESCE(user_lastname,'') SEPARATOR ' & ') as user_full
+															FROM group2user
+															LEFT JOIN users ON group2user_user_id = user_id
+															WHERE group2user_group_id = '$_GET[tournament_id]'
+															GROUP BY group2user_wins
+															ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC");
+
+						}
+						else
+						{
+							$db->sql_query("SELECT *, 
+																CONCAT(COALESCE(user_firstname,''),' ',COALESCE(user_lastname,'')) as user_full
+															FROM group2user
+															LEFT JOIN users ON group2user_user_id = user_id
+															WHERE group2user_group_id = '$_GET[tournament_id]'
+															ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_birthday DESC");
+						}
 
 						$x.= "<table style='width:100%; border-collapse: collapse;'>";
 						$x.= "<tr>";
@@ -838,20 +852,27 @@ try
 
 						$x.= "<h1>Details</h1>";
 						$db->sql_query("SELECT *, 
-															CONCAT(p1.user_firstname,' ',p1.user_lastname) as p1_user,
-															CONCAT(p2.user_firstname,' ',p2.user_lastname) as p2_user 	 
+															CONCAT(COALESCE(p1.user_firstname,''),' ',COALESCE(p1.user_lastname,'')) as p1_user,
+															CONCAT(COALESCE(p2.user_firstname,''),' ',COALESCE(p2.user_lastname,'')) as p2_user, 	 
+															CONCAT(COALESCE(p3.user_firstname,''),' ',COALESCE(p3.user_lastname,'')) as p3_user,
+															CONCAT(COALESCE(p4.user_firstname,''),' ',COALESCE(p4.user_lastname,'')) as p4_user 	 
 														FROM games
 															LEFT JOIN users as p1 ON game_player1_id = p1.user_id
 															LEFT JOIN users as p2 ON game_player2_id = p2.user_id
+															LEFT JOIN users as p3 ON game_player3_id = p3.user_id
+															LEFT JOIN users as p4 ON game_player4_id = p4.user_id
 															WHERE game_group_id = '$_GET[tournament_id]'
 															ORDER BY game_round ASC, p1.user_account");
 
 						$x.= "<table style='width:100%;'>";
 						$x.= "<th style='text-align:left;'>Spieler 1</th>";
 						$x.= "<th style='text-align:left;'>Spieler 2</th>";
-						$x.= "<th style=''>Satz 1</th>";
-						$x.= "<th style=''>Satz 2</th>";
-						$x.= "<th style=''>Satz 3</th>";
+						if($t_data->group_counting!='win')
+						{
+							$x.= "<th style=''>Satz 1</th>";
+							$x.= "<th style=''>Satz 2</th>";
+							$x.= "<th style=''>Satz 3</th>";
+						}
 						$last_round = 0;
 						while($d = $db->get_next_res())
 						{
@@ -861,11 +882,41 @@ try
 								$last_round = $d->game_round;
 							}
 							$x.= "<tr>";
-							if($d->game_winner_id == $d->game_player1_id) {$x.= "<td><img style='height:15px;' src='".level."inc/imgs/crone.png'><b>&nbsp;".$d->p1_user."</b></td>";} else { $x.= "<td>".$d->p1_user."</td>"; }
-							if($d->game_winner_id == $d->game_player2_id) {$x.= "<td><img style='height:15px;' src='".level."inc/imgs/crone.png'><b>&nbsp;".$d->p2_user."</b></td>";} else { $x.= "<td>".$d->p2_user."</td>"; }
-							$x.= "<td style='text-align:center;'>".$d->game_set1_p1.":".$d->game_set1_p2."</td>";
-							$x.= "<td style='text-align:center;'>".$d->game_set2_p1.":".$d->game_set2_p2."</td>";
-							if($d->game_set3_p1>0) { $x.= "<td style='text-align:center;'>".$d->game_set3_p1.":".$d->game_set3_p2."</td>"; }
+							if(substr($t_data->group_system,0,6)=='Doppel')
+							{
+								if($d->game_winner_id == $d->game_player1_id) 
+								{ 
+									$zus_txt = 'font-weight:bold;'; 
+									$x.= "<td><table><tr><td rowspan='2'><img style='height:25px;' src='".level."inc/imgs/crone.png'></td><td style=".$zus_txt.">".$d->p1_user."</td></tr><tr><td style=".$zus_txt.">".$d->p3_user."</td></tr></table></td>";
+								} 
+								else 
+								{ 
+									$zus_txt =''; 
+									$x.= "<td><table><tr><td rowspan='2'></td><td style=".$zus_txt.">".$d->p1_user."</td></tr><tr><td style=".$zus_txt.">".$d->p3_user."</td></tr></table></td>";
+								}
+
+								if($d->game_winner_id == $d->game_player2_id) 
+								{ 
+									$zus_txt = 'font-weight:bold;'; 
+									$x.= "<td><table><tr><td rowspan='2'><img style='height:25px;' src='".level."inc/imgs/crone.png'></td><td style=".$zus_txt.">".$d->p2_user."</td></tr><tr><td style=".$zus_txt.">".$d->p4_user."</td></tr></table></td>";
+								} 
+								else 
+								{ 
+									$zus_txt =''; 
+									$x.= "<td><table><tr><td rowspan='2'></td><td style=".$zus_txt.">".$d->p2_user."</td></tr><tr><td style=".$zus_txt.">".$d->p4_user."</td></tr></table></td>";
+								}
+							}
+							else
+							{
+								if($d->game_winner_id == $d->game_player1_id) {$x.= "<td><img style='height:15px;' src='".level."inc/imgs/crone.png'><b>&nbsp;".$d->p1_user."</b></td>";} else { $x.= "<td>".$d->p1_user."</td>"; }
+								if($d->game_winner_id == $d->game_player2_id) {$x.= "<td><img style='height:15px;' src='".level."inc/imgs/crone.png'><b>&nbsp;".$d->p2_user."</b></td>";} else { $x.= "<td>".$d->p2_user."</td>"; }
+							}
+							if($t_data->group_counting!='win')
+							{
+								$x.= "<td style='text-align:center;'>".$d->game_set1_p1.":".$d->game_set1_p2."</td>";
+								$x.= "<td style='text-align:center;'>".$d->game_set2_p1.":".$d->game_set2_p2."</td>";
+								if($d->game_set3_p1>0) { $x.= "<td style='text-align:center;'>".$d->game_set3_p1.":".$d->game_set3_p2."</td>"; }
+							}
 							$x.= "</tr>";
 
 						}
