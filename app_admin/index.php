@@ -3,7 +3,7 @@
   require_once(level."inc/standard_includes.php");     //Load all necessary files (DB-Connection, User-Login, etc.)
   require_once(level."inc/php/class_query.php");       //Load class query for the grid (includes class column)
 
-  function show_dir($dir, $pos=2,$compare_string)
+  function show_dir($dir, $isSubfolder,$compare_string)
   {
     if(!isset($_GET['txt'])) { $_GET['txt'] = ""; }
     $handle = @opendir( $dir );
@@ -20,13 +20,12 @@
             if(strpos($compare_string,$file.";")!==FALSE) { $_GET['txt'] .= " disabled='1' checked='1'";}
             $_GET['txt'] .= "/> ".$file."<br>\n";
             $_GET['txt'] .= "<div id='$file' style='margin-left:30px;display:none;'>\n";
-            if(!is_numeric($pos)) { $pos = 0; }
-            show_dir($dir.$file.'/', $pos + 3,$compare_string);
+            show_dir($dir.$file.'/', true,$compare_string);
           }
         }
         else
         {
-          if($pos>2)
+          if($isSubfolder)
           {
             if(substr($file,strpos($file,"."))=='.php' AND $file!='menu.php')
             {
@@ -129,7 +128,7 @@
       $myPage->add_content("<div style='float:left;width:250px;border-right:1px solid gray;'>");
       $myPage->add_content("<h1>Apps</h1>");
       $myPage->add_content("<form name='append' method='POST' action='".$page->change_parameter('action','append')."'>");
-      $myPage->add_content(show_dir('../','',$compare_string));
+      $myPage->add_content(show_dir('../',false,$compare_string));
       $myPage->add_content("</div>");
       print $myPage->get_html_code();
     }
