@@ -1,0 +1,11 @@
+button.orange { background-color:#ffa500; }
+button.activated { border-left:5px solid gray; border-right:5px solid gray;  }
+
+
+div.user_mit_BHZ { float:left; }
+
+/* Teams*/
+div.team { float:left;width:270px;height:210px;border:1px solid gray;border-radius:1vw;padding:1vw;margin:0.5vw; }
+div.teams-player-left { float:left; }
+div.teams-player-right { float:right; }
+button.delete { background-color: red;width:100%;}

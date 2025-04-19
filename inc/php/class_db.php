@@ -24,11 +24,17 @@ class db
   private $res=NULL;
   private $counter=NULL;
   private $logger;
+  private static $instance = null;
 
-  function __construct($host,$user,$pw,$database)
+  function __construct()
   {
     //connect to database
-    $this->connection = new PDO("mysql:host=$host;dbname=$database", $user, $pw,array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
+    $user = "huebsche_bm";
+    $pw = "badminton123$";
+    $host = "localhost";
+    $db = "tournament";
+
+    $this->connection = new PDO("mysql:host=$host;dbname=$db", $user, $pw,array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
     $this->connection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
     if ($this->connection===False)
     { 
@@ -42,10 +48,18 @@ class db
 		else
 		{
 			$this->connected_host = $host;
-			$this->connected_database = $database;
+      $this->connected_db = $db;
 		}
-		$this->logger = new log();
+		$this->logger = new log($this);
   }
+
+  public static function getInstance()
+	{
+		if (self::$instance === null) {
+			self::$instance = new db();
+		}
+		return self::$instance;
+	}
   
   function insert($arr_fields,$table)
   {
@@ -60,7 +74,6 @@ class db
       } 
       $str_keys = substr($str_keys,0,-1);
       $str_vals = substr($str_vals,0,-1);
-
       $STH = $this->connection->prepare("INSERT INTO ".$table." (".str_replace(':','',$str_keys).") VALUES (".$str_keys.")");
       $STH->execute($arr_fields);
       $this->last_inserted_id = $this->connection->lastInsertId();
@@ -69,7 +82,7 @@ class db
     catch (PDOException $e)
     {
       throw new Exception("<div style='border:1px dotted black;color:red;text-align:center;padding:5px;margin:5px;font-weight:bold;'>
-                ".$e->getMessage()."
+                ".$e->getMessage()."<br/><span style='color:black;font-style:italic;'>INSERT INTO ".$table." (".str_replace(':','',$str_keys).") VALUES (".$str_vals.")</span>
             </div>");
     }
   }
@@ -99,7 +112,7 @@ class db
     catch (PDOException $e)
     {
       throw new Exception("<div style='border:1px dotted black;color:red;text-align:center;padding:5px;margin:5px;font-weight:bold;'>
-                ".$e->getMessage()."
+                ".$e->getMessage()."<br/><span style='color:black;font-style:italic;'>UPDATE ".$table." SET ".$str_vals." WHERE ".$id_column."='".$id."'</span>
             </div>");
     }
   }

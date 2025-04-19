@@ -13,12 +13,12 @@ class translation
   private $translation_table;
 
   //the language code represents the column name in the sql table
-  function __construct($db, $lang_code='german')
+  function __construct($lang_code='german')
   {
     $this->translation_table = "translation";
     $this->search_str="";
     $this->language_code = $lang_code;
-    $this->db = clone($db);
+    $this->db = new db();
     $this->db->sql_query("SHOW COLUMNS FROM ".$this->translation_table);
     while($d = $this->db->get_next_res())
     {

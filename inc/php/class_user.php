@@ -1,4 +1,7 @@
 <?php
+require_once('class_db.php');
+require_once('class_log.php');
+
 class user
 {
 	public $firstname;
@@ -11,11 +14,11 @@ class user
 	public $hidden;
 
 	private $frontend_language;
-	private $db;
 
 	//Read-only konfiguriert
 	protected $id;
 	protected $login;
+	private $db;
 
 	public function __get($name)
 	{
@@ -28,17 +31,28 @@ class user
 		else { $this->$name = $value; }
 	}
 
-
 	public function __construct($user_id=0)
 	{
-		include(level.'inc/db.php');
+		$this->db = db::getInstance(); //with new db() each user displayed on page would get his own db connection (can be 100 users or even more)
 		if($user_id!=0) { $this->load_user_by_id($user_id); }
+	}
+
+	//To store the user object in session, the PDO Object must be exluded
+	public function __sleep()
+	{
+		$vars = get_object_vars($this);
+		unset($vars['db']);
+		return array_keys($vars);
+	}
+
+	public function __wakeup()
+	{
+		$this->db = new db();
 	}
 
 	public function save()
 	{
-		include(level.'inc/db.php');
-		$db->sql_query("UPDATE users SET
+		$this->db->sql_query("UPDATE users SET
 							user_firstname = '$this->firstname',
 							user_lastname = '$this->lastname',
 							user_language = '".$this->get_frontend_language()."'
@@ -48,19 +62,16 @@ class user
 
 	public function load_user_by_login($login)
 	{
-		include(level.'inc/db.php');
-		$res = $db->sql_query_with_fetch("SELECT * FROM users WHERE user_account=:uid",array('uid'=>$login));
+		$res = $this->db->sql_query_with_fetch("SELECT * FROM users WHERE user_account=:uid",array('uid'=>$login));
 		$this->load_user_by_id($res->user_id);
 	}
 
 	public function load_user_by_id($id)
 	{
-		include(level.'inc/db.php');
-
-		$db->sql_query("SELECT *, DATE_FORMAT(user_birthday,'%d.%m.%Y') as user_birthday FROM users	WHERE user_id=:uid",array('uid'=>$id));
-		if($db->count()>0)
+		$this->db->sql_query("SELECT *, DATE_FORMAT(user_birthday,'%d.%m.%Y') as user_birthday FROM users	WHERE user_id=:uid",array('uid'=>$id));
+		if($this->db->count()>0)
 		{
-			$res = $db->get_next_res();
+			$res = $this->db->get_next_res();
 			$this->id = $id;
 			$this->login = $res->user_account;
 
@@ -88,14 +99,13 @@ class user
 	 */
 	public function check_permission($path,$permission_typ='read')
 	{
-		include(level.'inc/db.php');
 		//links without required permission
 		if(substr($path,0,9)=='index.php') { return true; }
 		if(substr($path,0,10)=='/index.php') { return true; }
 
 			//evaluate normal permissions
-		$db->sql_query("SELECT * FROM permissions WHERE permission_user_id='$this->id'");
-		while($d = $db->get_next_res())
+		$this->db->sql_query("SELECT * FROM permissions WHERE permission_user_id='$this->id'");
+		while($d = $this->db->get_next_res())
 		{
 		switch($permission_typ)
 		{
@@ -137,34 +147,30 @@ class user
 	}
 
 
-	function get_picture($with_name=true,$javascript_function=null,$size='',$thumbnail=false)
+	function get_picture($with_name=true,$javascript_function=null,$size='',$thumbnail=false,$with_random_id=false)
 	{
 		$css='';
 		$pic_path = $this->get_pic_path($thumbnail);
-
+		$custom_id = $this->id;
+		
 		if($size!='') { $css = 'width:'.$size.';'; }
+		$js = null;
+		if($javascript_function)
+		{
+			$js = " onclick='".$javascript_function."(\"".$custom_id."\");'"; 
+			$css.= "cursor:pointer;";
+		}
+
 		if($with_name)
 		{
-			$js = null;
-			if($javascript_function)
-			{
-				$js = " onclick='".$javascript_function."(".$this->id.");'";
-				$css.= "cursor:pointer;";
-			}
 			if($this->hidden) { $css.= "opacity:0.3"; }
-			$x = "<div class='user_mit_name' id='user".$this->id."'>";
+			$x = "<div class='user_mit_name' id='{$custom_id}'>";
 			$x.= "<img alt='$this->login' title='$this->login' style='$css' class='user' src='$pic_path' $js/>";
 			$x.= "<br/>".$this->login."</div>";
 			return $x;
 		}
 		else
 		{
-			$js = null;
-			if($javascript_function)
-			{
-				$js = " onclick='".$javascript_function."(".$this->id.");'";
-				$css.= "cursor:pointer;";
-			}
 			if($css!='') { $css = "style='".$css."'"; }
 			return "<img alt='$this->login' title='$this->login' $css class='user' src='$pic_path' $js/>";
 		}
@@ -217,15 +223,13 @@ class user
 
 	function get_comments()
 	{
-    include(level.'inc/db.php');
-
 		$txt = "<h1>".$this->fullname."</h1>";
 		$txt.= "<button style='margin-bottom:20px;' onclick='new_comment(".$this->id.");'>Neuer Kommentar</button>";
 		$txt.= "<table style='width:100%;'>";
-		$db->sql_query("SELECT *, DATE_FORMAT(comment_date,'%d.%m.%Y') as c_date FROM comments WHERE comment_user_id='".$this->id."' ORDER BY comment_date DESC");
-		while($data = $db->get_next_res())
+		$this->db->sql_query("SELECT *, DATE_FORMAT(comment_date,'%d.%m.%Y') as c_date FROM comments WHERE comment_user_id='".$this->id."' ORDER BY comment_date DESC");
+		while($data = $this->db->get_next_res())
 		{
-			$trainer = new user(clone($db),$data->comment_created_by);
+			$trainer = new user(clone($this->db),$data->comment_created_by);
 			$txt.= "<tr>";
 			$txt.= "<td>".$trainer->get_picture(false)."</td>";
 			$txt.= "<td style='font-size:12pt;width:100px;'>".$data->c_date."</td>";
@@ -240,31 +244,29 @@ class user
 
 	function get_user_history()
 	{
-    include(level.'inc/db.php');
-
 		$x = "";
 		include('class_chart.php');
 
-		$db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM group2user
+		$this->db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM group2user
 													LEFT JOIN groups ON group2user_group_id = groups.group_id
 													WHERE group2user_user_id='$this->id'
 													ORDER BY group_created DESC");
-		if($db->count()>0)
+		if($this->db->count()>0)
 		{
 
 			$x.= "<h1>Infos von ".$this->fullname."</h1>";
 			$x.= "<h2>Gespielte Turniere</h2>";
 			$x.= "<ul>";
-			while($d = $db->get_next_res())
+			while($d = $this->db->get_next_res())
 			{
 				$x.= "<li><a href='".level."app_tournaments/index.php?tournament_id=".$d->group_id."'>".$d->group_created_c." - ".$d->group_title."</a></li>";
 			}
 			$x.= "</ul>";
-			$db->sql_query("SELECT * FROM games WHERE game_player1_id='$this->id' OR game_player2_id='$this->id' OR game_player3_id='$this->id' OR game_player4_id='$this->id'");
-			$games_played = $db->count();
+			$this->db->sql_query("SELECT * FROM games WHERE game_player1_id='$this->id' OR game_player2_id='$this->id' OR game_player3_id='$this->id' OR game_player4_id='$this->id'");
+			$games_played = $this->db->count();
 
-			$db->sql_query("SELECT * FROM games WHERE game_winner_id='$this->id' OR game_winner2_id='$this->id'");
-			$games_won = $db->count();
+			$this->db->sql_query("SELECT * FROM games WHERE game_winner_id='$this->id' OR game_winner2_id='$this->id'");
+			$games_won = $this->db->count();
 
 			$x.= "<h2>Statistiken</h2>";
 
@@ -284,9 +286,9 @@ class user
 
 			$myChart = new chart("bars","Ränge", "",700,200);
 
-			$db->sql_query("SELECT * FROM group2user ORDER BY group2user_group_id, group2user_wins DESC, group2user_BHZ DESC");
+			$this->db->sql_query("SELECT * FROM group2user ORDER BY group2user_group_id, group2user_wins DESC, group2user_BHZ DESC");
 			$pos = 0; $found=false;
-			while($d = $db->get_next_res())
+			while($d = $this->db->get_next_res())
 			{
 				if(!isset($last_group)) { $last_group=$d->group2user_group_id; }
 				if($d->group2user_group_id!=$last_group)
@@ -324,20 +326,20 @@ class user
 			$myChart = null;
 
 			$x.= "<h2>Alle Spiele</h2>";
-			$db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM games
+			$this->db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM games
 													LEFT JOIN groups ON game_group_id = groups.group_id
 													WHERE game_player1_id='$this->id' OR game_player2_id='$this->id' OR game_player3_id='$this->id' OR game_player4_id='$this->id'
 													ORDER BY group_created DESC,game_round ASC");
 
 			$x.= "<table style='width:100%;'>";
 			$last_tournament_id = 0;
-			while($data = $db->get_next_res())
+			while($data = $this->db->get_next_res())
 			{
 				if($last_tournament_id != $data->game_group_id)
 				{
-					$myTournament = new tournament(clone($db),$data->game_group_id);
+					$myTournament = new tournament(clone($this->db),$data->game_group_id);
 					$last_tournament_id = $data->game_group_id;
-					$x.= "<tr><td colspan='6'><h1 style='margin-bottom:0px;'>".$myTournament->get_title()."</h1><h2 style='font-style:italic;'>".$data->group_created_c."</h2></td></tr>";
+					$x.= "<tr><td colspan='6'><h1 style='margin-bottom:0px;'>{$myTournament->title}</h1><h2 style='font-style:italic;'>{$data->group_created_c}</h2></td></tr>";
 				}
 
 				$u1 = null; $u2 = null; $u3 = null; $u4 = null;
@@ -378,7 +380,7 @@ class user
 
 				if($data->game_winner_id!='')
 				{
-					if($myTournament->get_counting()=='win')
+					if($myTournament->counting=='win')
 					{
 						if($data->game_winner_id==$_GET['user_id'] OR $data->game_winner2_id==$_GET['user_id'])
 						{
@@ -441,7 +443,6 @@ class user
 
 	function get_user_infos($with_form=true,$with_pic=true)
 	{
-		include(level.'inc/db.php');
 		$page = new header_mod();                               //about the current page and header modification functions
 		$x = "";
 
@@ -494,12 +495,12 @@ class user
 		$x.= "		<td>Trainingsort(e):</td>";
 		$x.= " 		<td style='width:300px;'>";
 
-		$db->sql_query("SELECT * FROM location_permissions
+		$this->db->sql_query("SELECT * FROM location_permissions
 										LEFT JOIN locations ON loc_permission_loc_id = location_id
 										LEFT JOIN (SELECT * FROM location2user WHERE location2user_user_id='".$this->id."') as lj ON lj.location2user_location_id = locations.location_id
 										WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
 										ORDER BY location_name");
-		while($d = $db->get_next_res())
+		while($d = $this->db->get_next_res())
 		{
 			$x.= "	   <input style='width:20px;' type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if($d->location2user_id>0) { $x.= " checked='checked'"; } $x.= "/>".$d->location_name."<br/>";
 		}
@@ -531,9 +532,7 @@ class user
 
 	function get_new_user()
 	{
-		include(level.'inc/db.php');
-
-	  	$page = new header_mod();                               //about the current page and header modification functions
+		$page = new header_mod();                               //about the current page and header modification functions
 		$x = "<h1>Neuer Spieler</h1>";
 		$x.= "<form id='new_user' action='".$page->change_parameter('action','create_new_user')."' method='POST'>";
 		$x.= "<input type='hidden' name='user_lastname'/>";
@@ -556,13 +555,13 @@ class user
 		$x.= "		<td>Trainingsort(e):</td>";
 		$x.= " 		<td style='width:300px;'>";
 
-		$db->sql_query("SELECT * FROM location_permissions
+		$this->db->sql_query("SELECT * FROM location_permissions
 										LEFT JOIN locations ON loc_permission_loc_id = location_id
 										LEFT JOIN (SELECT * FROM location2user WHERE location2user_user_id='".$this->id."') as lj ON lj.location2user_location_id = locations.location_id
 										WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
 										ORDER BY location_name");
 		$is_checked = false;
-		while($d = $db->get_next_res())
+		while($d = $this->db->get_next_res())
 		{
 			$x.= "	   <input style='width:20px;' type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if(!$is_checked) { $x.= " checked='checked'"; $is_checked = true; } $x.= "/>".$d->location_name."<br/>";
 		}
@@ -585,10 +584,8 @@ class user
 		{
 			$myPath = str_replace('_t.png','_stars.png',$myPath);
 
-	    include(level.'inc/db.php');
-
-	    $db->sql_query("SELECT * FROM exam2user WHERE exam2user_user_id='".$this->id."'");
-	    $anz_stars = $db->count();
+	    $this->db->sql_query("SELECT * FROM exam2user WHERE exam2user_user_id='".$this->id."'");
+	    $anz_stars = $this->db->count();
 	    if($anz_stars > 0)
 	    {
         	$im  = imagecreatefrompng($this->get_ori_pic_path());
@@ -688,11 +685,10 @@ class user
 
   function check_password($pw)
   {
-    include(level.'inc/db.php');
-    $db->sql_query("SELECT * FROM users
+    $this->db->sql_query("SELECT * FROM users
                            WHERE user_account = :user_account",array('user_account'=>$this->login));
-    $daten = $db->get_next_res();
-    if ($db->count()==1)
+    $daten = $this->db->get_next_res();
+    if ($this->db->count()==1)
     if (hash('sha256', $pw)==$daten->user_password)
     {
       return true;
@@ -704,10 +700,9 @@ class user
 
   function update_password($old_pw,$new_pw)
   {
-    include(level.'inc/db.php');
     if($this->check_password($old_pw))
     {
-      $db->update(array('user_password'=>hash('sha256', $new_pw)),'users','user_id',$this->id);
+      $this->db->update(array('user_password'=>hash('sha256', $new_pw)),'users','user_id',$this->id);
     }
     else {
       throw new Exception("Altes Passwort falsch");

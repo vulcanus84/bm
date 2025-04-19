@@ -21,12 +21,11 @@ class page
   private $content;                     //save the text until it will be printed by get_html_code
   private $arr_header_lines = array();  //array with all header lines (filled by the functions add_header_line, add_css_link, add_js_link)
   private $logger;
+  private $arr_data = [];
 
   public function __construct()
   {
-    //Get database connection
-    include(level.'inc/db.php');
-    $this->db = $db;
+    $this->db = new db();
     $this->logger = new log();
 
     //Used for adding/removing parameters to URL
@@ -80,11 +79,11 @@ class page
 
 	    if(isset($_SESSION['login_user']))
 			{
-				$this->t = new translation(clone($db),$_SESSION['login_user']->get_frontend_language());
+				$this->t = new translation($_SESSION['login_user']->get_frontend_language());
 			}
 			else
 			{
-				$this->t = new translation($db,"german");
+				$this->t = new translation("german");
 			}
 
 	    if(isset($_POST['user_login'])) { $this->check_login($_POST['user_login'],$_POST['pw']); }
@@ -132,6 +131,10 @@ class page
 	  $txt.= "</tr></table></div>";
 		return $txt;
 	}
+
+  public function add_data($key,$val) {
+    $this->arr_data[$key] = $val;
+  }
 
   //Add content to the page
   public function add_content_with_translation($txt)
@@ -359,7 +362,11 @@ class page
 
   private function get_content()
   {
-    $txt = "      <div class='content'>\n";
+    $str_data = "";
+    foreach($this->arr_data as $key => $val) {
+      $str_data.= "data-".$key."='".$val."' ";
+    }
+    $txt = "      <div id='content' $str_data>\n";
     $txt.= $this->content;
     $txt.= "      </div><!--End Content-->\n";
     return $txt;
@@ -443,6 +450,7 @@ class page
         $page->remove_parameter('pw');
         $page->remove_parameter('x');
    			$this->logger->write_to_log('User','Login');
+        die();
         header("Location: ".$page->get_link());
       }
       else

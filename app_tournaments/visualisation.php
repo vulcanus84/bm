@@ -138,7 +138,7 @@
         $db->sql_query("SELECT MAX(game_round) as game_round,MAX(game_status) as game_status FROM games WHERE game_group_id='$_GET[tournament_id]' GROUP BY game_round");
   			if($db->count()>0)
   			{
-	      	if($myTournament->get_system()=='Gruppenspiele')
+	      	if($myTournament->system=='Gruppenspiele')
 	      	{
 	          $one_round_more = 2;
 						print "<button id='round1'>Tabelle</button>";
@@ -152,7 +152,7 @@
 							print "<button id='round$d->game_round'>Runde $d->game_round</button>";
 		 				}
 					}
-	      	if($myTournament->get_status()=='Closed') { print "<button id='round$one_round_more'>Siegerehrung</button>"; }
+	      	if($myTournament->status=='Closed') { print "<button id='round$one_round_more'>Siegerehrung</button>"; }
   			}
   			else
   			{
@@ -162,9 +162,9 @@
       
       if(isset($_GET['action']) && $_GET['action']=='get_number_of_rounds')
       {
-      	if($myTournament->get_system()=='Gruppenspiele')
+      	if($myTournament->system=='Gruppenspiele')
       	{
-	        if($myTournament->get_status()=='Closed')
+	        if($myTournament->status=='Closed')
 	        {
 						print "2";
 	        }
@@ -176,7 +176,7 @@
       	else
       	{
 	        $db->sql_query("SELECT MAX(game_round) as game_round,MAX(game_status) as game_status FROM games WHERE game_group_id='$_GET[tournament_id]' GROUP BY game_round");
-	        if($myTournament->get_status()=='Closed')
+	        if($myTournament->status=='Closed')
 	        {
 	        	print $db->count()+1;
 	        }
@@ -194,7 +194,7 @@
 
       if(isset($_GET['action']) && $_GET['action']=='get_courts')
       {
-				if($myTournament->get_system()=='Gruppenspiele' AND $_GET['round']=='1')
+				if($myTournament->system=='Gruppenspiele' AND $_GET['round']=='1')
 				{
 					//Show overview of Gruppenspiele
 					
@@ -309,10 +309,10 @@
 				}
 				else
       	{
-	  			if(isset($_GET['round']) && $myTournament->get_rounds()>=$_GET['round'] && $myTournament->get_system()!='Gruppenspiele') 
+	  			if(isset($_GET['round']) && $myTournament->get_rounds()>=$_GET['round'] && $myTournament->system!='Gruppenspiele') 
 	  			{
 	  				$i=1;
-	  				for($i;$i<=$myTournament->get_number_of_courts();$i++)
+	  				for($i;$i<=$myTournament->number_of_courts;$i++)
 	  				{
 	  					$db->sql_query_with_fetch("SELECT * FROM games WHERE game_group_id='".$_GET['tournament_id']."' AND game_round='$_GET[round]' AND game_location='".$i."'");
 	  					if($db->count()>0) 
@@ -335,9 +335,9 @@
 	  			}
   			}
   
-  			if($myTournament->get_status()=='Closed')
+  			if($myTournament->status=='Closed')
   			{
-  				if($myTournament->get_rounds()<$_GET['round'] OR ($myTournament->get_system()=='Gruppenspiele' AND $_GET['round']=='2'))
+  				if($myTournament->get_rounds()<$_GET['round'] OR ($myTournament->system=='Gruppenspiele' AND $_GET['round']=='2'))
   				{
   					$x = "";
   					$i = 0;
