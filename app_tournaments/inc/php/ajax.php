@@ -396,7 +396,7 @@ if($_GET['ajax']=='define_games')
         $users_on_court.= $p1.'/'.$p2.'/';
         $p1=null;$p2=null;$p3=null;$p4=null;
 
-        $open_players = $myTournament->get_number_of_players() - 2;
+        $open_players = count($myTournament->arr_players) - 2;
         //Do we need a single game?
         if($open_players % 4 > 0)
         {

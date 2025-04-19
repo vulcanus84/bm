@@ -7,6 +7,7 @@ class tournament
 {
 	public $id;
 	public $db;
+	public $db2; //For loops with second db access
 	public $title;
 	public $description;
 	public $system;
@@ -1121,10 +1122,10 @@ class tournament
 				//Teilnehmer ungerade?, Freilos hinzufügen
 				if($players_count % 2 != 0)
 				{
-					$db->insert(array('group2user_group_id'=>$_GET['tournament_id'],'group2user_user_id'=>'1'),'group2user');
+					$this->db->insert(array('group2user_group_id'=>$_GET['tournament_id'],'group2user_user_id'=>'1'),'group2user');
 					$players_count++;
 				}
-				$db->update(array('group_status'=>'Started','group_round'=>'1','group_courts'=>$anz_courts),'groups','group_id',$_GET['tournament_id']);
+				$this->db->update(array('group_status'=>'Started','group_round'=>'1','group_courts'=>$anz_courts),'groups','group_id',$_GET['tournament_id']);
 				print "OK";
 			}
 			else
