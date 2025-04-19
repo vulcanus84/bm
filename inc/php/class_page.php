@@ -94,7 +94,7 @@ class page
 	  catch (Exception $e)
 	  {
 	    $this->error_text = $e->getMessage();
-			$this->t = new translation($db,"german");
+			$this->t = new translation("german");
 	  }
   }
 
@@ -464,16 +464,6 @@ class page
 
   }
 
-  public function set_info($info)
-  {
-    $this->info = $info;
-  }
-
-  public function get_info()
-  {
-    if(isset($this->info)) { return $this->info; } else { return null; }
-  }
-
   public function set_title($title)
   {
     $this->title = $title;
@@ -486,12 +476,12 @@ class page
 
   public function set_subtitle($title)
   {
-    $this->sub_title = $title;
+    $this->subtitle = $title;
   }
 
   public function get_subtitle()
   {
-    if(isset($this->sub_title)) { return $this->sub_title; } else { return null; }
+    if(isset($this->sub_title)) { return $this->subtitle; } else { return null; }
   }
 
   public function get_path()
