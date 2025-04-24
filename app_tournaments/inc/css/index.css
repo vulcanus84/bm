@@ -1,11 +1,68 @@
-button.orange { background-color:#ffa500; }
-button.activated { border-left:5px solid gray; border-right:5px solid gray;  }
+div.court { height: 220px;vertical-align:middle; }
 
+div.user_mit_BHZ { 
+  float:left;
+  text-align:center; 
+  font-size:10pt;
+  width:100px;
+}
+div.user_mit_BHZ img { width:100%; }
 
-div.user_mit_BHZ { float:left; }
 
 /* Teams*/
 div.team { float:left;width:270px;height:210px;border:1px solid gray;border-radius:1vw;padding:1vw;margin:0.5vw; }
 div.teams-player-left { float:left; }
 div.teams-player-right { float:right; }
-button.delete { background-color: red;width:100%;}
+
+div.court { float:left;width:100%;cursor:pointer; }
+img.img_court { width:100%; }
+
+/* Container für die Liste der Turniere */
+.tournament-list {
+  margin-top: 20px;
+}
+
+/* Container für jedes einzelne Turnier */
+.tournament-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+/* Details des Turniers */
+.tournament-details {
+  flex-grow: 1;
+  margin-right: 20px;
+}
+
+.tournament-details h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.tournament-details .date {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Container für die Buttons */
+.tournament-actions {
+  display: flex;
+  gap: 2px;
+}
+
+div.user_mit_name { width:33%; }
+img.user { width:120px; }
+
+span.score { font-size:10pt; }
+div.podest img { height:60%; }
+
+/* Tablets und größer */
+@media screen and (min-width: 700px) {
+  div.court { width:50%; }
+}

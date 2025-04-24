@@ -320,16 +320,16 @@
 	  					 	$data = $db->sql_query_with_fetch("SELECT * FROM games WHERE game_group_id='".$_GET['tournament_id']."' AND game_round='$_GET[round]' AND game_location='".$i."'");
 	  						if($data->game_status=='Closed')
 	  						{
-	  							print "<div class='court' style='height:unset;' id='court$i'><img src='court.php?action=fill&game_id=$data->game_id' class='court'/></div>"; 
+	  							print "<div class='court' style='height:unset;' id='court$i'><img src='court.php?action=fill&game_id=$data->game_id' class='img_court'/></div>"; 
 	  						}
 	  						else
 	  						{
-	  							print "<div class='court' style='height:unset;' id='court$i'><img src='court.php?action=fill&game_id=$data->game_id' class='court' onclick='check_result($i);'/></div>"; 
+	  							print "<div class='court' style='height:unset;' id='court$i'><img src='court.php?action=fill&game_id=$data->game_id' class='img_court' onclick='check_result($i);'/></div>"; 
 	  						}
 	  					}
 	  					else
 	  					{
-	  						print "<div class='court' id='court$i'><img src='court.php?action=clear' class='court'/></div>"; 
+	  						print "<div class='court' id='court$i'><img src='court.php?action=clear' class='img_court'/></div>"; 
 	  					}
 	  				}
 	  			}

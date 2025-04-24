@@ -1,0 +1,43 @@
+div#top_left_col { 
+  float:left;
+  width:25vw;
+  border-right:1px solid #CCC;
+  height:80vh;
+  clear:both; 
+}
+
+div#menu_left { 
+  border-right:1px solid #CCC;
+  width:25vw;
+  float:left; 
+  padding-bottom:5px; 
+}
+
+div#left_col { 
+  float:left; 
+  width:25vw;
+  min-width:300px;
+  border-right:1px solid #CCC; 
+  overflow:auto; 
+  height:calc(100vh - 180px); 
+  clear:both; 
+}
+
+div#menu_right { 
+  width:70vw; 
+  float:left; 
+  overflow:auto; 
+  margin-left:5px;
+}
+
+div#right_col { 
+  float:left; 
+  width:68vw;
+  margin-left:10px; 
+}
+
+
+/* Tablets und größer */
+@media screen and (min-width: 700px) {
+  
+}

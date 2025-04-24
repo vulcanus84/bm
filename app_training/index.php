@@ -18,7 +18,7 @@ try
 	}
 	
 	$myPage = new page();
-	$myTournament = new tournament();
+	$myTournament = new Tournament\tournament();
 	$logger = new log();
 
 	$page->change_parameter('x','1');

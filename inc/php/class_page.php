@@ -57,7 +57,13 @@ class page
 		$this->add_header_line("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no\"/>");
 
     //Set standard style sheets for all files
-    $this->add_css_link(level."inc/css/styles.css");
+    //$this->add_css_link(level."inc/css/styles.css");
+    $this->add_css_link(level."inc/css/general.css");
+    $this->add_css_link(level."inc/css/main_menu.css");
+    $this->add_css_link(level."inc/css/buttons.css");
+    $this->add_css_link(level."inc/css/modal.css");
+    $this->add_css_link(level."inc/css/query.css");
+
     $this->add_css_link(level."inc/js/calendar/theme.css");
 
     //Set standard javascript includes for all files
@@ -450,7 +456,6 @@ class page
         $page->remove_parameter('pw');
         $page->remove_parameter('x');
    			$this->logger->write_to_log('User','Login');
-        die();
         header("Location: ".$page->get_link());
       }
       else

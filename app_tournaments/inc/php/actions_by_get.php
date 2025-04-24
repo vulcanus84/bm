@@ -1,4 +1,5 @@
 <?php 
+namespace Tournament;
 
 if(isset($_GET['action']))
 {
@@ -37,7 +38,7 @@ if(isset($_GET['action']))
           
             $myTournament->system = $_POST['tournament_system'];
             $myTournament->counting = $_POST['tournament_counting'];
-            $myTournament->location = new location($_POST['created_by_location']);  
+            $myTournament->location = new \location($_POST['created_by_location']);  
             $myTournament->save();
             
             if($myTournament->id == null)
@@ -51,7 +52,7 @@ if(isset($_GET['action']))
           }
           else
           {
-            throw new Exception("Titel muss ausgefüllt werden");
+            throw new \Exception("Titel muss ausgefüllt werden");
           }
           break;
     }

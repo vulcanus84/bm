@@ -300,7 +300,7 @@ class query
 
       if($_GET['ajax']=='done_export')
       {
-  			$t = new translation(clone $this->db,$_SESSION['login_user']->get_frontend_language());
+  			$t = new translation($_SESSION['login_user']->get_frontend_language());
         return "<div style='vertical-align:center;border-top:2px solid #666;border-bottom:2px solid #666;background-image: url(\"../inc/imgs/query/bg.png\");overflow:hidden;margin:auto;padding:10px;'>
                   <div style='font-size:12pt;font-weight:bold;padding-bottom:10px;width:100%;'><a  href='$_GET[filename]'><img src='".level."inc/imgs/query/excel_download.png' alt='Excel Download' title='Excel Download'/></a></div>
                   <div id='close' style='cursor:pointer;font-size:12pt;font-weight:bold;margin-top:10px;padding-top:10px;width:100%;border-top:1px solid black;'>Schliessen</div>
@@ -1240,11 +1240,11 @@ class query
       $i = 0;
       if(isset($_SESSION['login_user']))
       {
-  			$t = new translation(clone $this->db,$_SESSION['login_user']->get_frontend_language());
+  			$t = new translation($_SESSION['login_user']->get_frontend_language());
       }
       else
       {
-  			$t = new translation(clone $this->db);
+  			$t = new translation();
       }
 
 			//Get default sorting

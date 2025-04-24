@@ -151,13 +151,13 @@ class user
 	{
 		$css='';
 		$pic_path = $this->get_pic_path($thumbnail);
-		$custom_id = $this->id;
+		$custom_id = 'user'.$this->id;
 		
 		if($size!='') { $css = 'width:'.$size.';'; }
 		$js = null;
 		if($javascript_function)
 		{
-			$js = " onclick='".$javascript_function."(\"".$custom_id."\");'"; 
+			$js = " onclick='".$javascript_function."(\"".$this->id."\");'"; 
 			$css.= "cursor:pointer;";
 		}
 
@@ -337,7 +337,7 @@ class user
 			{
 				if($last_tournament_id != $data->game_group_id)
 				{
-					$myTournament = new tournament(clone($this->db),$data->game_group_id);
+					$myTournament = new Tournament\tournament($data->game_group_id);
 					$last_tournament_id = $data->game_group_id;
 					$x.= "<tr><td colspan='6'><h1 style='margin-bottom:0px;'>{$myTournament->title}</h1><h2 style='font-style:italic;'>{$data->group_created_c}</h2></td></tr>";
 				}

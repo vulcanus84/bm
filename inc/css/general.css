@@ -1,0 +1,53 @@
+body { 
+  font-family:Arial;
+  background-color:#FAFAFF;
+}
+
+img {
+  border:none; 
+}
+
+h1 { 
+  color:#000; 
+  font-size:28px; 
+}
+
+h2 { 
+  color:#000; 
+  font-size:18px; 
+  font-weight: bold; 
+  margin-bottom:10px;
+  margin-top:5px; 
+}
+
+h3 { 
+  color:#000; 
+  font-size:12pt; 
+}
+
+h4 { 
+  color:#000; 
+  font-size:12pt; 
+}
+
+div.page { 
+  width:100%;
+  margin:0 auto; 
+}
+
+div.header { 
+  position:relative; 
+}
+
+div.content { 
+  width:100%; 
+}
+
+div.footer { 
+  clear:both;
+}
+
+div.menu {
+  height:50px; 
+  text-align:left;
+}

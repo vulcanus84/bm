@@ -89,7 +89,7 @@ while($d = $db->get_next_res())
 	
 	$txt.= "<tr>";
 	$txt.= "<td style=\"text-align:center;font-size:14pt;\"><div style=\"font-size:4pt\">&nbsp;</div>Runde ".$d->game_round."</td>";
-	$txt.= "<td style=\"text-align:center;font-size:20pt;font-weight:bold;\">".$myTournament->get_title()."</td>";
+	$txt.= "<td style=\"text-align:center;font-size:20pt;font-weight:bold;\">".$myTournament->title."</td>";
 	if(isset($d->court_no))
 	{
 		$txt.= "<td style=\"text-align:center;font-size:14pt;padding-top:2px;\"><div style=\"font-size:4pt\">&nbsp;</div>Feld $d->court_no</td>";

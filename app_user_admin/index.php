@@ -7,7 +7,7 @@ if(!isset($_SESSION['login_user'])) { header("Location: ../index.php"); }
 try
 {
 	$myPage = new page();
-	$myTournament = new tournament();
+	$myTournament = new Tournament\tournament();
 	if(isset($_GET['action']) && $_GET['action']=='change_location_filter') 
 	{ 
 		$page->change_parameter('location_filter',$_POST['location']);
@@ -371,7 +371,7 @@ try
 		}
 
 		$myPage->add_content("<div id='left_col' onscroll='sessionStorage.scrollTop = $(this).scrollTop();'>");
-		$myPage->add_content($myTournament->get_all_users('show_infos',$_GET['order_by']));
+		$myPage->add_content($myTournament->html->get_all_users($_GET['order_by']));
 		$myPage->add_content("</div>");
 		$myPage->add_content("</div>");
 		$myPage->add_content("<div id='right_col'>");
@@ -387,9 +387,9 @@ try
 		if($_GET['ajax']=='new_user') { print $myUser->get_new_user(); }
 		if($_GET['ajax']=='show_infos') { print $myUser->get_user_infos(); }
 		if($_GET['ajax']=='show_history') { print $myUser->get_user_history(); }
-		if($_GET['ajax']=='show_left_col') { print $myTournament->get_all_users('show_infos',$_GET['order_by']); }
+		if($_GET['ajax']=='show_left_col') { print $myTournament->html->get_all_users('show_infos',$_GET['order_by']); }
 		if($_GET['ajax']=='delete_user') { $db->delete('users','user_id',$user_id); }
-		if($_GET['ajax']=='get_all_users') { print $myTournament->get_all_users('show_infos',$_GET['order_by']); }
+		if($_GET['ajax']=='get_all_users') { print $myTournament->html->get_all_users('show_infos',$_GET['order_by']); }
 
 
 		if($_GET['ajax']=='add_user')
