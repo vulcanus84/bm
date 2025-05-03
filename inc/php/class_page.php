@@ -397,20 +397,17 @@ class page
     return $txt;
   }
 
-  public function get_login_mask()
-  {
-  	$txt = "";
-	  $txt.= "<div id='login_mask'>\n";
+  public function get_login_mask() {
+	  $txt = "<div id='login_mask'>\n";
 		$txt.= "<form id='login' action='' method='POST' name='login'>\n";
 		$txt.= "<h2>Benutzer</h2>";
     $txt.= "<input type='text' name='user_login'>";
 		$txt.= "<h2>Passwort</h2>";
 		$txt.= "<input type='password' name='pw'/><br/>";
-		$txt.= "<button onclick='this.submit();'>Login</button>";
-		$my_user = null;
+		$txt.= "<button class='green' onclick='this.submit();'>Login</button>";
 		$txt.= "</form>\n";
-		$txt.= "<a href='index.php'><button style='background-color:blue;'>Zurück</button></a>";
-		$txt.= "<a href='app_drawing/excercises.php'><button style='background-color:orange;'>Übungen</button></a>";
+		$txt.= "<a href='index.php'><button class='blue'>Zurück</button></a>";
+		$txt.= "<a href='app_drawing/excercises.php'><button class='orange'>Übungen</button></a>";
 	  $txt.= "</div>\n";
 	  return $txt;
 

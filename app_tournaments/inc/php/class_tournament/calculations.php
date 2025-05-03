@@ -225,51 +225,52 @@ class calc
 
 			if($this->tournament->system=='Doppel_fix')
 			{
-        $arr_teams_available = $this->tournament->arr_teams;
+				if(Count($this->tournament->arr_teams)>Count($this->tournament->arr_rounds)) //Stop it, if they played against each opponent
+				{
+					$arr_teams_available = $this->tournament->arr_teams;
 				
-        for ($court_nr=$court_nr; $court_nr <= $this->tournament->number_of_courts; $court_nr++) { 
-					$curr_team = $arr_teams_available[0];
+					for ($court_nr=$court_nr; $court_nr <= $this->tournament->number_of_courts; $court_nr++) { 
+						$curr_team = $arr_teams_available[array_key_first($arr_teams_available)];
+						unset($arr_teams_available[$curr_team->id]);
+						
+						$opponent = $arr_teams_available[array_key_first($arr_teams_available)];
+						$arr_opponents = $arr_teams_available;
 
-					$arr_teams_available = array_filter($arr_teams_available,function($team) use ($curr_team) { return $curr_team->arr_players[0]!=$team->arr_players[0]; }); 
-					$arr_teams_available = array_values($arr_teams_available);
-					
-          $opponent = $arr_teams_available[0];
-					$arr_opponents = $arr_teams_available;
-					//Remove all teams you have allready played against
-					foreach ($this->tournament->arr_rounds as $round) {
-						foreach ($round->arr_games as $game) {
-              //Is player in left side, remove right side
-							if($game->p1->id == $curr_team->arr_players[0]->id || $game->p3->id == $curr_team->arr_players[0]->id) { 
-                $arr_opponents = array_filter($arr_opponents,function($team) use ($game) { return $team->id!=$team->combine_ids($game->p2->id,$game->p4->id); }); 
-              }
-							if($game->p2->id == $curr_team->arr_players[0]->id || $game->p4->id == $curr_team->arr_players[0]->id) { 
-                $arr_opponents = array_filter($arr_opponents,function($team) use ($game) { return $team->id!=$team->combine_ids($game->p1->id,$game->p3->id); }); 
-              }
+						//Remove all teams you have allready played against
+						foreach ($this->tournament->arr_rounds as $round) {
+							foreach ($round->arr_games as $game) {
+								//Is team in left side, remove right side
+								if($game->t1->id == $curr_team->id) { unset($arr_opponents[$game->t2->id]); }
+								if($game->t2->id == $curr_team->id) { unset($arr_opponents[$game->t1->id]); }
+							}
 						}
+						if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+
+						// //Remove all teams with different number of wins
+						$arr_opponents = array_filter($arr_opponents, function ($team) use ($curr_team) { return $team->wins == $curr_team->wins; }); 
+						$arr_opponents = array_values($arr_opponents);
+						if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+
+						$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
+						$curr_game->p1 = $curr_team->arr_players[0];
+						$curr_game->p3 = $curr_team->arr_players[1];
+						$curr_game->p2 = $opponent->arr_players[0];
+						$curr_game->p4 = $opponent->arr_players[1];
+						$curr_game->t1 = $curr_team;
+						$curr_game->t2 = $opponent;
+						$curr_game->save();
+
+						//Remove team from available list
+						unset($arr_teams_available[$opponent->id]);
 					}
-					$arr_opponents = array_values($arr_opponents);
-					if(Count($arr_opponents)>0) { $opponent = $arr_opponents[0]; }
-
-					// //Remove all players with different number of wins
-					// $arr_opponents = array_filter($arr_opponents, function ($user) use ($player) { return $user->wins == $player->wins; }); 
-					// $arr_opponents = array_values($arr_opponents);
-					// if(Count($arr_opponents)>0) { $opponent = $arr_opponents[0]; }
-
-					$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
-					$curr_game->p1 = $curr_team->arr_players[0];
-					$curr_game->p3 = $curr_team->arr_players[1];
-					$curr_game->p2 = $opponent->arr_players[0];
-					$curr_game->p4 = $opponent->arr_players[1];
-					$curr_game->save();
-
-					//Remove team from available list
-					$arr_teams_available = array_filter($arr_teams_available, function($team) use ($opponent) { return $team->id != $opponent->id; });
-					$arr_teams_available = array_values($arr_teams_available);
-
-        }
+					print "OK";
+				}
+				else {
+					print "Zu viele Runden für die Anzahl an Teams";
+				}
+	
 			}
 
-			print "OK";
 		}
 		else
 		{
@@ -350,19 +351,19 @@ class calc
 							if($game->p2->id == $player->id) { unset($arr_opponents[$game->p1->id]); }
 						}
 					}
-					if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+					if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
 
 					//If player is seeded and we are in first round, remove all other seeded players
 					if($player->seeding_no<99 && $this->tournament->curr_round==1) {
 						$arr_opponents = array_filter($arr_opponents, function ($user) { return $user->seeding_no == 99; }); 
 						$arr_opponents = array_values($arr_opponents);
 					}
-					if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+					if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
 
 					//Remove all players with different number of wins
 					$arr_opponents = array_filter($arr_opponents, function ($user) use ($player) { return $user->wins == $player->wins; }); 
 					$arr_opponents = array_values($arr_opponents);
-					if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+					if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
 
 					$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
 					$curr_game->p1 = $player;

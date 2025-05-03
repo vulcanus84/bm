@@ -1,20 +1,59 @@
-div.court { height: 220px;vertical-align:middle; }
+h1 {
+  width:100%;
+}
 
-div.user_mit_BHZ { 
+div.court { vertical-align:middle; }
+
+div.user_mit_BHZ, div.user_mit_name { 
   float:left;
   text-align:center; 
   font-size:10pt;
   width:100px;
+  cursor: pointer;
 }
-div.user_mit_BHZ img { width:100%; }
+
+div.user_mit_BHZ img, div.user_mit_name img { 
+  width:100%; 
+}
 
 
-/* Teams*/
-div.team { float:left;width:270px;height:210px;border:1px solid gray;border-radius:1vw;padding:1vw;margin:0.5vw; }
+/* ****************** */
+/* Teams */
+/* Left side with the BHZ */
+div.team_small {
+  text-align: center;
+  font-size: 10pt;
+  margin:2px;
+  padding:2px;
+  float:left;
+  border:1px solid gray;
+  border-radius:1vw;
+  white-space: nowrap;
+}
+
+td div.team_small {
+  float:none;
+}
+
+/* Right side for team definition */
+div.team { 
+  float:left;
+  width:220px;
+  height:190px;
+  border:1px solid gray;
+  border-radius:1vw;
+  padding:1vw;
+  margin:0.5vw; 
+}
 div.teams-player-left { float:left; }
 div.teams-player-right { float:right; }
+div.team button {
+  margin-top:10px;
+  width:100%;
+}
+/* ****************** */
 
-div.court { float:left;width:100%;cursor:pointer; }
+
 img.img_court { width:100%; }
 
 /* Container für die Liste der Turniere */
@@ -25,9 +64,9 @@ img.img_court { width:100%; }
 /* Container für jedes einzelne Turnier */
 .tournament-item {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 15px;
+  padding: 10px;
+  margin-right:5px;
   border: 1px solid #ccc;
   margin-bottom: 10px;
   border-radius: 8px;
@@ -42,6 +81,7 @@ img.img_court { width:100%; }
 
 .tournament-details h3 {
   margin: 0;
+  padding-bottom: 5px;
   font-size: 18px;
 }
 
@@ -54,15 +94,36 @@ img.img_court { width:100%; }
 .tournament-actions {
   display: flex;
   gap: 2px;
+  height:100%;
 }
 
-div.user_mit_name { width:33%; }
 img.user { width:120px; }
 
 span.score { font-size:10pt; }
 div.podest img { height:60%; }
 
+#right_content .court {
+  flex: 0 0 calc(100% - 10px); /* zwei Spalten mit Abstand */
+  box-sizing: border-box;
+  text-align: center;
+}
+
+#right_content .user_mit_name {
+}
+
 /* Tablets und größer */
 @media screen and (min-width: 700px) {
-  div.court { width:50%; }
+  #right_content .court {
+    flex: 0 0 calc(50% - 10px); /* zwei Spalten mit Abstand */
+  }
+  .tournament-actions {
+    display: flex;
+  }
+
+}
+
+@media screen and (min-width: 1800px) {
+  #right_content .court {
+    flex: 0 0 calc(33% - 10px); /* zwei Spalten mit Abstand */
+  }
 }

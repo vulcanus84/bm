@@ -22,20 +22,20 @@ class html
 			switch ($this->tournament->status) {
 				case 'New':
 					if($this->tournament->system=='Doppel_fix') { $txt = 'Teams definieren'; } else { $txt='Turnier starten'; }
-					$html.="<div class='menu_item'><button id='start_tournament'>$txt</button></div>";
-					$html.="<div class='menu_item'><button id='stop_tournament'>Abbrechen</button></div>";
-					if(substr($this->tournament->system,0,6)!='Doppel') { $html.="<div class='menu_item'><button id='define_seedings'>Setzplätze definieren</button></div>"; }
+					$html.="<div class='menu_item'><button class='green' id='start_tournament'>$txt</button></div>";
+					$html.="<div class='menu_item'><button class='orange' id='stop_tournament'>Abbrechen</button></div>";
+					if(substr($this->tournament->system,0,6)!='Doppel') { $html.="<div class='menu_item'><button id='define_seedings' class='blue'>Setzplätze definieren</button></div>"; }
 					break;
 				
 				case 'define_seeded_players':
-					$html.="<div class='menu_item'><button id='start_tournament'>Turnier starten</button></div>";
-					$html.="<div class='menu_item'><button id='stop_tournament'>Abbrechen</button></div>";
-					if($this->tournament->number_of_seedings>0) { $html.="<div class='menu_item'><button id='delete_last_seeding'>Letzten Setzplatz löschen</button></div>"; }
+					$html.="<div class='menu_item'><button class='green' id='start_tournament'>Turnier starten</button></div>";
+					$html.="<div class='menu_item'><button class='orange' id='stop_tournament'>Abbrechen</button></div>";
+					if($this->tournament->number_of_seedings>0) { $html.="<div class='menu_item'><button id='delete_last_seeding' class='red'>Letzten Setzplatz löschen</button></div>"; }
 					break;
 				
 				case 'Define_teams':
-					$html.="<div class='menu_item'><button id='start_tournament'>Turnier starten</button></div>";
-					$html.="<div class='menu_item'><button id='stop_tournament'>Abbrechen</button></div>";
+					$html.="<div class='menu_item'><button class='green' id='start_tournament'>Turnier starten</button></div>";
+					$html.="<div class='menu_item'><button class='orange' id='stop_tournament'>Abbrechen</button></div>";
 					break;
 				
 				case 'Started':
@@ -58,19 +58,14 @@ class html
 					break;
 	
 				case 'Closed':
-					$this->tournament->db->sql_query("SELECT MAX(game_round) as game_round,MAX(game_status) as game_status FROM games WHERE game_group_id='$_GET[tournament_id]' GROUP BY game_round");
-					if($this->tournament->db->count()>0)
-					{
-						while($d = $this->tournament->db->get_next_res())
-						{
-							$zus_txt = "";
-							if($d->game_status!='Closed') { $game_open = true; }
-							if(isset($_GET['round'])) { if($d->game_round==$_GET['round']) { $zus_txt = "style='background-color:orange;'"; } }
-							$html.="<div class='menu_item'><button ".$zus_txt." onclick='window.location=\"index.php?tournament_id=$_GET[tournament_id]&round=$d->game_round\"';'>Runde $d->game_round</button></div>";
-						}
-						$html.="<div class='menu_item'><button id='award_ceremony' style='background-color:olive;'>Siegerehrung</button></div>";
-						$html.="<div class='menu_item'><button id='tournament_report' style='background-color:olive;'>Turnierbericht</button></div>";
+					foreach ($this->tournament->arr_rounds as $round) {
+						if(Count($round->arr_games)==0) { break; }
+						$class = 'green';
+						if(isset($_GET['round'])) { if($round->id==$_GET['round']) { $class = "orange"; }}
+						$html.="<div class='menu_item'><button class='change_round $class' data-round='{$round->id}'>Runde {$round->id}</button></div>";
 					}
+					$html.="<div class='menu_item'><button id='award_ceremony' class='olive'>Siegerehrung</button></div>";
+					$html.="<div class='menu_item'><button id='tournament_report' class='olive'>Turnierbericht</button></div>";
 					break;
 
 				default:
@@ -85,16 +80,12 @@ class html
 	}
 
   function get_users_for_teams() {
-		$arr_defined_players = [];
+		$arr_undefined_players = $this->tournament->arr_players;
 		foreach ($this->tournament->arr_teams as $team) {
 			foreach ($team->arr_players as $player) {
-				$arr_defined_players[$player->id] = $player;
+				unset($arr_undefined_players[$player->id]);
 			}
 		}	
-		$arr_undefined_players = [];
-		$arr_undefined_players = array_filter($this->tournament->arr_players, function ($player) use ($arr_undefined_players) {
-			return !in_array($player->id, $arr_undefined_players);
-		});
 
     $players_to_define = Count($arr_undefined_players)-1;
     if($players_to_define==-1) {
@@ -102,10 +93,9 @@ class html
     } else {
       $html = "<h1>Partner wählen ({$players_to_define}) </h1>";
     }
-    
   	
 		foreach ($arr_undefined_players as $key => $my_user) {
-			if($key > 0) {
+			if($key !== array_key_first($arr_undefined_players)) {
 				$html.= $my_user->get_picture();
 			}
 		}
@@ -114,32 +104,26 @@ class html
 
 	function get_partner_definition() {
 		$html = ""; $i=1;
-		$arr_defined_players = [];
+		$arr_undefined_players = $this->tournament->arr_players;
 
 		//Show all teams and calculated missing players
 		foreach($this->tournament->arr_teams as $t) {
-			$arr_defined_players[] = $t->arr_players[0]->id;
-			$arr_defined_players[] = $t->arr_players[1]->id;
-			$team_id = $i-1;
-			$html.= "<div data-team-id='{$team_id}' class='team'>";
+			unset($arr_undefined_players[$t->arr_players[0]->id]);
+			unset($arr_undefined_players[$t->arr_players[1]->id]);
+			$html.= "<div data-team-id='{$t->id}' class='team'>";
 			$html.= "Team {$i}<p>";
-			$html.= "<div class='teams-player-left'>{$t->arr_players[0]->get_picture()}</div>";
-			$html.= "<div class='teams-player-right'>{$t->arr_players[1]->get_picture()}</div>";
-			$html.= "<button class='red'>Team löschen</button>";
+			$html.= "<div class='teams-player-left'>{$t->arr_players[1]->get_picture()}</div>";
+			$html.= "<div class='teams-player-right'>{$t->arr_players[0]->get_picture()}</div>";
+			$html.= "<button class='red' id='delete_team'>Team löschen</button>";
 			$html.= "</div>";
 			$i++;
 		}
-
-		$arr_undefined_players = [];
-		$arr_undefined_players = array_filter($this->tournament->arr_players, function ($player) use ($arr_undefined_players) {
-			return !in_array($player->id, $arr_undefined_players);
-		});
 
     if(Count($arr_undefined_players)>1) {
       //show first missing player
       $html.= "<div class='team'>";
       $html.= "Team {$i}<p>";
-      $html.= "<div class='teams-player-left'>{$arr_undefined_players[0]->get_picture()}</div>";
+      $html.= "<div class='teams-player-left'>{$arr_undefined_players[array_key_first($arr_undefined_players)]->get_picture()}</div>";
       $html.= "<div class='teams-player-right'><img src='".level."inc/imgs/undefined.png'/></div>";
       $html.= "</div>";
     }
@@ -192,61 +176,88 @@ class html
 
 	function get_tournament_form($id=null) {
 		if($id!=null) { $this->tournament->load($id); }
-		$html = "<form id='new_tournament' action='index.php?action=save_tournament' method='post'>";
-		$html.= "<input type='hidden' name='tournament_id' value='".$this->tournament->id."'>";
-		if($this->tournament->id!=null) 
-		{ 
-			$html.= "<h1>Turnier anpassen</h1>"; 
-		} 
-		else 
-		{ 
-			$html.= "<h1>Turnier erstellen</h1>"; 
-			$this->tournament->status = "New";
-		}
+		$html = "<form id='new_tournament' action='index.php?action=save_tournament' method='post' style='display:flex;flex-direction:column;gap:1em;width:90%;'>";
 
-		$html.= "	<table style='width:100%;'>";
-		$html.= "	<tr><td style='width:150px;'>Turniername:</td><td><input id='tournament_title' name='tournament_title' style='width:80%;' type='text' value='".$this->tournament->title."' required /></td></tr>";
-		$html.= "	<tr><td style='width:150px;'>Spielsystem:</td>";
-		$html.= "	<td>";
-		$html.= "	 <select id='tournament_system' name='tournament_system' style='width:80%;'"; if($this->tournament->status!='New') { $html.= " disabled"; } $html.=">";
-		$html.= "	   <option value='Schoch' "; if($this->tournament->system=='Schoch') { $html.= " selected='1'"; } $html.= ">Schoch</option>";
-		$html.= "	   <option value='Gruppenspiele' "; if($this->tournament->system=='Gruppenspiele') { $html.= " selected='1'"; } $html.= ">Gruppenspiele</option>";
-		$html.= "	   <option value='Doppel_dynamisch' "; if($this->tournament->system=='Doppel_dynamisch') { $html.= " selected='1'"; } $html.= ">Doppel (dynamische Partner)</option>";
-		$html.= "	   <option value='Doppel_fix' "; if($this->tournament->system=='Doppel_fix') { $html.= " selected='1'"; } $html.= ">Doppel (fixe Partner)</option>";
-		$html.= "	 </select>";
-		$html.= "	</td>";
-		$html.= "	</tr>";
-		$html.= "	<tr><td style='width:150px;'>Zählweise:</td>";
-		$html.= "	<td>";
-		$html.= "	 <select id='tournament_counting' name='tournament_counting' style='width:80%;'";  if($this->tournament->status!='New') { $html.= " disabled"; } $html.=">";
-		$html.= "	   <option value='win' "; if($this->tournament->counting=='win') { $html.= " selected='1'"; } $html.= ">Nur Sieg</option>";
-		$html.= "	   <option value='pointsOneSet' "; if($this->tournament->counting=='pointsOneSet') { $html.= " selected='1'"; } $html.= ">Mit Punkten auf ein Satz</option>";
-		$html.= "	   <option value='official2sets' "; if($this->tournament->counting=='official2sets') { $html.= " selected='1'"; } $html.= ">Offiziell (21 Punkte, 2 Gewinnsätze)</option>";
-		$html.= "	   <option value='2sets11points' "; if($this->tournament->counting=='2sets11points') { $html.= " selected='1'"; } $html.= ">Verkürzt (11 Punkte, 2 Gewinnsätze, keine Verlängerung)</option>";
-		$html.= "	   <option value='2setswinning' "; if($this->tournament->counting=='2setswinning') { $html.= " selected='1'"; } $html.= ">2 Gewinnsätze (Punkte frei)</option>";
-		$html.= "	 </select>";
-		$html.= "	</td>";
-		$html.= "	</tr>";
-		$html.= "	<tr><td style='vertical-align:top;'>Turnierbeschreibung:</td><td><textarea id='tournament_description' name='tournament_description' style='width:80%;height:100px;'>{$this->tournament->description}</textarea></td></tr>";
-		$html.= "	<tr><td style='width:150px;'>Organisator:</td>";
-		$html.= "	<td>";
-		$html.= "	 <select id='created_by_location' name='created_by_location' style='width:80%;'>";
-		$this->db->sql_query("SELECT * FROM location_permissions
-										LEFT JOIN locations ON loc_permission_loc_id = location_id
-										WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
-										ORDER BY location_name");
-		while($d = $this->db->get_next_res())
-		{
-			$html.= "	   <option value='$d->location_id' "; if($this->tournament->location!=null && $this->tournament->location->id==$d->location_id) { $html.= " selected='1'"; } $html.= ">$d->location_name</option>";
+		$html .= "<input type='hidden' name='tournament_id' value='" . $this->tournament->id . "'>";
+		
+		$html .= "<h1>" . ($this->tournament->id != null ? "Turnier anpassen" : "Turnier erstellen") . "</h1>";
+		
+		if ($this->tournament->id == null) {
+				$this->tournament->status = "New";
 		}
-		$html.= "	 </select>";
-		$html.= "	</td>";
-		$html.= "	</tr>";
-		$html.= "	<tr><td><input style='border-radius:5px;background-color:green;color:white;' type='submit' value='Speichern'/></td></tr>";
-		$html.= "</table>";
-		$html.= "</form>";
-		if($this->tournament->status=='Closed') { $html.= "<td><button style='background-color:orange;' onclick='window.location=\"index.php?action=reactivate_tournament&tournament_id=".$this->tournament->id."\";'>Reaktivieren</button></td>"; }
+		
+		// Turniername
+		$html .= "<div style='display:flex;flex-direction:column;'>";
+		$html .= "<label for='tournament_title'>Turniername:</label>";
+		$html .= "<input id='tournament_title' name='tournament_title' type='text' value='" . $this->tournament->title . "' required />";
+		$html .= "</div>";
+		
+		// Spielsystem
+		$html .= "<div style='display:flex;flex-direction:column;'>";
+		$html .= "<label for='tournament_system'>Spielsystem:</label>";
+		$html .= "<select id='tournament_system' name='tournament_system' " . ($this->tournament->status != 'New' ? "disabled" : "") . ">";
+		$options = [
+				'Schoch' => 'Schoch',
+				'Gruppenspiele' => 'Gruppenspiele',
+				'Doppel_dynamisch' => 'Doppel (dynamische Partner)',
+				'Doppel_fix' => 'Doppel (fixe Partner)'
+		];
+		foreach ($options as $val => $label) {
+				$selected = ($this->tournament->system == $val) ? " selected='1'" : "";
+				$html .= "<option value='$val'$selected>$label</option>";
+		}
+		$html .= "</select></div>";
+		
+		// Zählweise
+		$html .= "<div style='display:flex;flex-direction:column;'>";
+		$html .= "<label for='tournament_counting'>Zählweise:</label>";
+		$html .= "<select style='width:100%;' id='tournament_counting' name='tournament_counting' " . ($this->tournament->status != 'New' ? "disabled" : "") . ">";
+		$countOptions = [
+				'win' => 'Nur Sieg',
+				'pointsOneSet' => 'Mit Punkten auf ein Satz',
+				'official2sets' => 'Offiziell (21 Punkte, 2 Gewinnsätze)',
+				'2sets11points' => 'Verkürzt (11 Punkte, 2 Gewinnsätze, keine Verlängerung)',
+				'2setswinning' => '2 Gewinnsätze (Punkte frei)'
+		];
+		foreach ($countOptions as $val => $label) {
+				$selected = ($this->tournament->counting == $val) ? " selected='1'" : "";
+				$html .= "<option value='$val'$selected>$label</option>";
+		}
+		$html .= "</select></div>";
+		
+		// Beschreibung
+		$html .= "<div style='display:flex;flex-direction:column;'>";
+		$html .= "<label for='tournament_description'>Turnierbeschreibung:</label>";
+		$html .= "<textarea id='tournament_description' name='tournament_description' style='height:100px;'>{$this->tournament->description}</textarea>";
+		$html .= "</div>";
+		
+		// Organisator
+		$html .= "<div style='display:flex;flex-direction:column;'>";
+		$html .= "<label for='created_by_location'>Organisator:</label>";
+		$html .= "<select id='created_by_location' name='created_by_location'>";
+		$this->db->sql_query("SELECT * FROM location_permissions
+				LEFT JOIN locations ON loc_permission_loc_id = location_id
+				WHERE loc_permission_user_id = '" . $_SESSION['login_user']->id . "'
+				ORDER BY location_name");
+		while ($d = $this->db->get_next_res()) {
+				$selected = ($this->tournament->location != null && $this->tournament->location->id == $d->location_id) ? " selected='1'" : "";
+				$html .= "<option value='$d->location_id'$selected>$d->location_name</option>";
+		}
+		$html .= "</select></div>";
+		
+		// Buttons
+		$html .= "<div style='display:flex;gap:1em;margin-top:1em;'>";
+		
+		$html .= "<button type='submit' class='green'>Speichern</button>";
+		
+		if ($this->tournament->status == 'Closed') {
+				$html .= "<button type='button' class='orange' onclick='window.location=\"index.php?action=reactivate_tournament&tournament_id=" . $this->tournament->id . "\";'>Reaktivieren</button>";
+		}
+		
+		$html .= "</div>"; // button row
+		$html .= "</form>";
 		return $html;
+		
 	}
 
 	function get_assigned_users() {
@@ -260,7 +271,7 @@ class html
 	}
 
 	function get_users_for_seedings() {
-		$html = "<h1>Teilnehmer (0)</h1>";
+		$html = "<h1>Teilnehmer (".Count($this->tournament->arr_players).")</h1>";
   	$this->db->sql_query("SELECT * FROM group2user
   												LEFT JOIN users ON group2user_user_id = user_id
   												WHERE group2user_group_id='{$this->tournament->id}' AND group2user_seeded = 99
@@ -278,8 +289,8 @@ class html
   	$html = "";
   	if($mode!='narrow')
   	{
- 			$html.= "<h1>Teilnehmer (0)</h1>";
- 			if(!isset($_GET['round']))
+			$html = "<h1>Teilnehmer (".Count($this->tournament->arr_players).")</h1>";
+			if(!isset($_GET['round']))
  			{
  				$html.="<a href='match_pdf.php?tournament_id={$this->tournament->id}' target='_blank'>Alle Matchblätter</a>";
  			}
@@ -287,7 +298,6 @@ class html
  			{
  				$html.="<a href='match_pdf.php?tournament_id={$this->tournament->id}&round={$_GET['round']}' target='_blank'>Matchblätter Runde {$_GET['round']}</a>";
  			}
-      $html.= "<hr/>";
   	}
 
   	$last_wins = "";
@@ -311,7 +321,7 @@ class html
           }
         }
         $last_wins = $team->arr_players[0]->wins;
-        $html.= "<div class='user_mit_BHZ' onclick='show_user_games($team->id);'>{$team->arr_players[0]->get_picture(false,null,'80px',false)}{$team->arr_players[1]->get_picture(false,null,'80px',true)}<br/>{$team->arr_players[0]->login} & {$team->arr_players[1]->login}<br/>{$team->arr_players[0]->BHZ}.{$team->arr_players[0]->FBHZ}</div>";
+        $html.= "<div class='team_small' onclick='show_user_games($team->id);'>{$team->arr_players[0]->get_picture(false,null,'80px',false)}{$team->arr_players[1]->get_picture(false,null,'80px',true)}<br/>{$team->arr_players[0]->login} & {$team->arr_players[1]->login}<br/>{$team->arr_players[0]->BHZ}.{$team->arr_players[0]->FBHZ}</div>";
       }
 
     } else {
@@ -344,11 +354,10 @@ class html
 
   function get_all_users($group_by='alphabetical') {
 		$html = "";
-		$header = new \header_mod();
-		$html.="<a href='".$header->change_parameter('order_by','alphabetical')."'><img style='height:48px;' src='".level."inc/imgs/sort_az_descending.png' title='Alphabetisch' alt='Alphabetisch' /></a>";
-		$html.="<a href='".$header->change_parameter('order_by','gender')."'><img style='height:48px;' src='".level."inc/imgs/male_female.png' title='Geschlecht' alt='Geschlecht' /></a>";
-		$html.="<a href='".$header->change_parameter('order_by','age')."'><img style='height:48px;' src='".level."inc/imgs/sort_by_age.png' title='Alter' alt='Alter' /></a>";
-		$html.="<a href='".$header->change_parameter('order_by','location')."'><img style='height:48px;' src='".level."inc/imgs/sort_by_location.png' title='Trainingsort' alt='Trainingsort' /></a>";
+		$html.="<img id='alphabetical' class='img_sort' src='".level."inc/imgs/sort_az_descending.png' title='Alphabetisch' alt='Alphabetisch' />";
+		$html.="<img id='gender' class='img_sort' src='".level."inc/imgs/male_female.png' title='Geschlecht' alt='Geschlecht' />";
+		$html.="<img id='age' class='img_sort' src='".level."inc/imgs/sort_by_age.png' title='Alter' alt='Alter' />";
+		$html.="<img id='location' class='img_sort' src='".level."inc/imgs/sort_by_location.png' title='Trainingsort' alt='Trainingsort' />";
 		$html.="<hr>";
 		$this->db->sql_query("SELECT * FROM location_permissions
 										LEFT JOIN locations ON loc_permission_loc_id = location_id
@@ -356,18 +365,18 @@ class html
 										ORDER BY location_name");
 		if($this->db->count()>1)
 		{
-			$html.="<form id='change_location_filter' action='".$header->change_parameter('action','change_location_filter')."' method='POST'>";
-			$html.="<select name='location' style='width:90%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">";
-			$html.="<option value=''>-- Alle Standorte --</option>";
-			while ($d=$this->db->get_next_res())
-			{
-				$html.="<option";
-				if(isset($_GET['location_filter']) && $_GET['location_filter']==$d->location_id) {$html.=" selected='1'"; }
-				$html.=" value='".$d->location_id."'>".$d->location_name."</option>";
+			if($group_by=='location') {
+				$html.="<select name='location' style='width:90%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">";
+				$html.="<option value=''>-- Alle Standorte --</option>";
+				while ($d=$this->db->get_next_res())
+				{
+					$html.="<option";
+					if(isset($_GET['location_filter']) && $_GET['location_filter']==$d->location_id) {$html.=" selected='1'"; }
+					$html.=" value='".$d->location_id."'>".$d->location_name."</option>";
+				}
+				$html.="</select>";
+				$html.="<hr style='margin:0px;'>";
 			}
-			$html.="</select>";
-			$html.="</form>";
-			$html.="<hr style='margin:0px;'>";
 			if(isset($_GET['show_hidden']) AND $_GET['show_hidden']=='1')
 			{
 				$w_str = "WHERE user_id!='1'";
@@ -718,7 +727,7 @@ class html
 
     $i=3;
     $html.= "<div style='width:100%;'><img style='width:100%;' src='inc/php/podest.php?p1=$p[0]&p2=$p[1]&p3=$p[2]&p4=$p[3]&p5=$p[4]&p6=$p[5]'/>";
-    $html.= "</div><div style='clear:both;margin-left:5vw;'>";
+    $html.= "</div>";
 
     $this->db->sql_query("SELECT * FROM group2user
                           LEFT JOIN users ON group2user_user_id = user_id
@@ -748,7 +757,6 @@ class html
       }
       $my_user = null;
     }
-    $html.= "</div>";
     return $html;
 
   }

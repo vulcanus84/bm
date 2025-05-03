@@ -111,16 +111,6 @@ div#language_selection
 	float:left;
 }
 
-div#login
-{
-	float:right;
-	right:0;
-}
-
-/* Login */
-div#login_mask { width:100%;max-width:400px;margin:auto;text-align:center; }
-div#login_mask h1 { font-size:16pt; }
-
 div#statistik { float:left;width:40%;vertical-align:top;border-right:1% solid #DDD;border-left:1% solid #DDD;padding-left:1%; }	
 div#aktivitaeten { float:left;width:30%;vertical-align:top;margin-left:1%; }
 
@@ -128,19 +118,11 @@ span.fields { float:left;margin-bottom:10px;width:100%;text-align:center;font-we
 span.fields input { width:90%;text-align:center; }
 span.fields textarea { width:90%;text-align:center; }
 
-div.button { width:100%; }
-div.button a { width:80%; }
-
 table#statistics { border:5px solid #DDD;width:100%; }
 table#statistics th { padding:5px;border-top:1px solid gray;border-bottom:1px solid gray; text-align:center; }
 table#statistics td { padding:5px;text-align:center;border-right:1px solid gray;vertical-align:top; }
 
 
-
-
-
-input { font-size:14pt; }
-textarea { font-size:14pt;height:150px; }
 div#login_mask { margin-top:10px;padding:3%;width:90%; font-size:10pt;position:relative; }
 div#login_mask h1 { margin:0; }
 div#login_mask input { width:90%;font-size:18pt;height:30px; }
@@ -160,7 +142,6 @@ div#males { float:left;	position:relative;width:100%; }
 div.not_podest { display:none; }
 div.show_not_podest { display:block;width:94%;border:3px solid gray; clear:both;text-align:center;border-radius:15px;padding:3%;cursor:pointer; }
 div.podest { width:100%; }
-div#duell_people { margin:auto; }
 
 div#statistik { width:95%;border-top:3px solid gray;margin-top:20px; }
 div#aktivitaeten { width:95%;border-top:3px solid gray;margin-top:20px; }
@@ -168,7 +149,6 @@ div#aktivitaeten { width:95%;border-top:3px solid gray;margin-top:20px; }
 div.alert { text-align:center;padding:3%;width:94%; }
 
 div.optional_view { display:none; }
-div#logo { float:left;width:70%;max-width:100px; }
 
 #my_view { float:none; width:90%; max-width:none;}
 #password_change { float:none; width:90%; max-width:none;margin-left:5px;}

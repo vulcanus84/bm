@@ -33,16 +33,14 @@ class game
   public $stopped_on;
   public $duration;
   
-	function __construct($round, $id=null)
-	{
+	function __construct($round, $id=null) {
     //Get database connection
 		$this->db= new \db();
     $this->round = $round;
 		if($id!=null) { $this->load($id); }
 	}
 
-  function load($id)
-  {
+  function load($id) {
 		$this->db->sql_query("SELECT * FROM games WHERE game_id= :id",array('id'=>$id));
 		if($this->db->count()==1)
 		{
@@ -51,9 +49,9 @@ class game
 			$this->status = $data->game_status;
 			$this->location = $data->game_location;
 
-      if($data->game_player1_id>0) { $this->p1 = $this->round->tournament->arr_players[$data->game_player1_id];  }
-      if($data->game_player2_id>0) { $this->p2 = $this->round->tournament->arr_players[$data->game_player2_id]; }
-      if($data->game_player3_id>0) { 
+      if($data->game_player1_id!==null) { $this->p1 = $this->round->tournament->arr_players[$data->game_player1_id];  }
+      if($data->game_player2_id!==null) { $this->p2 = $this->round->tournament->arr_players[$data->game_player2_id]; }
+      if($data->game_player3_id!==null) { 
         $this->p3 = $this->round->tournament->arr_players[$data->game_player3_id]; 
         if($data->game_player4_id>0) { $this->p4 = $this->round->tournament->arr_players[$data->game_player4_id]; }
         $team_id1 = $this->round->tournament->calc->calc_team_id($this->p1->id,$this->p3->id);
@@ -61,43 +59,41 @@ class game
         $team_id2 = $this->round->tournament->calc->calc_team_id($this->p2->id,$this->p4->id);
         $this->t2 = $this->round->tournament->arr_teams[$team_id2];
       }
-      if($data->game_winner_id>0) { $this->winner = $this->round->tournament->arr_players[$data->game_winner_id]; }
-      if($data->game_winner2_id>0) { $this->winner2= $this->round->tournament->arr_players[$data->game_winner2_id]; }
+      if($data->game_winner_id!==null) { $this->winner = $this->round->tournament->arr_players[$data->game_winner_id]; }
+      if($data->game_winner2_id!==null) { $this->winner2= $this->round->tournament->arr_players[$data->game_winner2_id]; }
 
-      if($data->game_set1_p1>0) { $this->set1_p1_points= $data->game_set1_p1; }
-      if($data->game_set1_p2>0) { $this->set1_p2_points= $data->game_set1_p2; }
-      if($data->game_set2_p1>0) { $this->set2_p1_points= $data->game_set2_p1; }
-      if($data->game_set2_p2>0) { $this->set2_p2_points= $data->game_set2_p2; }
-      if($data->game_set3_p1>0) { $this->set3_p1_points= $data->game_set3_p1; }
-      if($data->game_set3_p2>0) { $this->set3_p2_points= $data->game_set3_p2; }
+      if($data->game_set1_p1!==null) { $this->set1_p1_points= $data->game_set1_p1; }
+      if($data->game_set1_p2!==null) { $this->set1_p2_points= $data->game_set1_p2; }
+      if($data->game_set2_p1!==null) { $this->set2_p1_points= $data->game_set2_p1; }
+      if($data->game_set2_p2!==null) { $this->set2_p2_points= $data->game_set2_p2; }
+      if($data->game_set3_p1!==null) { $this->set3_p1_points= $data->game_set3_p1; }
+      if($data->game_set3_p2!==null) { $this->set3_p2_points= $data->game_set3_p2; }
 
-      if($data->game_created_on>0) { $this->created_on = new \DateTime($data->game_created_on); }
-      if($data->game_started_on>0) { $this->started_on = new \DateTime($data->game_started_on); }
-      if($data->game_stopped_on>0) { $this->stopped_on = new \DateTime($data->game_stopped_on); }
+      if($data->game_created_on!==null) { $this->created_on = new \DateTime($data->game_created_on); }
+      if($data->game_started_on!==null) { $this->started_on = new \DateTime($data->game_started_on); }
+      if($data->game_stopped_on!==null) { $this->stopped_on = new \DateTime($data->game_stopped_on); }
 
     }
   }
 
-  function delete()
-  {
+  function delete() {
     $this->db->delete('games','game_id',$this->id);
     $this->round->remove_game($this);
   }
 
-  function save()
-  {
+  function save() {
     $arr_fields = [];
     //Connection to tournament
     $arr_fields['game_group_id'] = $this->round->tournament->id;
     $arr_fields['game_round'] = $this->round->id;
 
     //Players (all of class \user)
-    if($this->p1!=null) { $arr_fields['game_player1_id'] = $this->p1->id; } else { $arr_fields['game_player1_id'] = null; }
-    if($this->p2!=null) { $arr_fields['game_player2_id'] = $this->p2->id; } else { $arr_fields['game_player2_id'] = null; }
-    if($this->p3!=null) { $arr_fields['game_player3_id'] = $this->p3->id; } else { $arr_fields['game_player3_id'] = null; }
-    if($this->p4!=null) { $arr_fields['game_player4_id'] = $this->p4->id; } else { $arr_fields['game_player4_id'] = null; }
-    if($this->winner!=null) { $arr_fields['game_winner_id'] = $this->winner->id; } else { $arr_fields['game_winner_id'] = null; }
-    if($this->winner2!=null) { $arr_fields['game_winner2_id'] = $this->winner2->id; } else { $arr_fields['game_winner2_id'] = null; }
+    if($this->p1!==null) { $arr_fields['game_player1_id'] = $this->p1->id; } else { $arr_fields['game_player1_id'] = null; }
+    if($this->p2!==null) { $arr_fields['game_player2_id'] = $this->p2->id; } else { $arr_fields['game_player2_id'] = null; }
+    if($this->p3!==null) { $arr_fields['game_player3_id'] = $this->p3->id; } else { $arr_fields['game_player3_id'] = null; }
+    if($this->p4!==null) { $arr_fields['game_player4_id'] = $this->p4->id; } else { $arr_fields['game_player4_id'] = null; }
+    if($this->winner!==null) { $arr_fields['game_winner_id'] = $this->winner->id; } else { $arr_fields['game_winner_id'] = null; }
+    if($this->winner2!==null) { $arr_fields['game_winner2_id'] = $this->winner2->id; } else { $arr_fields['game_winner2_id'] = null; }
 
     //General information
     $arr_fields['game_status'] = $this->status;

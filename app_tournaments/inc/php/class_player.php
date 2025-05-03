@@ -37,31 +37,24 @@ class player extends \user
   }
 
   function save() {
-    try 
-    {
-      try {
-        $arr_fields['group2user_user_id'] = $this->id;
-        $arr_fields['group2user_group_id'] = $this->tournament->id;
-        if($this->wins!=null) { $arr_fields['group2user_wins'] = $this->wins; }
-        if($this->seeding_no!=null) { $arr_fields['group2user_seeded'] = $this->seeding_no; }
-        if($this->BHZ!=null) { $arr_fields['group2user_BHZ'] = $this->BHZ; }
-        if($this->FBHZ!=null) { $arr_fields['group2user_FBHZ'] = $this->FBHZ; }
-        if($this->partner!=null) { $arr_fields['group2user_partner_id'] = $this->partner->id; } else { $arr_fields['group2user_partner_id'] = 'NULL'; }
+    try {
+      $arr_fields['group2user_user_id'] = $this->id;
+      $arr_fields['group2user_group_id'] = $this->tournament->id;
+      if($this->wins!==null) { $arr_fields['group2user_wins'] = $this->wins; }
+      if($this->seeding_no!==null) { $arr_fields['group2user_seeded'] = $this->seeding_no; }
+      if($this->BHZ!==null) { $arr_fields['group2user_BHZ'] = $this->BHZ; }
+      if($this->FBHZ!==null) { $arr_fields['group2user_FBHZ'] = $this->FBHZ; }
+      if($this->partner!==null) { $arr_fields['group2user_partner_id'] = $this->partner->id; } else { $arr_fields['group2user_partner_id'] = 'NULL'; }
 
-        if($this->tournament_user_id!=null)
-        {
-          $this->db->update($arr_fields,'group2user','group2user_id',$this->tournament_user_id);
-        }
-        else
-        {
-          $this->db->insert($arr_fields,'group2user');
-        }
-      } catch (\Throwable $th) {
-        print $th->getMessage();
+      if($this->tournament_user_id!==null)
+      {
+        $this->db->update($arr_fields,'group2user','group2user_id',$this->tournament_user_id);
       }
-    } 
-    catch (\Throwable $th) 
-    {
+      else
+      {
+        $this->db->insert($arr_fields,'group2user');
+      }
+    } catch (\Throwable $th) {
       print $th->getMessage();
     }
   }
@@ -103,6 +96,7 @@ class player extends \user
             }
             break;
     
+          case 'Doppel_fix':
           case 'Schoch':
             if($this->id==$game->p1?->id OR $this->id==$game->p2?->id OR $this->id==$game->p3?->id OR $this->id==$game->p4?->id) {
               if($mode=='main') { $BHZ = $BHZ + $game->winner->wins; } else { $BHZ = $BHZ + $game->winner->BHZ; }
@@ -147,9 +141,9 @@ class player extends \user
 
   }
 
-  function get_player_info() {
+  function get_tournament_info() {
     $html = "<div>";
-    $html.= "<h1>Bisherige Spiele von ".$this->login."</h1>";
+    $html.= "<h1>Bisherige Spiele von ".$this->login."</h1><button class='green' id='back_to_round'>Zurück zur Runde</button>";
     $html.= "<table style='width:100%;'>";
     foreach ($this->tournament->arr_rounds as $round) {
       foreach ($round->arr_games as $game) {
@@ -183,7 +177,7 @@ class player extends \user
           $html.= "<td style='text-align:center;'><h2>gegen</h2></td>";
           $html.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u2->get_pic_path()."' onclick=\"show_user_games('".$u2->id."');\"><br/>".$u2->login."</td>";
           if(isset($u4)) { $html.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u4->get_pic_path()."' onclick=\"show_user_games('".$u4->id."');\"><br/>".$u4->login."</td>"; }
-          if($game->winner->id!='')
+          if($game->winner?->id!='')
           {
             if($this->tournament->counting=='win')
             {

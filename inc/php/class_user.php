@@ -79,6 +79,7 @@ class user
 			$this->lastname = $res->user_lastname;
 			$this->fullname = $this->firstname." ".$this->lastname;
 			if(trim($this->fullname)=='') { $this->fullname = $this->login; }
+			if(trim($this->firstname)=='') { $this->firstname = $this->login; }
 			$this->gender = $res->user_gender;
 			$this->birthday = $res->user_birthday;
 

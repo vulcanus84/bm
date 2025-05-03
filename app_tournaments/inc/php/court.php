@@ -60,13 +60,13 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 	{
 		imagecopyresized($im, $user1, 50, 60, 0, 0, $user1_width*$f1/1.5, $user1_height*$f1/1.5, $user1_width, $user1_height);
 		imagecopyresized($im, $user3, 140, 80, 0, 0, $user3_width*$f3/1.5, $user3_height*$f3/1.5, $user3_width, $user3_height);
-		$text = $c_user1->login."/".$c_user3->login;
+		$text = $c_user1->firstname."/".$c_user3->firstname;
 		$color = $mixed;
 	}
 	else
 	{
 		imagecopyresized($im, $user1, 72, 35, 0, 0, $user1_width*$f1, $user1_height*$f1, $user1_width, $user1_height);
-		$text = $c_user1->login;
+		$text = $c_user1->firstname;
 		if($c_user1->gender=='Herr') { $color = $boy; } else { $color = $girl; } 
 	}
 
@@ -81,13 +81,13 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 	{
 		imagecopyresized($im, $user2, 320, 110, 0, 0, $user2_width*$f2/1.5, $user2_height*$f2/1.5, $user2_width, $user2_height);
 		imagecopyresized($im, $user4, 410, 130, 0, 0, $user4_width*$f4/1.5, $user4_height*$f4/1.5, $user4_width, $user4_height);
-		$text = $c_user2->login."/".$c_user4->login;
+		$text = $c_user2->firstname."/".$c_user4->firstname;
 		$color = $mixed;
 	}
 	else
 	{
 		imagecopyresized($im, $user2, 350, 80, 0, 0, $user2_width*$f2, $user2_height*$f2, $user2_width, $user2_height);
-		$text = $c_user2->login;
+		$text = $c_user2->firstname;
 		if($c_user2->gender=='Herr') { $color = $boy; } else { $color = $girl; } 
 	}
 	

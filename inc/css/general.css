@@ -3,6 +3,22 @@ body {
   background-color:#FAFAFF;
 }
 
+input {
+  border-radius:5px;
+  font-size:14pt;
+  font-family: Arial;
+}
+
+textarea { 
+  font-size:14pt;
+  height:150px; 
+  font-family: Arial;
+}
+
+select {
+  font-size:14pt;
+}
+
 img {
   border:none; 
 }
@@ -51,3 +67,29 @@ div.menu {
   height:50px; 
   text-align:left;
 }
+
+#login_mask {
+  display: flex;
+  flex-direction: column;   /* Elemente untereinander anordnen */
+  align-items: center;
+  justify-content: center;
+  border:1px solid gray;
+  border-radius: 15px;
+  padding:10px;
+  width: 100%;
+  max-width: 350px;
+  margin: auto;
+  text-align: center;
+}
+
+#login_mask button {
+  width: 300px;
+  margin-top: 10px;
+}
+
+#login_mask input {
+  width: 300px;
+  text-align: center;
+}
+
+div#login_mask h1 { font-size:16pt; }

@@ -1,43 +1,136 @@
-div#top_left_col { 
-  float:left;
-  width:25vw;
-  border-right:1px solid #CCC;
-  height:80vh;
-  clear:both; 
+/* Basis Layout */
+#content {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  border-right: 1px solid #CCC;
 }
 
-div#menu_left { 
-  border-right:1px solid #CCC;
-  width:25vw;
-  float:left; 
-  padding-bottom:5px; 
+/* Linke Spalte */
+#left_col {
+  flex: 0 0 100%;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #CCC;
+  transition: all 0.3s ease;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1000;
+  cursor: pointer; /* macht den Balken klickbar */
 }
 
-div#left_col { 
-  float:left; 
-  width:25vw;
-  min-width:300px;
-  border-right:1px solid #CCC; 
-  overflow:auto; 
-  height:calc(100vh - 180px); 
-  clear:both; 
+/* Header in linker Spalte */
+#left_header {
+  padding-bottom: 5px;
+  border-bottom: 1px solid #CCC;
 }
 
-div#menu_right { 
-  width:70vw; 
-  float:left; 
-  overflow:auto; 
-  margin-left:5px;
+#left_content {
+  overflow: auto;
+  height: calc(100vh - 180px);
+  width:100%;
 }
 
-div#right_col { 
-  float:left; 
-  width:68vw;
-  margin-left:10px; 
+/* Collapsed Label */
+#collapsed_label {
+  display: none; /* Standard: versteckt */
+  writing-mode: vertical-lr; /* vertikaler Text */
+  text-align: center;
+  font-weight: bold;
+  margin: auto;
+  color: #333;
 }
 
+/* Rechte Spalte */
+#right_col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#right_header {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+  justify-content: left;
+}
+
+#right_content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center; /* << Zentriert die .ranking-Boxen */
+}
 
 /* Tablets und größer */
 @media screen and (min-width: 700px) {
+  #left_col {
+    flex: 0 0 25vw;
+  }
+}
+
+@media screen and (max-width: 699px) {
+  #left_col {
+    width: 40px;
+    flex: none;
+    overflow: hidden;
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #left_content, 
+  #left_header {
+    display: none;
+  }
+
+  #collapsed_label {
+    display: block;
+  }
+
+  #right_col {
+    margin-left: 35px;
+    flex: 1;
+    display: flex; /* <- Flex behalten */
+    flex-direction: column; /* <- wie auf Desktop */
+  }
+
+  #right_header {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
+    justify-content: center;
+  }
   
+
+  #right_content {
+    display: flex; /* <- weiterhin Flex für Umbruch */
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  #left_col.open {
+    width: 80%;
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  #left_col.open #collapsed_label {
+    display: none;
+  }
+
+  #left_col.open #left_content {
+    display: block;
+    overflow: auto;
+    height: calc(100vh - 60px); /* oder Höhe neu anpassen */
+  }
+
+  #left_col.open #left_header {
+    display: block;
+  }
 }

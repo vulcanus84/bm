@@ -2,7 +2,8 @@ div.menu_item {
 	float:left;
 }
 
-button {
+button, 
+input[type="submit"] {
   border: none;
   color: white;
   cursor: pointer;
@@ -170,3 +171,21 @@ button.gray:focus {
 button.gray:active {
   background-color: #A0A0A0; /* Dunkleres Grau für die "gedrückte" Ansicht */
 }
+
+button.olive {
+  background-color: #808000; /* Olive */
+}
+
+button.olive:hover {
+  background-color: #666600; /* Etwas dunkleres Olive für Hover */
+}
+
+button.olive:focus {
+  outline: none;
+  box-shadow: 0 0 5px 2px rgba(128, 128, 0, 0.6); /* Fokus-Schatten in Olive */
+}
+
+button.olive:active {
+  background-color: #4d4d00; /* Noch dunkleres Olive für Aktiv-Zustand */
+}
+

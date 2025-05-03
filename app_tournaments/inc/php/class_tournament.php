@@ -73,20 +73,30 @@ class tournament
 				$this->add_round(1);
 			}
 			$this->id=$tournament_id;
-			//Load Players or Teams
 			$this->db->sql_query("SELECT * FROM group2user 
 														LEFT JOIN users ON group2user_user_id = user_id 
 														WHERE group2user_group_id= :tournament_id 
 														ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_account ASC",
 														array('tournament_id'=>$tournament_id));
+			//Load Players
+			while($d = $this->db->get_next_res())
+			{
+				$myPlayer = $this->add_player(intval($d->group2user_user_id));
+				if($myPlayer->seeding_no<99) { $this->number_of_seedings++; }
+			}
+
+			$this->db->sql_query("SELECT * FROM group2user 
+														LEFT JOIN users ON group2user_user_id = user_id 
+														WHERE group2user_group_id= :tournament_id AND group2user_partner_id > 0
+														ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC, user_account ASC",
+														array('tournament_id'=>$tournament_id));
+			//Load Teams
 			while($d = $this->db->get_next_res())
 			{
 				if($d->group2user_partner_id>0)
 				{
-					$this->add_team($d->group2user_user_id,$d->group2user_partner_id);
+					$this->add_team(intval($d->group2user_user_id),intval($d->group2user_partner_id));
 				}
-				$myPlayer = $this->add_player($d->group2user_user_id);
-				if($myPlayer->seeding_no<99) { $this->number_of_seedings++; }
 			}
 
 			$this->max_seeding_pos = round(Count($this->arr_players)/2,0);
@@ -122,6 +132,14 @@ class tournament
 			throw new \Exception("Tournament with the following ID not found: ".$tournament_id);
 		}
 
+	}
+
+	function reload() {
+		$this->arr_rounds = [];
+		$this->arr_players = [];
+		$this->arr_teams = [];
+		$this->curr_round = 0;
+		$this->load($this->id);
 	}
 
 	function save() {
@@ -180,11 +198,13 @@ class tournament
 	}
 
 	function add_partner($id) {
-		$arr_undefined_players = [];
-		$arr_undefined_players = array_filter($this->arr_players, function ($player) use ($arr_undefined_players) {
-			return !in_array($player->id, $arr_undefined_players);
-		});
-		$myTeam = $this->add_team($arr_undefined_players[0]->id,$id);
+		$arr_undefined_players = $this->arr_players;
+		foreach($this->arr_teams as $t) {
+			unset($arr_undefined_players[$t->arr_players[0]->id]);
+			unset($arr_undefined_players[$t->arr_players[1]->id]);
+		}
+		$key = intval(array_key_first($arr_undefined_players));
+		$myTeam = $this->add_team($arr_undefined_players[$key]->id,$id);
 		$myTeam->save();
 	}
 
@@ -219,7 +239,7 @@ class tournament
 					}
 				}
 				else {
-					if($players_count>0) {
+					if($players_count>Count($this->arr_teams)*2) {
 						return "Noch nicht alle Teams definiert";
 					}
 				}
@@ -332,7 +352,6 @@ class tournament
 			$this->db->sql_query("DELETE FROM news WHERE news_tournament_id='{$this->id}'");
 			$this->db->sql_query("DELETE FROM group2user WHERE group2user_user_id='1' AND group2user_group_id='{$this->id}'"); //Remove Dummy user if exist
 			$this->status = "New";
-			$this->calc->calc_ranking();
 			$this->save();
 
 			foreach ($this->arr_players as $player) {
@@ -341,7 +360,6 @@ class tournament
 			foreach ($this->arr_teams as $team) {
 				$team->delete();
 			}
-			$this->save();
 		} catch (\Throwable $th) {
 			print $th->getMessage();
 		}

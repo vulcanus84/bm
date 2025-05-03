@@ -45,21 +45,13 @@ try
 		}
 		
 
-		//***********************************************************************************************************************************
-		//Menu
-		//***********************************************************************************************************************************
-		$myPage->add_content("<div id='menu'>");
-		$myPage->add_content("	<div id='menu_left'>");
+		$myPage->add_content("<div id='left_col'>");
+		$myPage->add_content("	<div id='collapsed_label'>Spieler / Rangliste</div>");
+		$myPage->add_content("	<div id='left_header'>");
 		$myPage->add_content("		<span><a href='index.php'><button class='activated orange'>Turniere</button></a></span>");
 		$myPage->add_content("		<span><a href='../app_user_admin/index.php'><button style='background-color:blue;'>Spieler</button></a></span>");
 		$myPage->add_content("	</div>");
-		$myPage->add_content("	<div id='menu_right'>");
-		$myPage->add_content($myTournament->html->get_buttons());
-		$myPage->add_content("	</div>");
-		$myPage->add_content("</div>");
-		//***********************************************************************************************************************************
-
-		$myPage->add_content("<div id='left_col'>");
+		$myPage->add_content("	<div id='left_content'>");
 		if($myTournament->id)
 		{
 			if($myTournament->status=='Started' OR $myTournament->status=='Closed')
@@ -85,9 +77,15 @@ try
 		{
 			$myPage->add_content($myTournament->html->get_all_tournaments());
 		}
+		$myPage->add_content("	</div>");
 		$myPage->add_content("</div>");
 
 		$myPage->add_content("<div id='right_col'>");
+		$myPage->add_content("	<div id='right_header'>");
+		$myPage->add_content($myTournament->html->get_buttons());
+		$myPage->add_content("	</div>");
+		$myPage->add_content("	<div id='right_content'>");
+
 		if($myTournament->id > 0)
 		{
 			switch ($myTournament->status) {
@@ -147,6 +145,7 @@ try
 			}
 
 		}
+		$myPage->add_content("</div>");
 		$myPage->add_content("</div>");
 
 		print $myPage->get_html_code();
