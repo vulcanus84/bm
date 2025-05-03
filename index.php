@@ -8,6 +8,7 @@ try
 {
 	$myPage = new page();
 	$myPage->permission_required=true;
+	print "TEST";
 	print $myPage->get_html_code();
 }
 catch (Exception $e)
