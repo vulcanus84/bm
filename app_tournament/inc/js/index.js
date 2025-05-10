@@ -1,0 +1,673 @@
+var tournamentId;
+var base_link = String(window.location.origin + window.location.pathname);
+var server_link = String(window.location);
+if(!server_link.includes('?')) { server_link = server_link + '?x=y'; }
+
+const queryString = window.location.search;
+const params = new URLSearchParams(queryString);
+
+const urlParams = {};
+for (const [key, value] of params) {
+  urlParams[key] = value;
+}
+
+
+$(document).ready(function() {
+  tournamentId = $('#content').data('tournament-id');
+  setEvents();
+});
+
+function setEvents() {
+  const allSections = $('#left_content section'); // alle Gruppen (z.B. BCZ 1, BCZ 2 etc.)
+  // Standort-Filter
+  $('select[name="location"]').off('change').on('change', function() {
+    const selected = $(this).val();
+    allSections.hide(); // alle verstecken
+
+    if (!selected) {
+      allSections.show(); // alles zeigen wenn "-- Alle Standorte --" gewählt
+    } else {
+      allSections.each(function() {
+        if ($(this).find('h1').text().includes($(this).find('h1').text().split('(')[0].trim())) {
+          $(this).toggle($(this).find('h1').text().includes($('select[name="location"] option:selected').text().trim()));
+        }
+      });
+    }
+  });
+
+  //Remove click event from main part with the delegations
+  $('#content').off('click');
+
+  $('#content').on('click', 'button#back_to_round', (e) => window.location = server_link);
+  $('#left_col').off('click').on('click', function(e) {
+    if (!$(e.target).closest('.user_mit_name, button, select, a, .dropdown,img').length) {
+      $(this).toggleClass('open');
+    }
+  });
+  
+  
+  if($('#content').data('round-status')=='Drawn') {
+    $('#content').on('click','img.img_court', function (e) {
+      const gameId = $(e.currentTarget).data('game-id');
+      const court = $(e.currentTarget).closest('div').attr('id');
+      check_result(court,gameId);
+    });
+  }
+
+  $('button.edit_tournament').off('click').on('click', function(e) {
+    $('#left_col').toggleClass('open');
+    get_tournament_form($(e.currentTarget));
+  });
+  $('button.delete_tournament').off('click').on('click', (e) => delete_tournament($(e.currentTarget)));
+  $('button.open_tournament').off('click').on('click', (e) => window.location = base_link + '?tournament_id=' + $(e.currentTarget).data('tournament-id'));
+
+  $('img.img_sort').off('click').on('click', (e) => change_group_by(e));
+
+  if($('#content').data('system')=='Schoch') {
+    if($('#content').data('status')=='New') {
+      $('#content').on('click','div.user_mit_name', (e) => add_user(e.currentTarget.id));
+    }
+  }
+  
+  if($('#content').data('system')=='Doppel_fix') {
+    if($('#content').data('status')=='New') {
+      $('#content').on('click','div.user_mit_name', (e) => add_user(e.currentTarget.id));
+      $('#define_teams').off('click').on('click', (e) => define_teams());
+    }
+    else {
+      $('#content').on('click','.user_mit_name', (e) => add_as_partner(e.currentTarget));
+    }
+  }
+
+
+  $('button#delete_team').off('click').on('click', (e) => delete_team(e.currentTarget));
+
+  $('#stop_tournament').off('click').on('click', (e) => stop_tournament());
+  $('#start_tournament').off('click').on('click', (e) => start_tournament());
+  $('#close_tournament').off('click').on('click', (e) => close_tournament());
+  $('#tournament_homepage').off('click').on('click', (e) => window.location = base_link + '?tournament_id=' + tournamentId);
+  if(urlParams['mode']=='details') {
+    $('#award_ceremony').off('click').on('click', (e) => window.location = base_link + '?tournament_id=' + tournamentId + '&mode=award');
+    $('#tournament_report').hide();
+  } else {
+    $('#tournament_report').off('click').on('click', (e) => window.location = base_link + '?tournament_id=' + tournamentId + '&mode=details');
+    $('#award_ceremony').hide();
+  }
+
+  $('#draw').off('click').on('click', (e) => define_games());
+  $('#delete_draw').off('click').on('click', (e) => clear_it());
+  $('#close_round').off('click').on('click', (e) => close_round());
+  $('#reset_round').off('click').on('click', (e) => reset_round($(e.currentTarget).data('round')));
+
+  $('#define_seedings').off('click').on('click', (e) => define_seeded_players());
+  $('#delete_last_seeding').off('click').on('click', (e) => delete_last_seeding());
+
+  $('.change_round').off('click').on('click', function(e) {
+    var round = $(e.currentTarget).data('round');
+    const url = new URL(window.location);
+    url.searchParams.set('round',round);
+    window.location.href = url.toString();
+  });
+
+  //Define which Buttons are shown
+  switch ($('#content').data('round-status')) {
+    case 'New':
+      $('#draw').show();
+      $('#stop_tournament').show();
+      if($('#content').data('round-id')>0) { $('#close_tournament').show(); } else { $('#close_tournament').hide(); }
+      break;
+
+    case 'Drawn':
+      $('#delete_draw').show();
+      $('#close_round').show();
+      break;
+
+    case 'Closed':
+      $('#reset_round').show();
+      $('#close_tournament').show();
+      $('#stop_tournament').show();
+
+      break;
+      
+    default:
+      break;
+  }
+}
+
+
+function perform_ajax(function_name,param_url,target_id=null) {
+  var my_url = server_link+'&ajax='+function_name+'&tournament_id='+tournamentId+'&'+param_url;
+  if(target_id!=null)   
+  { 
+    $('#'+target_id).load(my_url); 
+  }
+  else
+  {
+    $.ajax({ url: my_url }).done(
+      function(data)
+      {
+        if(data=='OK') { window.location = server_link; } else { alert(data); }
+      });  
+  
+  }
+}
+
+//***** Tournaments actions *****
+function start_tournament() {
+  var my_url = server_link+'&ajax=start_tournament';
+  $.ajax({ url: my_url }).done(
+  function(data)
+  {
+    if(data=='OK')
+    {
+      const url = new URL(window.location);
+      url.searchParams.set('round','1');
+      window.location.href = url.toString();
+    }
+    else
+    {
+      alert(data);
+    }
+  });
+}
+
+function stop_tournament() {
+  if (confirm('Bist du sicher, dass du das Turnier abbrechen wilst? \n\n - Alle bisherigen Spiele und Partner werden gelöscht \n - Die zugewiesen Spieler und Setzlisten bleiben erhalten'))
+  {
+    var my_url = server_link+'&ajax=stopp_tournament&tournament_id='+tournamentId;
+    $.ajax({ url: my_url }).done(
+    function(data)
+    {
+      if(data!='') {
+        alert(data); 
+      } else {
+        window.location = base_link + '?tournament_id='+tournamentId;
+      }
+    });
+  }
+}
+
+function close_tournament() {
+  var my_url = server_link+'&ajax=close_tournament';
+  $.ajax({ url: my_url }).done(
+  function(data)
+  {
+    if(data.substring(0, 2)=='OK')
+    {
+      window.location = base_link + '?tournament_id='+tournamentId;
+    }
+    else
+    {
+      alert(data);
+    }
+  });
+}
+
+function delete_tournament(tournament) {
+  $('.tournament-item').css('background-color', 'transparent');
+  $(tournament).closest('div').parent().css('background-color','#FFE5B4');
+  $('#right_col').load(server_link+'&ajax=delete_permission&tournament_id='+tournament.data('tournament-id'));
+}
+
+function show_user_games(user_id) {
+  $('#right_col').load(server_link+'&ajax=show_user_info&user_id='+user_id);
+}
+
+function get_tournament_form(tournament) {
+  $('.tournament-item').css('background-color', 'transparent');
+  if(tournament) {
+    $(tournament).closest('div').parent().css('background-color','#FFE5B4');
+    $('#right_col').load(server_link+'&ajax=get_tournament_form&tournament_id='+tournament.data('tournament-id'));
+  } else {
+    $('#right_col').load(server_link+'&ajax=get_tournament_form');
+  }
+}
+
+//***** Define players *****
+function add_user(user_tag_id) {
+  var pos = $('#'+user_tag_id).parent().closest('div')[0].id;
+  var user_id = user_tag_id.replace(/user/g, "");
+
+  if(pos=='left_content')
+  {
+    var my_url = server_link+'&ajax=add_user&user_id=' + user_id;
+    $.ajax({ url: my_url }).done(
+    function(data)
+    {
+      let elem = $('#'+user_tag_id).clone();
+
+      //No clean HTML I know, ID's should be unique but with the same person in different locations same ID's appear
+      const elements = document.querySelectorAll('#'+user_tag_id); // Alle Elemente mit dieser ID finden
+      elements.forEach(element => element.remove()); 
+
+      $('#right_content').append(elem);
+      update_number_of_players();
+    });
+  }
+  else
+  {
+    var my_url = server_link+'&ajax=remove_user&user_id=' + user_id;
+    $.ajax({ url: my_url }).done(
+    function(data)
+    {
+      const items = data.trim().split(',');
+      let elem = $('#'+user_tag_id).clone();
+      $('#'+user_tag_id).remove();
+
+      items.forEach(item => {
+        let elem2 = elem.clone();
+        $('#section_'+ item).append(elem2);
+        let $container = $('#section_'+item);
+
+        let $items = $container.find('.user_mit_name').get();        
+        $items.sort(function(a, b) {
+          let altA = ($(a).find('img').attr('alt') || '').toLowerCase();
+          let altB = ($(b).find('img').attr('alt') || '').toLowerCase();
+          return altA.localeCompare(altB);
+        });
+        
+        $container.append($items);
+      });
+      update_number_of_players();
+    });
+  }
+}
+
+function new_user()
+{
+  $('#right_col').load(server_link+'&ajax=new_user');
+}
+
+function remove_user()
+{
+  $('#right_col').load(server_link+'&ajax=remove_user&tournament_id=$_GET[tournament_id]');
+}
+
+function update_number_of_players()
+{
+  let left_col = $('#left_col');
+  let sections = left_col.find('section');
+
+  sections.each(function(index, element) {
+    let $section = $(element);
+
+    let count = $section.find('.user_mit_name').length;
+    let $h1 = $section.find('h1');
+
+    $h1.text(function(_, oldText) {
+      return oldText.replace(/\(\d+\)/, `(${count})`);
+    });
+  });
+
+  let count = $('#right_col').find('.user_mit_name').length;
+  let $h1 = $('#right_col').find('h1');
+  $h1.text(function(_, oldText) {
+    return oldText.replace(/\(\d+\)/, `(${count})`);
+  });
+}
+
+function add_as_partner(user_tag_id) {
+  perform_ajax('add_as_partner','user_id='+user_tag_id.id.replace(/user/g, ""));
+}
+
+function delete_team(team_tag) {
+  const teamId = $(team_tag).closest('div[data-team-id]').data('team-id');
+  perform_ajax('delete_team','team_id='+teamId);
+}
+
+function define_teams() {
+  var my_url = server_link+'&ajax=define_teams';
+  $.ajax({ url: my_url }).done(
+  function(data)
+  {
+    if(data.substring(0, 2)=='OK')
+    {
+      window.location = server_link;
+    }
+    else
+    {
+      alert(data);
+    }
+  });
+}
+//***** Seeding players *****
+function add_as_seeded(user_id)
+{
+  var my_url = server_link+'&ajax=add_as_seeded&&user_id='+user_id;
+  $.ajax({ url: my_url }).done(
+  function(data)
+  {
+    if(data=='OK')
+    {
+      window.location = server_link;
+    }
+    else
+    {
+      alert(data);
+    }
+  });
+}
+
+function delete_last_seeding()
+{
+  var my_url = server_link+'&ajax=delete_last_seeding';
+  $.ajax({ url: my_url }).done(
+  function(data)
+  {
+    if(data=='OK')
+    {
+      window.location = server_link;
+    }
+    else
+    {
+      alert(data);
+    }
+  });
+}
+
+function define_seeded_players()
+{
+  var my_url = server_link+'&ajax=define_seeded_players';
+  $.ajax({ url: my_url }).done(
+  function(data)
+  {
+    if(data=='OK')
+    {
+      window.location = server_link+'';
+    }
+    else
+    {
+      alert(data);
+    }
+  });
+}
+
+//***** Handling rounds *****
+function define_games()
+{
+  $.ajax({ url: server_link+'&ajax=define_games&tournament_id='+tournamentId+'&round=1'  }).done(
+  function(data)
+  {
+    if(data=='OK')
+    {
+      var i = 1;
+      $('#content')
+        .data('round-status','Drawn')
+        .attr('data-round-status', 'Drawn');
+      $('div.court').each(function () {
+        court = this.id.replace(/court/g, "");
+        shuffle_game(court);
+      });
+      $('#delete_draw').show();
+      $('#close_round').show();
+      $('#draw').hide();
+      $('#close_tournament').hide();
+      $('#stop_tournament').hide();
+      setEvents();
+    }
+    else
+    {
+      alert(data);
+    }
+  });
+}
+
+function shuffle_game(court_no)
+{
+  var delay = court_no*500;
+  $('#court'+court_no).load(server_link+'&ajax=load',
+  function()
+  {
+    $('#court'+court_no).delay(1000).fadeTo(delay,1,
+    function (data)
+    {
+      $('#court'+court_no).load(server_link+'&ajax=show&court_id='+court_no);
+    });
+  });
+}
+
+function close_round()
+{
+  var my_url = server_link+'&ajax=close_round&tournament_id='+tournamentId;
+  $.ajax({ url: my_url }).done(
+  function(data)
+  {
+    if(data.substring(0, 2)=='OK')
+    {
+      var myNewUrl = server_link+'';
+      myNewUrl = myNewUrl.replace('round='+urlParams['round'],'round='+ data.substring(3));
+      window.location = myNewUrl;
+    }
+    else
+    {
+      alert(data);
+    }
+  });
+}
+
+function reset_round(round_nr) {
+  var my_url = server_link+'&ajax=reset_round&tournament_id='+tournamentId+'&round='+round_nr;
+  $.ajax({ url: my_url }).done(
+  function(data)
+  {
+    if(data.substring(0, 2)=='OK')
+    {
+      window.location = server_link;
+    }
+    else
+    {
+      alert(data);
+    }
+  });
+}
+
+function clear_it()
+{
+  if (confirm('Bist du sicher, dass du die Auslosung löschen wilst? \n\n (alle eingetragen Spiele der aktuellen Runde und die Auslosungen werden gelöscht)'))
+  {
+    $('div.court').each(function () {
+      var court = this.id.replace(/court/g, "");
+      $(this).load(server_link+'&ajax=clear&tournament_id='+tournamentId+'&court_id='+court);
+    });
+    $('#content')
+    .data('round-status','New')
+    .attr('data-round-status', 'New');
+    $('#delete_draw').hide();
+    $('#close_round').hide();
+    $('#draw').show();
+    $('#close_tournament').show();
+    $('#stop_tournament').show();
+    setEvents();
+  }
+}
+
+//***** Handling results *****
+function check_result(court,game_id)
+{
+  $('#'+court).load(server_link+'&ajax=get_result&game_id='+game_id+'&court='+court, function() {
+    if($('#content').data('counting') == 'win') {
+      $('img.img_user').on('click', function (e) 
+      {  
+        set_winner($(e.currentTarget).data('user-id'),court);
+      });
+    }
+    $('.abort').on('click', (e)=> set_winner(0,court));
+    $('button.save_game').on('click', (e) => set_points_and_winner(court))
+  });
+}
+
+function set_winner(user_id,court)
+{
+  $('#'+court).load(server_link+'&ajax=set_winner&winner_id='+user_id+'&court='+court);
+}
+
+function set_points_and_winner(court) {
+  //Check result
+  var error = '';
+  var wins_p1=0;
+  var wins_p2=0;
+  var points_p1=0;
+  var points_p2=0;
+  
+  court = court.replace(/court/g, "");
+  const modus = $('#content').data('counting');
+  const set1_p1 = $('#'+court+'_set1_p1').val();
+  const set1_p2 = $('#'+court+'_set1_p2').val();
+  const set2_p1 = $('#'+court+'_set2_p1').val();
+  const set2_p2 = $('#'+court+'_set2_p2').val();
+  const set3_p1 = $('#'+court+'_set3_p1').val();
+  const set3_p2 = $('#'+court+'_set3_p2').val();
+
+  if(modus=='pointsOneSet')
+  {
+    if(set1_p1 == set1_p2)
+    {
+      if(set1_p1 > 0 || set1_p2 > 0)
+      {
+        error += 'Punkte dürfen nicht gleich sein';
+      }
+    }
+  }
+
+  if(modus=='official2sets')
+  {
+    for(var i=1;i<4;i++)
+    {
+      //Point differences and maxPoints
+      var max_points = 0; var diff = 0;
+      if(i==1) { diff = Math.abs(set1_p1 - set1_p2); max_points = Math.max(set1_p1,set1_p2); points_p1 = parseInt(set1_p1); points_p2 = parseInt(set1_p2); }
+      if(i==2) { diff = Math.abs(set2_p1 - set2_p2); max_points = Math.max(set2_p1,set2_p2); points_p1 = parseInt(set2_p1); points_p2 = parseInt(set2_p2); }
+      if(i==3) { diff = Math.abs(set3_p1 - set3_p2); max_points = Math.max(set3_p1,set3_p2); points_p1 = parseInt(set3_p1); points_p2 = parseInt(set3_p2); }
+
+      //If nothing is inserted skip checks
+      if(i==1 && max_points==0) break;
+
+      if(i==3 && wins_p1 - wins_p2 !=0)
+      {
+        if(set3_p1!=0 || set3_p2!=0)
+        {
+          error += '3. Satz wird nur bei unentschieden nach 2 Sätzen gespielt';
+        }
+        break;
+      }
+
+      if(max_points>20 && max_points < 31)
+      {
+        if((diff < 2 && max_points!=30) || (diff > 2 && max_points>21))
+        {
+          error +=  'Punktedifferenz in Satz ' + i + ' nicht gültig';
+          break;
+        }
+        else
+        {
+          if(points_p1>points_p2) { wins_p1++; }
+          if(points_p1<points_p2) { wins_p2++; }
+        }
+      }
+      else
+      {
+        error += 'Punkte in Satz ' + i + ' nicht gültig';
+        break;
+      }
+    }
+  }
+
+  if(modus=='2sets11points')
+  {
+    for(var i=1;i<4;i++)
+    {
+      //Point differences and maxPoints
+      var max_points = 0; var diff = 0;
+      if(i==1) { diff = Math.abs(set1_p1 - set1_p2); max_points = Math.max(set1_p1,set1_p2); points_p1 = parseInt(set1_p1); points_p2 = parseInt(set1_p2); }
+      if(i==2) { diff = Math.abs(set2_p1 - set2_p2); max_points = Math.max(set2_p1,set2_p2); points_p1 = parseInt(set2_p1); points_p2 = parseInt(set2_p2); }
+      if(i==3) { diff = Math.abs(set3_p1 - set3_p2); max_points = Math.max(set3_p1,set3_p2); points_p1 = parseInt(set3_p1); points_p2 = parseInt(set3_p2); }
+
+      if(i==3 && wins_p1 - wins_p2 !=0)
+      {
+        if(set3_p1!=0 || set3_p2!=0)
+        {
+          error += '3. Satz wird nur bei unentschieden nach 2 Sätzen gespielt';
+        }
+        break;
+      }
+
+      if(i==1 && max_points==0)
+      {
+        $('#court'+court).load(server_link+'&ajax=show&tournament_id=$_GET[tournament_id]&round=$_GET[round]&court_id='+court);
+        break;
+      }
+      if(max_points==11)
+      {
+        if(diff < 1)
+        {
+          error +=  'Punktedifferenz in Satz ' + i + ' nicht gültig';
+          break;
+        }
+        else
+        {
+          if(points_p1>points_p2) { wins_p1++; }
+          if(points_p1<points_p2) { wins_p2++; }
+        }
+      }
+      else
+      {
+        error += 'Punkte in Satz ' + i + ' nicht gültig';
+        break;
+      }
+    }
+  }
+
+  if(modus=='2setswinning')
+  {
+    for(var i=1;i<4;i++)
+    {
+      //Point differences and maxPoints
+      var max_points = 0; var diff = 0;
+      if(i==1) { diff = Math.abs(set1_p1 - set1_p2); max_points = Math.max(set1_p1,set1_p2); points_p1 = parseInt(set1_p1); points_p2 = parseInt(set1_p2); }
+      if(i==2) { diff = Math.abs(set2_p1 - set2_p2); max_points = Math.max(set2_p1,set2_p2); points_p1 = parseInt(set2_p1); points_p2 = parseInt(set2_p2); }
+      if(i==3) { diff = Math.abs(set3_p1 - set3_p2); max_points = Math.max(set3_p1,set3_p2); points_p1 = parseInt(set3_p1); points_p2 = parseInt(set3_p2); }
+
+      if(i==3 && wins_p1 - wins_p2 !=0)
+      {
+        if(set3_p1!=0 || set3_p2!=0)
+        {
+          error += '3. Satz wird nur bei unentschieden nach 2 Sätzen gespielt';
+        }
+        break;
+      }
+
+      if(i==1 && max_points==0)
+      {
+        break;
+      }
+      if(diff < 1)
+      {
+        error +=  'Punktedifferenz in Satz ' + i + ' nicht gültig';
+        break;
+      }
+      else
+      {
+        if(points_p1>points_p2) { wins_p1++; }
+        if(points_p1<points_p2) { wins_p2++; }
+      }
+    }
+  }
+
+  if(error!='')
+  {
+    alert(error);
+  }
+  else
+  {
+    $('#court'+court).load(server_link+'&ajax=set_points_and_winner&court='+court+'&set1_p1='+set1_p1+'&set1_p2='+set1_p2+'&set2_p1='+set2_p1+'&set2_p2='+set2_p2+'&set3_p1='+set3_p1+'&set3_p2='+set3_p2);
+  }
+}
+
+
+function change_group_by(id) {
+  let sort_by = id.currentTarget.id;
+  //$('#left_content').html("<img src='../inc/imgs/query/loading.gif' />");
+  $('#left_content').load(server_link+'&ajax=get_all_users&order_by='+sort_by, function() {
+    setEvents();
+  });
+}

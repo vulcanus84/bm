@@ -354,7 +354,7 @@
 		 		$x.= "					<td><div style='position:relative;'><img src='court.php?action=$txt' class='court'/></td>";
 		 		$x.= "					<td>";
 	  		$x.= "						<img src='play.png' id='play_court$court_no' style='width:3vw;cursor:pointer;' onclick='play_court($court_no,".$data->court_game_id.");'/>";
-	   		$x.= "						<a href='../app_tournaments/match_pdf.php?tournament_id=$data->game_group_id&game_id=$data->court_game_id' target='_blank'><img src='match_paper.png' id='stop_court$court_no' style='width:3vw;opacity:1;cursor:pointer;'/></a>";
+	   		$x.= "						<a href='../app_tournament/match_pdf.php?tournament_id=$data->game_group_id&game_id=$data->court_game_id' target='_blank'><img src='match_paper.png' id='stop_court$court_no' style='width:3vw;opacity:1;cursor:pointer;'/></a>";
 	  		$x.= "						<img src='clear.png' id='clear_court$court_no' style='width:3vw;cursor:pointer;' onclick='clear_court($court_no);'/>";
 		 		$x.= "					</td>";
 	 		}
@@ -364,7 +364,7 @@
 		 		$x.= "					<td><div style='position:relative;'><img src='court.php?action=$txt' class='court' style='opacity:0.4;'/>";
 		 		$x.= "					<div id='timer_court$court_no' style='position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);font-size:24pt;font-weight:bold;'></div></div></td>";
 		 		$x.= "					<td>";
-	   		$x.= "						<a href='../app_tournaments/match_pdf.php?tournament_id=$data->game_group_id&game_id=$data->court_game_id' target='_blank'><img src='match_paper.png' id='stop_court$court_no' style='width:3vw;opacity:1;cursor:pointer;'/></a>";
+	   		$x.= "						<a href='../app_tournament/match_pdf.php?tournament_id=$data->game_group_id&game_id=$data->court_game_id' target='_blank'><img src='match_paper.png' id='stop_court$court_no' style='width:3vw;opacity:1;cursor:pointer;'/></a>";
 	  		$x.= "						<img src='stop.png' id='stop_court$court_no' style='width:3vw;opacity:1;cursor:pointer;' onclick='stop_court($court_no);' />";
 	  		$x.= "						<img src='clear.png' id='clear_court$court_no' style='width:3vw;opacity:0.3;'/>";
 		 		$x.= "					</td>";

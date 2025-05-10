@@ -76,8 +76,10 @@ class db
       $str_vals = substr($str_vals,0,-1);
       $STH = $this->connection->prepare("INSERT INTO ".$table." (".str_replace(':','',$str_keys).") VALUES (".$str_keys.")");
       $STH->execute($arr_fields);
-      $this->last_inserted_id = $this->connection->lastInsertId();
-      if($table!='log') { $this->logger->write_to_log('Database', "INSERT INTO ".$table." (".str_replace(':','',$str_keys).") VALUES (".$str_vals.")"); }
+      if($table!='log') { 
+        $this->last_inserted_id = $this->connection->lastInsertId();
+        $this->logger->write_to_log('Database', "INSERT INTO ".$table." (".str_replace(':','',$str_keys).") VALUES (".$str_vals.")"); 
+      }
     }
     catch (PDOException $e)
     {

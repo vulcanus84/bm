@@ -4,6 +4,7 @@ require_once('class_log.php');
 
 class user
 {
+	public $main_pic_path = 'app_tournament/user_pics/';
 	public $firstname;
 	public $lastname;
 	public $fullname;
@@ -181,11 +182,11 @@ class user
 	{
 		if($thumbnail)
 		{
-			$pic_path = level."app_user_admin/user_pics/".$this->id."_t.png";
+			$pic_path = level.$this->main_pic_path.$this->id."_t.png";
 		}
 		else
 		{
-			$pic_path = level."app_user_admin/user_pics/".$this->id.".png";
+			$pic_path = level.$this->main_pic_path.$this->id.".png";
 		}
 		if(!file_exists($pic_path))
 		{
@@ -199,13 +200,13 @@ class user
 	{
 		if($thumbnail)
 		{
-			$pic_path = level."app_user_admin/user_pics/".$this->id."_t.png";
-			$pic_path_star = level."app_user_admin/user_pics/".$this->id."_stars_t.png";
+			$pic_path = level.$this->main_pic_path.$this->id."_t.png";
+			$pic_path_star = level.$this->main_pic_path.$this->id."_stars_t.png";
 		}
 		else
 		{
-			$pic_path = level."app_user_admin/user_pics/".$this->id.".png";
-			$pic_path_star = level."app_user_admin/user_pics/".$this->id."_stars.png";
+			$pic_path = level.$this->main_pic_path.$this->id.".png";
+			$pic_path_star = level.$this->main_pic_path.$this->id."_stars.png";
 		}
 		if(!file_exists($pic_path_star))
 		{
@@ -260,7 +261,7 @@ class user
 			$x.= "<ul>";
 			while($d = $this->db->get_next_res())
 			{
-				$x.= "<li><a href='".level."app_tournaments/index.php?tournament_id=".$d->group_id."'>".$d->group_created_c." - ".$d->group_title."</a></li>";
+				$x.= "<li><a href='".level."app_tournament/index.php?tournament_id=".$d->group_id."'>".$d->group_created_c." - ".$d->group_title."</a></li>";
 			}
 			$x.= "</ul>";
 			$this->db->sql_query("SELECT * FROM games WHERE game_player1_id='$this->id' OR game_player2_id='$this->id' OR game_player3_id='$this->id' OR game_player4_id='$this->id'");
@@ -516,13 +517,13 @@ class user
 		if($with_form)
 		{
 			$x.= " 	<tr>";
-			$x.= " 		<td colspan='2'><button onclick='$('#right_col').hide(); $(\"#new_user\").submit();'>Speichern</button>";
-			$x.= "		<button type='button' style='background-color:blue;' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
+			$x.= " 		<td colspan='2'><button class='green' onclick='$('#right_col').hide(); $(\"#new_user\").submit();'>Speichern</button>";
+			$x.= "		<button type='button' class='blue' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
 			if($this->check_permission('app_user_admin')==false)
 			{
-				$x.= "		<button type='button' style='background-color:red;' onclick='delete_permission(".$this->id.");'>Spieler löschen</button>";
+				$x.= "		<button type='button' class='red' onclick='delete_permission(".$this->id.");'>Spieler löschen</button>";
 			}
-			$x.= "		<button type='button' style='background-color:purple;' onclick='show_history(".$this->id.");'>Infos</button></td>";
+			$x.= "		<button type='button' class='purple' onclick='show_history(".$this->id.");'>Infos</button></td>";
 			$x.= "	</tr>";
 	    }
 		$x.= "</table>";
@@ -569,7 +570,7 @@ class user
 		$x.= " 		</td>";
 		$x.= " 	</tr>";
 		$x.= " 	<tr>";
-		$x.= " 		<td><button onclick='$(\"#new_user\").submit();'>Erstellen</button></td>";
+		$x.= " 		<td><button class='green' onclick='$(\"#new_user\").submit();'>Erstellen</button></td>";
 		$x.= "</table>";
 		$x.= "</form>";
 
@@ -589,7 +590,7 @@ class user
 	    $anz_stars = $this->db->count();
 	    if($anz_stars > 0)
 	    {
-        	$im  = imagecreatefrompng($this->get_ori_pic_path());
+        $im  = imagecreatefrompng($this->get_ori_pic_path());
   			$img_width = imagesx($im);
   			$img_height = imagesy($im);
 

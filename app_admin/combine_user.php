@@ -221,7 +221,7 @@
           ORDER BY group_created DESC");
           while($d = $db->get_next_res())
           {
-            print "<li style='list-style:none;font-size:10pt;'><a href='".level."app_tournaments/index.php?tournament_id=".$d->group_id."'>".$d->group_created_c." - ".$d->group_title."</a></li>";
+            print "<li style='list-style:none;font-size:10pt;'><a href='".level."app_tournament/index.php?tournament_id=".$d->group_id."'>".$d->group_created_c." - ".$d->group_title."</a></li>";
           }
           print "</ul>";
           print "</tr></td>";
