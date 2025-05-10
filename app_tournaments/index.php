@@ -84,7 +84,7 @@ try
 		$myPage->add_content("	<div id='right_header'>");
 		$myPage->add_content($myTournament->html->get_buttons());
 		$myPage->add_content("	</div>");
-		$myPage->add_content("	<div id='right_content'>");
+		if(isset($_GET['mode'])) { $myPage->add_content("	<div id='right_content' style='justify-content:center;'>"); } else { $myPage->add_content("	<div id='right_content'>"); }
 
 		if($myTournament->id > 0)
 		{

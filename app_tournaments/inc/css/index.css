@@ -4,6 +4,8 @@ h1 {
 
 div.court { vertical-align:middle; }
 
+div.ranking { text-align: center; }
+
 div.user_mit_BHZ, div.user_mit_name { 
   float:left;
   text-align:center; 
@@ -106,9 +108,6 @@ div.podest img { height:60%; }
   flex: 0 0 calc(100% - 10px); /* zwei Spalten mit Abstand */
   box-sizing: border-box;
   text-align: center;
-}
-
-#right_content .user_mit_name {
 }
 
 /* Tablets und größer */

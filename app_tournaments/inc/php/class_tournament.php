@@ -4,7 +4,7 @@ namespace Tournament;
 require_once('class_round.php');
 require_once('class_game.php');
 require_once('class_team.php');
-require_once('../inc/php/class_location.php');
+require_once(level.'inc/php/class_location.php');
 
 class tournament
 {

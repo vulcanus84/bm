@@ -1,6 +1,6 @@
 <?php
 namespace Tournament;
-require_once('../inc/php/class_user.php');
+require_once(level.'inc/php/class_user.php');
 
 class html
 {

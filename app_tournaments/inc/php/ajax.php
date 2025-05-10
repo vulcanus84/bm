@@ -127,77 +127,57 @@ switch ($_GET['ajax']) {
     $court_no = str_replace('court','',$_GET['court']);
     $curr_game = $myTournament->arr_rounds[$myTournament->curr_round-1]->arr_games[$court_no-1];
   
-    if($myTournament->counting=='pointsOneSet')
+    switch ($myTournament->counting) {
+      case 'pointsOneSet':
+        if($_GET['set1_p1']>$_GET['set1_p2']) { $winner = $curr_game->p1; $looser = $curr_game->p2; }
+        if($_GET['set1_p1']<$_GET['set1_p2']) { $winner = $curr_game->p2; $looser = $curr_game->p1; }
+        $curr_game->set1_p1_points = $_GET['set1_p1'];
+        $curr_game->set1_p2_points = $_GET['set1_p2'];
+        break;
+
+      case 'official2sets':
+      case '2sets11points':
+      case '2setswinning':
+        $wins_p1=0; $wins_p2=0;
+        for($i=1;$i<4;$i++)
+        {
+          if($_GET['set'.$i.'_p1']>$_GET['set'.$i.'_p2']) { $wins_p1++; }
+          if($_GET['set'.$i.'_p1']<$_GET['set'.$i.'_p2']) { $wins_p2++; }
+        }
+    
+        if(max($wins_p1,$wins_p2)>0)
+        {
+          if($wins_p1>$wins_p2) { $winner = $curr_game->p1; $looser = $curr_game->p2; } else { $winner = $curr_game->p2; $looser = $curr_game->p1; }
+        }
+        $curr_game->set1_p1_points = $_GET['set1_p1'];
+        $curr_game->set1_p2_points = $_GET['set1_p2'];
+        $curr_game->set2_p1_points = $_GET['set2_p1'];
+        $curr_game->set2_p2_points = $_GET['set2_p2'];
+        $curr_game->set3_p1_points = $_GET['set3_p1'];
+        $curr_game->set3_p2_points = $_GET['set3_p2'];
+        break;
+    }
+
+    if(isset($winner))
     {
-      if($_GET['set1_p1']>$_GET['set1_p2']) { $winner = $curr_game->p1; $looser = $curr_game->p2; }
-      if($_GET['set1_p1']<$_GET['set1_p2']) { $winner = $curr_game->p2; $looser = $curr_game->p1; }
-  
       //If double is played, set winner2
       if($curr_game->p3) { 
         if($curr_game->p1->id==$winner->id) { $winner2=$curr_game->p3; $looser2=$curr_game->p4; } else { $winner2 = $curr_game->p4; $looser2 = $curr_game->p3; } 
       }
-  
-      if(isset($winner))
-      {
-        $curr_game->winner = $winner;
-        if(isset($winner2)) { $curr_game->winner2 = $winner2; }
-        $curr_game->set1_p1_points = $_GET['set1_p1'];
-        $curr_game->set1_p2_points = $_GET['set1_p2'];
-        $curr_game->save();
-  
-        //Insert information in tournament log
-        if(isset($curr_game->p3)) {
-          $winner_txt = $winner->login."/".$winner2->login; $looser_txt=$looser->login."/".$looser2->login;
-        } else {
-          $winner_txt = $winner->login; $looser_txt = $looser->login;
-        }
-        $db->insert(array('news_tournament_id'=>$myTournament->id,'news_title'=>$winner_txt.' hat gewonnen','news_text'=>'Im Turnier '.$myTournament->title.' hat soeben '.$winner_txt.' gegen '.$looser_txt.' gewonnen. Herzliche Gratulation!'),'news');
+
+      $curr_game->winner = $winner;
+      if(isset($winner2)) { $curr_game->winner2 = $winner2; }
+      $curr_game->save();
+
+      //Insert information in tournament log
+      if(isset($curr_game->p3)) {
+        $winner_txt = $winner->login."/".$winner2->login; $looser_txt=$looser->login."/".$looser2->login;
+      } else {
+        $winner_txt = $winner->login; $looser_txt = $looser->login;
       }
+      $db->insert(array('news_tournament_id'=>$myTournament->id,'news_title'=>$winner_txt.' hat gewonnen','news_text'=>'Im Turnier '.$myTournament->title.' hat soeben '.$winner_txt.' gegen '.$looser_txt.' gewonnen. Herzliche Gratulation!'),'news');
     }
-  
-  
-    if($myTournament->counting=='official2sets' OR $myTournament->counting=='2sets11points' OR $myTournament->counting=='2setswinning')
-    {
-      $wins_p1=0; $wins_p2=0;
-      for($i=1;$i<4;$i++)
-      {
-        if($_GET['set'.$i.'_p1']>$_GET['set'.$i.'_p2']) { $wins_p1++; }
-        if($_GET['set'.$i.'_p1']<$_GET['set'.$i.'_p2']) { $wins_p2++; }
-      }
-  
-      if(max($wins_p1,$wins_p2)>0)
-      {
-        if($wins_p1>$wins_p2) { $winner_id=$data->game_player1_id; $looser = new user($data->game_player2_id); } else { $winner_id=$data->game_player2_id; $looser = new user($data->game_player1_id); }
-  
-        //If double is played, set winner2
-        if($data->game_player3_id>0) { if($data->game_player1_id==$winner_id) { $winner2_id=$data->game_player3_id; } else { $winner2_id = $data->game_player4_id; } } else { $winner2_id=null; }
-  
-        $db->update(array('game_winner_id'=>$winner_id,'game_winner2_id'=>$winner2_id,'game_set1_p1'=>$_GET['set1_p1'],'game_set1_p2'=>$_GET['set1_p2'],'game_set2_p1'=>$_GET['set2_p1'],'game_set2_p2'=>$_GET['set2_p2'],'game_set3_p1'=>$_GET['set3_p1'],'game_set3_p2'=>$_GET['set3_p2']),'games','game_id',$data->game_id);
-  
-        //Insert information in tournament log
-        $winner = new user($winner_id);
-        $game = $db->sql_query_with_fetch("SELECT * FROM games WHERE game_id='".$data->game_id."'");
-        if($data->game_player3_id>0)
-        {
-          $winner2 = new user($winner2_id);
-          if($game->game_player1_id==$winner_id) { $looser = new user($game->game_player2_id); $looser2 = new user($game->game_player4_id); } else { $looser = new user($game->game_player1_id); $looser2 = new user($game->game_player3_id); }
-          $winner_txt = $winner->login."/".$winner2->login; $looser_txt=$looser->login."/".$looser2->login;
-        }
-        else
-        {
-          if($game->game_player1_id==$winner_id) { $looser = new user($game->game_player2_id); } else { $looser = new user($game->game_player1_id); }
-          $winner_txt = $winner->login; $looser_txt = $looser->login;
-        }
-        $db->insert(array('news_tournament_id'=>$_GET['tournament_id'],'news_title'=>$winner_txt.' hat gewonnen','news_text'=>'Im Turnier '.$myTournament->get_title().' hat soeben '.$winner_txt.' gegen '.$looser_txt.' gewonnen. Herzliche Gratulation!'),'news');
-      }
-      else
-      {
-        $db->update(array('game_winner_id'=>'NULL','game_winner2_id'=>'NULL','game_set1_p1'=>$_GET['set1_p1'],'game_set1_p2'=>$_GET['set1_p2'],'game_set2_p1'=>$_GET['set2_p1'],'game_set2_p2'=>$_GET['set2_p2'],'game_set3_p1'=>$_GET['set3_p1'],'game_set3_p2'=>$_GET['set3_p2']),'games','game_id',$data->game_id);
-      }
-    }
-  
-    $data = $db->sql_query_with_fetch("SELECT * FROM games WHERE game_group_id='".$_GET['tournament_id']."' AND game_round='$_GET[round]' AND game_location='".$_GET['court']."'");
-  
+
     print "<img src='inc/php/court.php?created_on=".time()."&action=fill&game_id={$curr_game->id}' class='img_court'/>";
   
     if($myTournament->system=='Gruppenspiele')
@@ -346,63 +326,56 @@ switch ($_GET['ajax']) {
       case 'official2sets':
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
         $myHTML = new HTML($db);
-        $_POST[$data->game_location.'_set1_p1']=$data->game_set1_p1;
-        $_POST[$data->game_location.'_set1_p2']=$data->game_set1_p2;
-        $_POST[$data->game_location.'_set2_p1']=$data->game_set2_p1;
-        $_POST[$data->game_location.'_set2_p2']=$data->game_set2_p2;
-        $_POST[$data->game_location.'_set3_p1']=$data->game_set3_p1;
-        $_POST[$data->game_location.'_set3_p2']=$data->game_set3_p2;
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set1_p1',false);
+        $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1_points;
+        $_POST[$curr_game->location.'_set1_p2']=$curr_game->set1_p2_points;
+        $_POST[$curr_game->location.'_set2_p1']=$curr_game->set2_p1_points;
+        $_POST[$curr_game->location.'_set2_p2']=$curr_game->set2_p2_points;
+        $_POST[$curr_game->location.'_set3_p1']=$curr_game->set3_p1_points;
+        $_POST[$curr_game->location.'_set3_p2']=$curr_game->set3_p2_points;
+        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set1_p2',false);
+        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set2_p1',false);
+        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set2_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set2_p2',false);
+        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set2_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set3_p1',false);
+        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set3_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set3_p2',false);
+        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set3_p2',false);
         $html.= "<br/>";
-        $html.= "<p/><button class='green' onclick=\"set_points_and_winner('official2sets','".$data->game_location."',
-                $('#".$data->game_location."_set1_p1').val(),
-                $('#".$data->game_location."_set1_p2').val(),
-                $('#".$data->game_location."_set2_p1').val(),
-                $('#".$data->game_location."_set2_p2').val(),
-                $('#".$data->game_location."_set3_p1').val(),
-                $('#".$data->game_location."_set3_p2').val()
-                ); \">Speichern</button>";
+        $html.= "<p/><button class='green' onclick=\"set_points_and_winner('{$curr_game->location}'); \">Speichern</button>";
         $html.= "</td>";
         break;
       
       case '2sets11points':
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
         $myHTML = new HTML($db);
-        $_POST[$data->game_location.'_set1_p1']=$data->game_set1_p1;
-        $_POST[$data->game_location.'_set1_p2']=$data->game_set1_p2;
-        $_POST[$data->game_location.'_set2_p1']=$data->game_set2_p1;
-        $_POST[$data->game_location.'_set2_p2']=$data->game_set2_p2;
-        $_POST[$data->game_location.'_set3_p1']=$data->game_set3_p1;
-        $_POST[$data->game_location.'_set3_p2']=$data->game_set3_p2;
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$data->game_location.'_set1_p1',false);
+        $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1;
+        $_POST[$curr_game->location.'_set1_p2']=$curr_game->set1_p2;
+        $_POST[$curr_game->location.'_set2_p1']=$curr_game->set2_p1;
+        $_POST[$curr_game->location.'_set2_p2']=$curr_game->set2_p2;
+        $_POST[$curr_game->location.'_set3_p1']=$curr_game->set3_p1;
+        $_POST[$curr_game->location.'_set3_p2']=$curr_game->set3_p2;
+        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set1_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$data->game_location.'_set1_p2',false);
+        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set1_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$data->game_location.'_set2_p1',false);
+        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set2_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$data->game_location.'_set2_p2',false);
+        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set2_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$data->game_location.'_set3_p1',false);
+        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set3_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$data->game_location.'_set3_p2',false);
+        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set3_p2',false);
         $html.= "<br/>";
-        $html.= "<p/><button class='green' onclick=\"set_points_and_winner('2sets11points','".$data->game_location."',
-                $('#".$data->game_location."_set1_p1').val(),
-                $('#".$data->game_location."_set1_p2').val(),
-                $('#".$data->game_location."_set2_p1').val(),
-                $('#".$data->game_location."_set2_p2').val(),
-                $('#".$data->game_location."_set3_p1').val(),
-                $('#".$data->game_location."_set3_p2').val()
+        $html.= "<p/><button class='green' onclick=\"set_points_and_winner('2sets11points','".$curr_game->location."',
+                $('#".$curr_game->location."_set1_p1').val(),
+                $('#".$curr_game->location."_set1_p2').val(),
+                $('#".$curr_game->location."_set2_p1').val(),
+                $('#".$curr_game->location."_set2_p2').val(),
+                $('#".$curr_game->location."_set3_p1').val(),
+                $('#".$curr_game->location."_set3_p2').val()
                 ); \">Speichern</button>";
         $html.= "</td>";
         break;
@@ -410,31 +383,31 @@ switch ($_GET['ajax']) {
       case '2setswinning':
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
         $myHTML = new HTML($db);
-        $_POST[$data->game_location.'_set1_p1']=$data->game_set1_p1;
-        $_POST[$data->game_location.'_set1_p2']=$data->game_set1_p2;
-        $_POST[$data->game_location.'_set2_p1']=$data->game_set2_p1;
-        $_POST[$data->game_location.'_set2_p2']=$data->game_set2_p2;
-        $_POST[$data->game_location.'_set3_p1']=$data->game_set3_p1;
-        $_POST[$data->game_location.'_set3_p2']=$data->game_set3_p2;
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set1_p1',false);
+        $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1;
+        $_POST[$curr_game->location.'_set1_p2']=$curr_game->set1_p2;
+        $_POST[$curr_game->location.'_set2_p1']=$curr_game->set2_p1;
+        $_POST[$curr_game->location.'_set2_p2']=$curr_game->set2_p2;
+        $_POST[$curr_game->location.'_set3_p1']=$curr_game->set3_p1;
+        $_POST[$curr_game->location.'_set3_p2']=$curr_game->set3_p2;
+        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set1_p2',false);
+        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set2_p1',false);
+        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set2_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set2_p2',false);
+        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set2_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set3_p1',false);
+        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set3_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$data->game_location.'_set3_p2',false);
+        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set3_p2',false);
         $html.= "<br/>";
-        $html.= "<p/><button class='green' onclick=\"set_points_and_winner('2setswinning','".$data->game_location."',
-                $('#".$data->game_location."_set1_p1').val(),
-                $('#".$data->game_location."_set1_p2').val(),
-                $('#".$data->game_location."_set2_p1').val(),
-                $('#".$data->game_location."_set2_p2').val(),
-                $('#".$data->game_location."_set3_p1').val(),
-                $('#".$data->game_location."_set3_p2').val()
+        $html.= "<p/><button class='green' onclick=\"set_points_and_winner('2setswinning','".$curr_game->location."',
+                $('#".$curr_game->location."_set1_p1').val(),
+                $('#".$curr_game->location."_set1_p2').val(),
+                $('#".$curr_game->location."_set2_p1').val(),
+                $('#".$curr_game->location."_set2_p2').val(),
+                $('#".$curr_game->location."_set3_p1').val(),
+                $('#".$curr_game->location."_set3_p2').val()
                 ); \">Speichern</button>";
         $html.= "</td>";
     

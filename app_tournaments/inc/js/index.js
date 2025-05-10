@@ -485,10 +485,12 @@ function clear_it()
 function check_result(court,game_id)
 {
   $('#'+court).load(server_link+'&ajax=get_result&game_id='+game_id+'&court='+court, function() {
-    $('img.img_user').on('click', function (e) 
-    {  
-      set_winner($(e.currentTarget).data('user-id'),court);
-    });
+    if($('#content').data('counting') == 'win') {
+      $('img.img_user').on('click', function (e) 
+      {  
+        set_winner($(e.currentTarget).data('user-id'),court);
+      });
+    }
     $('.abort').on('click', (e)=> set_winner(0,court));
     $('button.save_game').on('click', (e) => set_points_and_winner(court))
   });
@@ -537,18 +539,15 @@ function set_points_and_winner(court) {
       if(i==2) { diff = Math.abs(set2_p1 - set2_p2); max_points = Math.max(set2_p1,set2_p2); points_p1 = parseInt(set2_p1); points_p2 = parseInt(set2_p2); }
       if(i==3) { diff = Math.abs(set3_p1 - set3_p2); max_points = Math.max(set3_p1,set3_p2); points_p1 = parseInt(set3_p1); points_p2 = parseInt(set3_p2); }
 
+      //If nothing is inserted skip checks
+      if(i==1 && max_points==0) break;
+
       if(i==3 && wins_p1 - wins_p2 !=0)
       {
         if(set3_p1!=0 || set3_p2!=0)
         {
           error += '3. Satz wird nur bei unentschieden nach 2 Sätzen gespielt';
         }
-        break;
-      }
-
-      if(i==1 && max_points==0)
-      {
-        $('#court'+court).load(server_link+'&ajax=show&tournament_id=$_GET[tournament_id]&round=$_GET[round]&court_id='+court);
         break;
       }
 

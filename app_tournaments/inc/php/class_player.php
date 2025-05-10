@@ -98,8 +98,11 @@ class player extends \user
     
           case 'Doppel_fix':
           case 'Schoch':
+            //Was player involved in this game?
             if($this->id==$game->p1?->id OR $this->id==$game->p2?->id OR $this->id==$game->p3?->id OR $this->id==$game->p4?->id) {
-              if($mode=='main') { $BHZ = $BHZ + $game->winner->wins; } else { $BHZ = $BHZ + $game->winner->BHZ; }
+              //Search for opponent
+              if($this->id==$game->p1?->id OR $this->id==$game->p3?->id) { $opponent = $game->p2; } else { $opponent = $game->p1; }
+              if($mode=='main') { $BHZ = $BHZ + $opponent->wins; } else { $BHZ = $BHZ + $opponent->BHZ; }
             }
             break;
 
