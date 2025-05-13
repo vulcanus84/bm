@@ -443,59 +443,40 @@ class user
 		print $x;
 	}
 
-	function get_user_infos($with_form=true,$with_pic=true)
+	function get_user_form($fields='all',$with_pic=true)
 	{
-		$page = new header_mod();                               //about the current page and header modification functions
-		$x = "";
-
-		if($with_form)
-		{
-			$x.= "<form id='new_user' action='".$page->change_parameter('action','modify_user')."' method='post' enctype='multipart/form-data'>";
-			$x.= "<input type='hidden' id='user_id' name='user_id' value='".$this->id."' />";
-		}
-		$x.= "<table>";
+		$html = "";
+		$html.= "<form id='new_user'>";
+		$html.= "<input type='hidden' id='user_id' name='user_id' value='".$this->id."' />";
+		$html.= "<table>";
 		if($with_pic)
 		{
-			$x.= " 	<tr>";
-			$x.= " 		<td colspan='2'>";
-			$x.= 				$this->get_picture(false,'test');
-			$x.= "		</td>";
-			$x.= "	</tr>";
-			$x.= " 	<tr>";
-			$x.= " 		<td></td>";
-			$x.= " 		<td>";
-			$x.= "			<input style='visibility:hidden;' onchange='$(\"#new_user\").submit();' name='pictures[]' id='inpPicture' type='file' accept='image/*'/>";
-			$x.= "		</td>";
-			$x.= "	</tr>";
-			$x.= "	<tr>";
+			//$html.= " <tr><td colspan='2'>{$this->get_picture(false,'trigger_upload_pic_selection')}</td></tr>";
+			$html.= " <tr><td colspan='2'><img id='user_pic_large' src='{$this->get_pic_path()}?t=".round(microtime(true) * 1000)."' onclick='trigger_upload_pic_selection();'/></td></tr>";
+			$html.= " <tr><td colspan='2'><input style='visibility:hidden;' onchange='$(\"#new_user\").submit();' name='pictures[]' id='inpPicture' type='file' accept='image/*'/></td></tr>";
 		}
-		$x.= "		<td>Anrede:</td>";
-		$x.= " 		<td>";
-		$x.= " 			<select name='user_gender'>";
-		$x.= " 				<option"; if($this->gender=='Herr') { $x.=" selected='1'"; } $x.=" value='Herr'>Herr</option>";
-		$x.= " 				<option"; if($this->gender=='Frau') { $x.=" selected='1'"; } $x.=" value='Frau'>Frau</option>";
-		$x.= " 			</select>";
-		$x.= " 		</td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Nickname:</td>";
-		$x.= " 		<td><input type='text' name='user_account' value='".$this->login."'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Vorname:</td>";
-		$x.= " 		<td><input type='text' name='user_firstname' value='".$this->firstname."'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Nachname:</td>";
-		$x.= " 		<td><input type='text' name='user_lastname' value='".$this->lastname."'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Geburtsdatum:</td>";
-		$x.= " 		<td><input type='text' name='user_birthday' value='".$this->birthday."'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Trainingsort(e):</td>";
-		$x.= " 		<td style='width:300px;'>";
+		$html.= "		<tr>";
+		$html.= "			<td>Anrede:</td>";
+		$html.= " 		<td>";
+		$html.= " 			<select name='user_gender'>";
+		$html.= " 				<option"; if($this->gender=='Herr') { $html.=" selected='1'"; } $html.=" value='Herr'>Herr</option>";
+		$html.= " 				<option"; if($this->gender=='Frau') { $html.=" selected='1'"; } $html.=" value='Frau'>Frau</option>";
+		$html.= " 			</select>";
+		$html.= " 		</td>";
+		$html.= " 	</tr>";
+		$html.= "		<tr>";
+		$html.= "			<td>Nickname:</td>";
+		$html.= " 		<td><input type='text' name='user_account' value='".$this->login."' required/></td>";
+		$html.= " 	</tr>";
+
+		if($fields=='all') {
+			$html.= "	<tr><td>Vorname:</td><td><input type='text' name='user_firstname' value='".$this->firstname."'/></td></tr>";
+			$html.= "	<tr><td>Nachname:</td><td><input type='text' name='user_lastname' value='".$this->lastname."'/></td></tr>";
+			$html.= "	<tr><td>Geburtsdatum:</td><td><input type='text' name='user_birthday' value='".$this->birthday."'/></td></tr>";
+		}
+		$html.= "	<tr>";
+		$html.= "		<td>Trainingsort(e):</td>";
+		$html.= " 		<td style='width:300px;'>";
 
 		$this->db->sql_query("SELECT * FROM location_permissions
 										LEFT JOIN locations ON loc_permission_loc_id = location_id
@@ -504,77 +485,29 @@ class user
 										ORDER BY location_name");
 		while($d = $this->db->get_next_res())
 		{
-			$x.= "	   <input style='width:20px;' type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if($d->location2user_id>0) { $x.= " checked='checked'"; } $x.= "/>".$d->location_name."<br/>";
+			$html.= "	   <input style='width:20px;' type='checkbox' name='loc_".$d->location_id."' value='$d->location_id' "; if($d->location2user_id>0) { $html.= " checked='checked'"; } $html.= "/>".$d->location_name."<br/>";
 		}
-		$x.= " 		</td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Ausgeblendet:</td>";
+		$html.= " 		</td>";
+		$html.= " 	</tr>";
+		$html.= "	<tr>";
+
+		$html.= "		<td>Ausgeblendet:</td>";
 		if($this->hidden) { $val = 'checked=checked'; } else { $val = ""; }
-		$x.= " 		<td><input type='checkbox' name='user_hide' $val/></td>";
-		$x.= " 	</tr>";
-		$x.= " 	<tr><td>&nbsp;</td></tr>";
-		if($with_form)
+		$html.= " 		<td><input type='checkbox' name='user_hide' $val/></td>";
+		$html.= " 	</tr>";
+		$html.= " 	<tr><td>&nbsp;</td></tr>";
+		$html.= " 	<tr>";
+		$html.= " 		<td colspan='2'><button class='green' $(\"#new_user\").submit();'>Speichern</button>";
+		$html.= "		<button type='button' class='blue' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
+		if($this->check_permission('app_user_admin')==false)
 		{
-			$x.= " 	<tr>";
-			$x.= " 		<td colspan='2'><button class='green' onclick='$('#right_col').hide(); $(\"#new_user\").submit();'>Speichern</button>";
-			$x.= "		<button type='button' class='blue' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
-			if($this->check_permission('app_user_admin')==false)
-			{
-				$x.= "		<button type='button' class='red' onclick='delete_permission(".$this->id.");'>Spieler löschen</button>";
-			}
-			$x.= "		<button type='button' class='purple' onclick='show_history(".$this->id.");'>Infos</button></td>";
-			$x.= "	</tr>";
-	    }
-		$x.= "</table>";
-		if($with_form) { $x.= "</form>"; }
-		$my_user = null;
-		return $x;
-	}
-
-	function get_new_user()
-	{
-		$page = new header_mod();                               //about the current page and header modification functions
-		$x = "<h1>Neuer Spieler</h1>";
-		$x.= "<form id='new_user' action='".$page->change_parameter('action','create_new_user')."' method='POST'>";
-		$x.= "<input type='hidden' name='user_lastname'/>";
-		$x.= "<input type='hidden' name='user_firstname'/>";
-		$x.= "<table>";
-		$x.= "	<tr>";
-		$x.= "		<td>Anrede:</td>";
-		$x.= " 		<td>";
-		$x.= " 			<select name='user_gender'>";
-		$x.= " 				<option value='Herr'>Herr</option>";
-		$x.= " 				<option value='Frau'>Frau</option>";
-		$x.= " 			</select>";
-		$x.= " 		</td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Nickname:</td>";
-		$x.= " 		<td><input type='text' name='user_account'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Trainingsort(e):</td>";
-		$x.= " 		<td style='width:300px;'>";
-
-		$this->db->sql_query("SELECT * FROM location_permissions
-										LEFT JOIN locations ON loc_permission_loc_id = location_id
-										LEFT JOIN (SELECT * FROM location2user WHERE location2user_user_id='".$this->id."') as lj ON lj.location2user_location_id = locations.location_id
-										WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
-										ORDER BY location_name");
-		$is_checked = false;
-		while($d = $this->db->get_next_res())
-		{
-			$x.= "	   <input style='width:20px;' type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if(!$is_checked) { $x.= " checked='checked'"; $is_checked = true; } $x.= "/>".$d->location_name."<br/>";
+			$html.= "		<button type='button' class='red' onclick='delete_permission(".$this->id.");'>Spieler löschen</button>";
 		}
-		$x.= " 		</td>";
-		$x.= " 	</tr>";
-		$x.= " 	<tr>";
-		$x.= " 		<td><button class='green' onclick='$(\"#new_user\").submit();'>Erstellen</button></td>";
-		$x.= "</table>";
-		$x.= "</form>";
-
-		return $x;
+		$html.= "		<button type='button' class='purple' onclick='show_history(".$this->id.");'>Infos</button></td>";
+		$html.= "	</tr>";
+		$html.= "</table>";
+		$html.= "</form>";
+		return $html;
 	}
 
 	function create_star_image()

@@ -20,9 +20,13 @@ $(document).ready(function() {
 });
 
 function setEvents() {
-  const allSections = $('#left_content section'); // alle Gruppen (z.B. BCZ 1, BCZ 2 etc.)
+
+  //Remove click event from main part with the delegations
+  $('#content').off('click');
+
   // Standort-Filter
-  $('select[name="location"]').off('change').on('change', function() {
+  $('#content').on('change', 'select[name="location"]', function() {
+    const allSections = $('#left_content section'); // alle Gruppen (z.B. BCZ 1, BCZ 2 etc.)
     const selected = $(this).val();
     allSections.hide(); // alle verstecken
 
@@ -37,8 +41,6 @@ function setEvents() {
     }
   });
 
-  //Remove click event from main part with the delegations
-  $('#content').off('click');
 
   $('#left_col').off('click').on('click', function(e) {
     if (!$(e.target).closest('.user_mit_name, button, select, a, .dropdown,img').length) {
@@ -48,6 +50,53 @@ function setEvents() {
   $('#content').on('click','div.user_mit_name', (e) => show_infos(e.currentTarget.id));
 
   $('img.img_sort').off('click').on('click', (e) => change_group_by(e));
+  
+  $('#content').on('submit','form#new_user', function(e) {
+    e.preventDefault(); // Formular nicht normal absenden
+  
+    let formData = new FormData(this); // FormData aus Formular
+
+    //Check Formular-Data
+    const checkboxes = document.querySelectorAll('#new_user input[type="checkbox"][name^="loc_"]');
+    let checked = false;
+
+    checkboxes.forEach(box => {
+        if (box.checked) {
+            checked = true;
+        }
+    });
+
+    var oldVal = $('select[name="location"]').val();
+
+    if (!checked) {
+        alert("Bitte mindestens einen Trainingsort auswählen!");
+    } else {
+      $.ajax({
+        url: server_link+'&ajax=save_user',
+        type: 'POST',
+        data: formData,
+        processData: false, // wichtig bei FormData
+        contentType: false, // ebenfalls wichtig
+        success: function(response) {
+          if (!isNaN(response) && response.trim() !== '') 
+          {
+            $('#left_content').load(server_link+'&ajax=get_left_col_users', function() {
+              $('select[name="location"]').val(oldVal);
+              $('select[name="location"]').trigger('change');
+              show_infos('user' + response,true);
+            });
+          } 
+          else 
+          {
+            $('#right_content').html(response);
+          }
+        },
+        error: function(xhr, status, error) {
+          $('#right_content').html(error);
+        }
+      });
+    }
+  });
 
 }
 
@@ -71,43 +120,61 @@ function perform_ajax(function_name,param_url,target_id=null) {
 
 
 function new_user() {
-  $('#right_col').load(server_link+'&ajax=new_user');
+  $('#right_content').load(server_link+'&ajax=new_user');
 }
 
+function trigger_upload_pic_selection(id)
+{
+  $('#inpPicture').trigger('click');
+}
 
-function show_infos(user_tag_id) {
+function show_infos(user_tag_id,pic_replace=false) {
   var user_id = user_tag_id.replace(/user/g, "");
-  $('#right_col').load(server_link+'&ajax=show_infos&user_id='+user_id);
+  $('#right_content').load(server_link+'&ajax=show_infos&user_id='+user_id, function() {
+    if(pic_replace) {
+      let neuesSrc = $('#user_pic_large').attr('src');
+      $('#'+user_tag_id + ' img').attr('src', neuesSrc);
+    }
+  });
   $('#left_col').toggleClass('open');
 }
 
 function show_history(user_id) {
-  $('#right_col').load(server_link+'&ajax=show_history&user_id='+user_id);
+  $('#right_content').load(server_link+'&ajax=show_history&user_id='+user_id);
 }
 
 
 function delete_permission(user_id) {
-  $('#right_col').load(server_link+'&ajax=delete_permission_user&user_id='+user_id);
+  $('#right_content').load(server_link+'&ajax=delete_permission_user&user_id='+user_id);
 }
 
 function delete_user(user_id)
 {
   var my_url = server_link +'&ajax=delete_user&user_id=' + user_id;
+  var oldVal = $('select[name="location"]').val();
   $.ajax({ url: my_url }).done(
   function(data)
   {
-    window.location = base_link;
-  });
+    $('#right_content').html("");
+    $('#left_content').load(server_link+'&ajax=get_left_col_users', function() {
+      $('select[name="location"]').val(oldVal);
+      $('select[name="location"]').trigger('change');
+    });
+});
 }
 
 function delete_pic(user_id)
 {
   var my_url = server_link +'&ajax=delete_pic&user_id=' + user_id;
+  var oldVal = $('select[name="location"]').val();
   $.ajax(my_url).done(
   function(data)
   {
-    $('#right_col').load(server_link + '&ajax=show_infos&user_id='+user_id);
-    $('#left_col').load(server_link + '&ajax=show_left_col');
+    $('#right_content').load(server_link + '&ajax=show_infos&user_id='+user_id);
+    $('#left_content').load(server_link+'&ajax=get_left_col_users', function() {
+      $('select[name="location"]').val(oldVal);
+      $('select[name="location"]').trigger('change');
+    });
   });
 }
 
