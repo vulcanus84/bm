@@ -54,10 +54,12 @@ class game
       if($data->game_player3_id!==null) { 
         $this->p3 = $this->round->tournament->arr_players[$data->game_player3_id]; 
         if($data->game_player4_id>0) { $this->p4 = $this->round->tournament->arr_players[$data->game_player4_id]; }
-        $team_id1 = $this->round->tournament->calc->calc_team_id($this->p1->id,$this->p3->id);
-        $this->t1 = $this->round->tournament->arr_teams[$team_id1];
-        $team_id2 = $this->round->tournament->calc->calc_team_id($this->p2->id,$this->p4->id);
-        $this->t2 = $this->round->tournament->arr_teams[$team_id2];
+        if(Count($this->round->tournament->arr_teams)>0) {
+          $team_id1 = $this->round->tournament->calc->calc_team_id($this->p1->id,$this->p3->id);
+          $this->t1 = $this->round->tournament->arr_teams[$team_id1];
+          $team_id2 = $this->round->tournament->calc->calc_team_id($this->p2->id,$this->p4->id);
+          $this->t2 = $this->round->tournament->arr_teams[$team_id2];
+        }
       }
       if($data->game_winner_id!==null) { $this->winner = $this->round->tournament->arr_players[$data->game_winner_id]; }
       if($data->game_winner2_id!==null) { $this->winner2= $this->round->tournament->arr_players[$data->game_winner2_id]; }
