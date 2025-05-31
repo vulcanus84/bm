@@ -73,6 +73,14 @@ class game
       if($data->game_started_on!==null) { $this->started_on = new \DateTime($data->game_started_on); }
       if($data->game_stopped_on!==null) { $this->stopped_on = new \DateTime($data->game_stopped_on); }
 
+      if(isset($this->started_on) && isset($this->stopped_on)) {
+        $interval = $this->started_on->diff($this->stopped_on);
+        $this->duration = ($interval->days * 24 * 60 * 60) + 
+                          ($interval->h * 60 * 60) + 
+                          ($interval->i * 60) + 
+                          $interval->s;
+      }
+
     }
   }
 

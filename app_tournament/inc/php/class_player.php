@@ -174,20 +174,17 @@ class player extends \user
         //In invert isn't set, current player was not involved in game
         if($invert!==null) {
           $html.= "<tr>";
-          $html.= "<td style='text-align:center;'><h2>Runde ".$game->round->id."</h2></td>";
           $html.= "<td style='text-align:center;'><img style='width:100px;' src='".$u1->get_pic_path()."'><br/>".$u1->login."</td>";
           if(isset($u3)) { $html.= "<td style='text-align:center;'><img style='width:100px;' src='".$u3->get_pic_path()."'><br/>".$u3->login."</td>"; }
-          $html.= "<td style='text-align:center;'><h2>gegen</h2></td>";
-          $html.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u2->get_pic_path()."' onclick=\"show_user_games('".$u2->id."');\"><br/>".$u2->login."</td>";
-          if(isset($u4)) { $html.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u4->get_pic_path()."' onclick=\"show_user_games('".$u4->id."');\"><br/>".$u4->login."</td>"; }
+          $html_result = "";
           if($game->winner?->id!='')
           {
             if($this->tournament->counting=='win')
             {
               if($game->winner->id==$this->id OR $game->winner2?->id==$this->id) {
-                $html.= "<td style='text-align:center;'><h1 style='color:green;'>Gewonnen!</h1></td>";
+                $html_result.= "<h1 style='color:green;'>Gewonnen!</h1>";
               } else {
-                $html.= "<td style='text-align:center;'><h1 style='color:red;'>Verloren!</h1></td>";
+                $html_result.= "<h1 style='color:red;'>Verloren!</h1>";
               }
             }
             else
@@ -209,23 +206,26 @@ class player extends \user
       
               if($game->winner->id==$this->id OR $game->winner2?->id==$this->id)
               {
-                $html.= "<td style='text-align:center;'><h1 style='color:green;'>".$txt."</h1></td>";
+                $html_result.= "<h1 style='color:green;'>".$txt."</h1>";
               }
               else
               {
-                $html.= "<td style='text-align:center;'><h1 style='color:red;'>".$txt."</h1></td>";
+                $html_result.= "<h1 style='color:red;'>".$txt."</h1>";
               }
       
             }
             if($game->duration>0)
             {
-              $html.= "<td style='text-align:center;font-size:14pt;'>Spieldauer<br/>".gmdate("H:i:s", $game->duration)."</td>";
+              $html_result.= "<p><b>Spieldauer</b><br/>".gmdate("H:i:s", $game->duration)."</p>";
             }
           }
           else
           {
-            $html.= "<td style='text-align:center;' colspan='2'><h2 style='font-style:italic;'>Noch nicht gespielt</h2></td>";
+            $html_result.= "<h2 style='font-style:italic;'>Noch nicht gespielt</h2>";
           }
+          $html.= "<td style='text-align:center;'><h2>Runde ".$game->round->id."<br/>{$html_result}</td>";
+          $html.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u2->get_pic_path()."' onclick=\"show_user_games('".$u2->id."');\"><br/>".$u2->login."</td>";
+          if(isset($u4)) { $html.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u4->get_pic_path()."' onclick=\"show_user_games('".$u4->id."');\"><br/>".$u4->login."</td>"; }
           $html.= "</tr>";
           $html.= "<tr><td colspan='8'><hr/></td></tr>";
   
