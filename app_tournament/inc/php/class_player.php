@@ -178,9 +178,9 @@ class player extends \user
             if($this->tournament->counting=='win')
             {
               if($game->winner->id==$this->id OR $game->winner2?->id==$this->id) {
-                $html_result.= "<h1 style='color:green;'>Gewonnen!</h1>";
+                $html_result.= "<span style='color:green;'>Gewonnen!</span>";
               } else {
-                $html_result.= "<h1 style='color:red;'>Verloren!</h1>";
+                $html_result.= "<span style='color:red;'>Verloren!</span>";
               }
             }
             else
@@ -202,11 +202,11 @@ class player extends \user
       
               if($game->winner->id==$this->id OR $game->winner2?->id==$this->id)
               {
-                $html_result.= "<h1 style='color:green;'>".$txt."</h1>";
+                $html_result.= "<span style='color:green;'>".$txt."</span>";
               }
               else
               {
-                $html_result.= "<h1 style='color:red;'>".$txt."</h1>";
+                $html_result.= "<span style='color:red;'>".$txt."</span>";
               }
       
             }
@@ -220,16 +220,16 @@ class player extends \user
             $html_result.= "<h2 style='font-style:italic;'>Noch nicht gespielt</h2>";
           }
 
-          $left_player = "<div style='display:inline-block;'><img style='width:100px;' src='" . $u1->get_pic_path() . "'><br/>" . $u1->login . "</div>";
+          $left_player = "<div style='display:inline-block;'><img style='width:20vw;max-width:100px;' src='" . $u1->get_pic_path() . "'><br/>" . $u1->login . "</div>";
           if (isset($u3)) {
-              $left_player .= "<div style='display:inline-block; margin-left:10px;'><img style='width:100px;' src='" . $u3->get_pic_path() . "'><br/>" . $u3->login . "</div>";
+              $left_player .= "<div style='display:inline-block; margin-left:10px;'><img style='width:20vw;max-width:100px;' src='" . $u3->get_pic_path() . "'><br/>" . $u3->login . "</div>";
           }
           
           $html_result = "<div><h2>Runde " . $game->round->id . "</h2>" . $html_result . "</div>";
           
-          $right_player = "<div style='display:inline-block;'><img style='width:100px; cursor:pointer;' src='" . $u2->get_pic_path() . "' onclick=\"show_user_games('" . $u2->id . "');\"><br/>" . $u2->login . "</div>";
+          $right_player = "<div style='display:inline-block;'><img style='width:20vw;max-width:100px; cursor:pointer;' src='" . $u2->get_pic_path() . "' onclick=\"show_user_games('" . $u2->id . "');\"><br/>" . $u2->login . "</div>";
           if (isset($u4)) {
-              $right_player .= "<div style='display:inline-block; margin-left:10px;'><img style='width:100px; cursor:pointer;' src='" . $u4->get_pic_path() . "' onclick=\"show_user_games('" . $u4->id . "');\"><br/>" . $u4->login . "</div>";
+              $right_player .= "<div style='display:inline-block; margin-left:10px;'><img style='width:20vw;max-width:100px; cursor:pointer;' src='" . $u4->get_pic_path() . "' onclick=\"show_user_games('" . $u4->id . "');\"><br/>" . $u4->login . "</div>";
           }
           
           $html .= "<div style='display: flex; justify-content: center; align-items: center; width: 100%; overflow-x: auto;border-bottom:1px solid gray;'>";
