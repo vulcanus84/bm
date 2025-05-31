@@ -1,9 +1,11 @@
 <?php
 
+use Tournament\tournament;
+
 require_once('class_team.php');
 require_once('class_tournament.php');
 
-if(isset($_GET['user_id'])) { $myUser = new \user($_GET['user_id']); } else { $myUser = new \user(); }
+if(isset($_GET['user_id'])) { $myUser = new user($_GET['user_id']); } else { $myUser = new \user(); }
 
 switch ($_GET['ajax']) {
   case 'load':
@@ -18,8 +20,8 @@ switch ($_GET['ajax']) {
     $html = "<h1>Willst du folgendes Turnier wirklich löschen?</h1>";
     $html.= "<h2>".$myTournament->title."</h2><h3>".nl2br($myTournament->description)."</h3>";
     $html.= "<div style='display:flex;flex-direction:row;gap:5px;'>";
-    $html.= "<button onclick='window.location=\"index.php?action=delete_tournament&tournament_id=".$myTournament->id."\"' class='red'>Ja</button>";
-    $html.= "<button onclick='window.location=\"index.php\"' class='green'>Nein</button>";
+    $html.= "<button id='delete_tournament' data-tournament-id='{$myTournament->id}' class='red'>Ja</button>";
+    $html.= "<button id='abort_tournament_delete' class='green'>Nein</button>";
     $html.= "</div>";
     print $html;
     break;
@@ -734,4 +736,39 @@ switch ($_GET['ajax']) {
     print $myUser->id;
     break;
 
-  }
+  case 'reactivate_tournament':
+    $myTournament = new tournament($_GET['tournament_id']);
+    $myTournament->reactivate();
+    print "OK".$myTournament->id;      
+    break;
+
+  case 'delete_tournament':
+    try {
+      $myTournament = new tournament($_GET['tournament_id']);
+      $myTournament->delete();
+      print "OK";
+    } catch (\Throwable $th) {
+      print $th->getMessage();
+    }
+    break;
+
+  case 'save_tournament':
+    if($_POST['tournament_title']!='')
+    {
+      $myTournament = new tournament($_POST['tournament_id']);
+      $myTournament->title = $_POST['tournament_title'];
+      $myTournament->description = $_POST['tournament_description'];
+    
+      if(isset($_POST['tournament_system'])) { $myTournament->system = $_POST['tournament_system']; }
+      if(isset($_POST['tournament_counting'])) { $myTournament->counting = $_POST['tournament_counting']; }
+      $myTournament->location = new location($_POST['created_by_location']);  
+      $myTournament->save();
+      print "OK".$myTournament->id;      
+    }
+    else
+    {
+      throw new \Exception("Titel muss ausgefüllt werden");
+    }
+    break;
+
+}

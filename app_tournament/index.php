@@ -29,8 +29,6 @@ try
 
 	if(!isset($_GET['order_by'])) { $_GET['order_by']='location'; }
 	
-	include('inc/php/actions_by_get.php');	
-
 	if(!IS_AJAX)
 	{
 		//Display page

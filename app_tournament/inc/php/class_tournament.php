@@ -134,6 +134,31 @@ class tournament
 
 	}
 
+	function reactivate() {
+		$this->status = "Started";
+		$this->save();
+	}
+
+	function delete() {
+		//Update or insert
+		try {
+			if($this->id!=null)
+			{
+				$this->db->delete('groups','group_id',$this->id);
+				//Unset all properties
+				foreach ($this as $key => $value) {
+					unset($this->$key);
+				}
+			}
+			else
+			{
+				throw new \Exception("Current Tournament not saved");
+			}
+		} catch (\Throwable $th) {
+			print $th->getMessage();
+		}
+	}
+
 	function reload() {
 		$this->arr_rounds = [];
 		$this->arr_players = [];

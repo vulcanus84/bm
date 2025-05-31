@@ -21,17 +21,17 @@ $(document).ready(function() {
 
 function setEvents() {
 
-  //Remove click event from main part with the delegations
-  $('#content').off('click');
+  //Remove all events from main part with the delegations
+  $('#content').off();
 
-  // Standort-Filter
+  //Location filter
   $('#content').on('change', 'select[name="location"]', function() {
-    const allSections = $('#left_content section'); // alle Gruppen (z.B. BCZ 1, BCZ 2 etc.)
+    const allSections = $('#left_content section');
     const selected = $(this).val();
-    allSections.hide(); // alle verstecken
+    allSections.hide();
 
     if (!selected) {
-      allSections.show(); // alles zeigen wenn "-- Alle Standorte --" gewählt
+      allSections.show();
     } else {
       allSections.each(function() {
         if ($(this).find('h1').text().includes($(this).find('h1').text().split('(')[0].trim())) {
@@ -100,7 +100,6 @@ function setEvents() {
 
 }
 
-
 function perform_ajax(function_name,param_url,target_id=null) {
   var my_url = server_link+'&ajax='+function_name+'&tournament_id='+tournamentId+'&'+param_url;
   if(target_id!=null)   
@@ -117,7 +116,6 @@ function perform_ajax(function_name,param_url,target_id=null) {
   
   }
 }
-
 
 function new_user() {
   $('#right_content').load(server_link+'&ajax=new_user');
@@ -142,7 +140,6 @@ function show_infos(user_tag_id,pic_replace=false) {
 function show_history(user_id) {
   $('#right_content').load(server_link+'&ajax=show_history&user_id='+user_id);
 }
-
 
 function delete_permission(user_id) {
   $('#right_content').load(server_link+'&ajax=delete_permission_user&user_id='+user_id);
@@ -177,7 +174,6 @@ function delete_pic(user_id)
     });
   });
 }
-
 
 function change_group_by(id) {
   let sort_by = id.currentTarget.id;

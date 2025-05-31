@@ -157,13 +157,13 @@ class html
 				$html .= "<span class='date'>{$data->c_date}</span>";
 				$html .= "</div>"; // End tournament-details
 				$html .= "<div class='tournament-actions'>";
-				$html .= "<button class='edit_tournament gray' data-tournament-id='{$data->group_id}'>
+				$html .= "<button id='edit_tournament' class='gray' data-tournament-id='{$data->group_id}'>
 										<img src='".level."inc/imgs/query/edit.png' alt='Bearbeiten' />
 									</button>";
-				$html .= "<button class='open_tournament gray' data-tournament-id='{$data->group_id}'>
+				$html .= "<button id='open_tournament' class='gray' data-tournament-id='{$data->group_id}'>
 										<img src='".level."inc/imgs/query/next.png' alt='Laden' />
 									</button>";
-				$html .= "<button class='delete_tournament gray' data-tournament-id='{$data->group_id}'>
+				$html .= "<button id='delete_tournament_permission' class='gray' data-tournament-id='{$data->group_id}'>
 										<img src='".level."inc/imgs/query/delete.png' alt='Löschen' />
 									</button>";
 				$html .= "</div>"; // End tournament-actions
@@ -176,7 +176,7 @@ class html
 
 	function get_tournament_form($id=null) {
 		if($id!=null) { $this->tournament->load($id); }
-		$html = "<form id='new_tournament' action='index.php?action=save_tournament' method='post' style='display:flex;flex-direction:column;gap:1em;width:90%;'>";
+		$html = "<form id='new_tournament' style='display:flex;flex-direction:column;gap:1em;width:90%;'>";
 
 		$html .= "<input type='hidden' name='tournament_id' value='" . $this->tournament->id . "'>";
 		
@@ -251,7 +251,7 @@ class html
 		$html .= "<button type='submit' class='green'>Speichern</button>";
 		
 		if ($this->tournament->status == 'Closed') {
-				$html .= "<button type='button' class='orange' onclick='window.location=\"index.php?action=reactivate_tournament&tournament_id=" . $this->tournament->id . "\";'>Reaktivieren</button>";
+				$html .= "<button type='button' class='orange' id='reactivate_tournament' data-tournament-id='{$this->tournament->id}'>Reaktivieren</button>";
 		}
 		
 		$html .= "</div>"; // button row
