@@ -22,6 +22,26 @@ function setEvents() {
   //Remove all events from main part with the delegations
   $('#content').off();
 
+  //Location filter
+  $('#content').on('change', 'select[name="location"]', function() {
+    const allSections = $('#left_content section');
+    const selected = $(this).val();
+    allSections.hide();
+
+    if (!selected) {
+      allSections.show();
+    } else {
+      allSections.each(function() {
+        if ($(this).find('h1').text().includes($(this).find('h1').text().split('(')[0].trim())) {
+          $(this).toggle($(this).find('h1').text().includes($('select[name="location"] option:selected').text().trim()));
+        }
+      });
+    }
+  });
+
+  //Sort type
+  $('img.img_sort').off('click').on('click', (e) => change_group_by(e));
+
   //New Tournament
   $('#content').on('submit','form#new_tournament', function(e) {
     e.preventDefault(); // Formular nicht normal absenden
