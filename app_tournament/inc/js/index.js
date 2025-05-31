@@ -57,7 +57,10 @@ function setEvents() {
     $('#left_col').toggleClass('open');
     get_tournament_form($(e.currentTarget));
   });
-  $('#content').on('click', 'button#delete_tournament_permission', (e) => delete_tournament_permission($(e.currentTarget)));
+  $('#content').on('click', 'button#delete_tournament_permission', function(e) { 
+    $('#left_col').toggleClass('open');
+    delete_tournament_permission($(e.currentTarget));
+  });
   $('#content').on('click', 'button#open_tournament', (e) => window.location = base_link + '?tournament_id=' + $(e.currentTarget).data('tournament-id'));
 
   //Buttons in deletion mode
