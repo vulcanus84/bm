@@ -92,16 +92,9 @@ function setEvents() {
   $('#content').on('click', 'button#define_teams', (e) => define_teams());
   $('#content').on('click', 'button#delete_team', (e) => delete_team(e.currentTarget));
 
-  //Stats Page for user in tournament
+  //Back button in stats Page for user in tournament
   $('#content').on('click', 'button#back_to_round', (e) => window.location = server_link);
 
-
-  $('#left_col').off('click').on('click', function(e) {
-    if (!$(e.target).closest('.user_mit_name, button, select, a, .dropdown,img').length) {
-      $(this).toggleClass('open');
-    }
-  });
-  
   switch ($('#content').data('status'))
   {
     case 'New':
@@ -120,6 +113,13 @@ function setEvents() {
           check_result(court,gameId);
         });
       }
+      $('#content').on('click','.user_mit_BHZ', function(e) { show_user_games($(e.currentTarget).data('player-id')); });
+      $('#content').on('click','.team_small', function(e) { show_user_games($(e.currentTarget).data('team-id')); });
+      break;
+
+    case 'Closed':
+      $('#content').on('click','.user_mit_BHZ', function(e) { show_user_games($(e.currentTarget).data('player-id')); });
+      $('#content').on('click','.team_small', function(e) { show_user_games($(e.currentTarget).data('team-id')); });
       break;
   }
 
@@ -155,6 +155,18 @@ function setEvents() {
     default:
       break;
   }
+
+  //Handling open/close of left panel on smartphone screens
+  $('#left_col').off('click').on('click', function(e) {
+    if (!$(e.target).closest('.user_mit_name, button, select, a, .dropdown,img').length) {
+      $(this).toggleClass('open');
+    }
+  });
+
+  $('#right_col').off('click').on('click', function(e) {
+    if($('#left_col').hasClass('open')) { $('#left_col').toggleClass('open') };
+  });
+
 }
 
 
@@ -266,6 +278,7 @@ function reactivate_tournament(tournament) {
 
 function show_user_games(user_id) {
   $('#right_col').load(server_link+'&ajax=show_user_info&user_id='+user_id);
+  $('#left_col').toggleClass('open');
 }
 
 function get_tournament_form(tournament) {

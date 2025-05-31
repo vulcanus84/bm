@@ -321,7 +321,7 @@ class html
           }
         }
         $last_wins = $team->arr_players[0]->wins;
-        $html.= "<div class='team_small' onclick='show_user_games($team->id);'>{$team->arr_players[0]->get_picture(false,null,'80px',false)}{$team->arr_players[1]->get_picture(false,null,'80px',true)}<br/>{$team->arr_players[0]->login} & {$team->arr_players[1]->login}<br/>{$team->arr_players[0]->BHZ}.{$team->arr_players[0]->FBHZ}</div>";
+        $html.= "<div class='team_small' id='team_{$team->id}' data-team-id='{$team->id}'>{$team->arr_players[0]->get_picture(false,null,'80px',false)}{$team->arr_players[1]->get_picture(false,null,'80px',true)}<br/>{$team->arr_players[0]->login} & {$team->arr_players[1]->login}<br/>{$team->arr_players[0]->BHZ}.{$team->arr_players[0]->FBHZ}</div>";
       }
 
     } else {
@@ -342,7 +342,7 @@ class html
           }
         }
         $last_wins = $player->wins;
-        $html.= "<div class='user_mit_BHZ' onclick='show_user_games($player->id);'>{$player->get_picture(false)}<br/>{$player->login}<br/>{$player->BHZ}.{$player->FBHZ}</div>";
+        $html.= "<div class='user_mit_BHZ' id='player_{$player->id}' data-player-id='{$player->id}'>{$player->get_picture(false)}<br/>{$player->login}<br/>{$player->BHZ}.{$player->FBHZ}</div>";
       }
   
     }
