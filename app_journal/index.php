@@ -33,13 +33,13 @@ try
 			}
 			$trainer = new user($d->journal_created_by);
 			$myPage->add_content("<div class='row'>");
-			$myPage->add_content("<div class ='col_trainer' id='trainer_".$d->journal_id."'>".$trainer->get_picture(false,'','60px',true)."</div>");
+			$myPage->add_content("<div class ='col_trainer' id='trainer_".$d->journal_id."'>".$trainer->get_picture(true)."</div>");
 			$myPage->add_content("<div class ='col_player' id='players_".$d->journal_id."'>");
 			$db2->sql_query("SELECT * FROM journal2user WHERE journal2user_journal_id='".$d->journal_id."'");
 			while($d2 = $db2->get_next_res())
 			{
 				$player = new user($d2->journal2user_user_id);
-				$myPage->add_content($player->get_picture(false,'','60px',true));
+				$myPage->add_content($player->get_picture(true));
 			}
 			$myPage->add_content("</div>");
 			$myPage->add_content("<div class='col_text' id='text_".$d->journal_id."'>".nl2br($d->journal_text)."</div>");
