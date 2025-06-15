@@ -2,9 +2,9 @@ div.menu_item {
 	float:left;
 }
 
-button, 
-input[type="submit"] {
+button {
   border: none;
+  background-color: #4CAF50;
   color: white;
   cursor: pointer;
   padding: 5px 10px 5px 10px;
@@ -17,6 +17,20 @@ input[type="submit"] {
   transition-duration: 0.4s;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Schatten hinzufügen für mehr Tiefe */
 }
+
+button:hover {
+  background-color: #45a049; /* Etwas dunkleres Grün für Hover */
+}
+
+button:focus {
+  outline: none; /* Entfernt die Standard-Fokus-Rahmen */
+  box-shadow: 0 0 5px 2px rgba(72, 183, 72, 0.6); /* Fokussierung mit Schatteneffekt */
+}
+
+button:active {
+  background-color: #398c39; /* Noch dunkleres Grün für die "gedrückte" Ansicht */
+}
+
 
 button.activated { 
   border-left:5px solid gray; 
@@ -157,6 +171,7 @@ button.pink:active {
 /* Sehr helles Grau */
 button.gray {
   background-color: #EEEEEE; /* Sehr helles Grau */
+  color:black;
 }
 
 button.gray:hover {

@@ -18,7 +18,7 @@ class page
   private $own_folder;                  //Foldername in which is page
   private $path;                        //Full path to page filename
   private $space="      ";              //used for better looking html source code
-  private $content;                     //save the text until it will be printed by get_html_code
+  private $content="";                     //save the text until it will be printed by get_html_code
   private $arr_header_lines = array();  //array with all header lines (filled by the functions add_header_line, add_css_link, add_js_link)
   private $logger;
   private $arr_data = [];
@@ -408,6 +408,7 @@ class page
 		$txt.= "</form>\n";
 		$txt.= "<a href='index.php'><button class='blue'>Zurück</button></a>";
 		$txt.= "<a href='app_drawing/excercises.php'><button class='orange'>Übungen</button></a>";
+		$txt.= "<a href='new/app_tournament/index.php'><button class='purple'>Login (Beta)</button></a>";
 	  $txt.= "</div>\n";
 	  return $txt;
 

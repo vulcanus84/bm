@@ -215,7 +215,7 @@ try
 		$myPage->add_content_with_translation("<td>Neues Passwort wiederholen</td>");
 		$myPage->add_content_with_translation("<td><input type='password' name='new_password_repeat'/></td>");
 		$myPage->add_content("</tr><tr>");
-		$myPage->add_content_with_translation("<td colspan='2'><button onclick='$(\"#change_password\").submit();'>Passwort wechseln</button></td>");
+		$myPage->add_content_with_translation("<td colspan='2'><button class='green' onclick='$(\"#change_password\").submit();'>Passwort wechseln</button></td>");
 		$myPage->add_content("</tr></table></form>");
 		$myPage->add_content_with_translation("<h2>Sprache</h2>");
 		$myPage->add_content("<table><tr>");

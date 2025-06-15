@@ -4,10 +4,10 @@ require_once('class_log.php');
 
 class user
 {
-	public $main_pic_path = 'app_tournament/user_pics/';
-	public $firstname;
-	public $lastname;
-	public $fullname;
+	public string $main_pic_path = 'app_tournament/user_pics/';
+	public string $firstname;
+	public string $lastname;
+	public string $fullname;
 	public $gender;
 	public $birthday;
 	public $training_location;
@@ -76,8 +76,8 @@ class user
 			$this->id = $id;
 			$this->login = $res->user_account;
 
-			$this->firstname = $res->user_firstname;
-			$this->lastname = $res->user_lastname;
+			$this->firstname = (string)$res->user_firstname;
+			$this->lastname = (string)$res->user_lastname;
 			$this->fullname = $this->firstname." ".$this->lastname;
 			if(trim($this->fullname)=='') { $this->fullname = $this->login; }
 			if(trim($this->firstname)=='') { $this->firstname = $this->login; }
@@ -250,7 +250,7 @@ class user
 		include('class_chart.php');
 
 		$this->db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM group2user
-													LEFT JOIN groups ON group2user_group_id = groups.group_id
+													LEFT JOIN `groups` ON group2user_group_id = `groups`.group_id
 													WHERE group2user_user_id='$this->id'
 													ORDER BY group_created DESC");
 		if($this->db->count()>0)
@@ -329,7 +329,7 @@ class user
 
 			$x.= "<h2>Alle Spiele</h2>";
 			$this->db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM games
-													LEFT JOIN groups ON game_group_id = groups.group_id
+													LEFT JOIN `groups` ON game_group_id = `groups`.group_id
 													WHERE game_player1_id='$this->id' OR game_player2_id='$this->id' OR game_player3_id='$this->id' OR game_player4_id='$this->id'
 													ORDER BY group_created DESC,game_round ASC");
 

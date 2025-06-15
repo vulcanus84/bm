@@ -38,8 +38,10 @@ class query
 	private $n2n_fix_col;
 	private $n2n_fix_val;
 
-  private $edit_margin;         //??
-  private $edit_width;          //??
+  private $append_sql_string; //SQL-String for appending to n2n table (e.g. "INSERT INTO XXX_ID (n2n_id_col, n2n_target_id_col) VALUES ('XXX_ID', 'XXX_TARGET_ID')")  
+  private $default_order_by; //Default order by column (e.g. "id DESC")
+  private $default_sort_dir = 'ASC'; //Default order by direction (ASC or DESC)
+  
   private $tbl_width;           //??
   private $edit_mode='no_edit'; //edit (not add or remove), append (only append to something), full (all functions)
 
@@ -755,7 +757,7 @@ class query
 	          $txt.= "<input type='checkbox' ".$val." name='".$col->db_col_name."' style='width:'".$col->get_width()."px;'/></td>";
 	          break;
 	        case 'area':
-	          $txt.= "<textarea name='".$col->db_col_name."' style='width:".$col->get_width()*1.2."px;height:".$col->get_height()."px;'>".$d->$db_col_name."</textarea>";
+	          $txt.= "<textarea name='".$col->db_col_name."' style='width:".$col->get_width()*1.2."px;height:".$col->get_height()."px;'>".$col->db_col_name."</textarea>";
 	          break;
 	        case 'date':
 	          $txt.= "<input type='text' id='".$col->get_save_column()."' name='".$col->get_save_column()."' value='".$last_value."' style='width:".$col->get_width()*0.9."px;'/></td>";
@@ -1129,8 +1131,6 @@ class query
 		if(!$this->save_filters_in_session) { $_SESSION['curr_where_string'] = null; $_SESSION['curr_filters'] = null; }
 
     $this->tbl_width = $this->width;
-    $this->edit_width = $this->width*0.9;
-    $this->edit_margin = $this->width*0.05-10;
 
     $txt = "";
     if(!IS_AJAX)

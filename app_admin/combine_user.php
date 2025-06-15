@@ -1,7 +1,6 @@
 <?php
   define("level","../");                               //define the structur to to root directory (e.g. "../", for files in root set "")
   require_once(level."inc/standard_includes.php");     //Load all necessary files (DB-Connection, User-Login, etc.)
-  require_once(level."inc/php/class_query.php");       //Load class query for the grid (includes class column)
 
   try
   {
@@ -123,15 +122,15 @@
       $myPage->add_content("<div style='text-align:center;'>
                               <div style='background-color:#8888FF;border-radius:5vw;width:80%;margin:0 auto;padding:1vw;'>
                                 Bild übertragen<br/>
-                                <button onclick='assign_pic(\"from\");' style='background-color:gray;'><<</button>&nbsp;<button onclick='assign_pic(\"to\");' style='background-color:gray;'>>></button><br/>
+                                <button class='gray' onclick='assign_pic(\"from\");'><<</button>&nbsp;<button class='gray' onclick='assign_pic(\"to\");'>>></button><br/>
                               </div>
                               <div style='background-color:#88FF88;border-radius:5vw;width:80%;margin:0 auto;padding:1vw;'>
                                 Turniere übertragen<br/>
-                                <button onclick='assign_tournaments(\"from\");' style='background-color:gray;'><<</button>&nbsp;<button onclick='assign_tournaments(\"to\");' style='background-color:gray;'>>></button><br/>
+                                <button class='gray' onclick='assign_tournaments(\"from\");'><<</button>&nbsp;<button class='gray' onclick='assign_tournaments(\"to\");'>>></button><br/>
                               </div>
                               <div style='background-color:#FF8888;border-radius:5vw;width:80%;margin:0 auto;padding:1vw;'>
                                 Sternchen übertragen<br/>
-                                <button onclick='assign_stars(\"from\");' style='background-color:gray;'><<</button>&nbsp;<button onclick='assign_stars(\"to\");' style='background-color:gray;'>>></button><br/>
+                                <button class='gray' onclick='assign_stars(\"from\");'><<</button>&nbsp;<button class='gray' onclick='assign_stars(\"to\");'>>></button><br/>
                               </div>
                             </div>");
       $myPage->add_content("</div>");
