@@ -6,7 +6,7 @@ div.court { vertical-align:middle; }
 
 div.ranking { text-align: center; }
 
-div.user_mit_BHZ, div.user_mit_name { 
+div.user_pic { 
   float:left;
   text-align:center; 
   font-size:10pt;
@@ -14,7 +14,7 @@ div.user_mit_BHZ, div.user_mit_name {
   cursor: pointer;
 }
 
-div.user_mit_BHZ img, div.user_mit_name img { 
+div.user_pic img { 
   width:100%; 
 }
 
@@ -31,6 +31,11 @@ div.team_small {
   border:1px solid gray;
   border-radius:1vw;
   white-space: nowrap;
+}
+
+div.team_small img {
+  width:90px;
+  height:auto;
 }
 
 td div.team_small {

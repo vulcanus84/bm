@@ -36,6 +36,10 @@ class player extends \user
     $this->save();
   }
 
+  function get_picture($thumbnail=false,$arr_text_lines=array()) {
+    return parent::get_picture(true, array_merge($arr_text_lines,array($this->login,$this->BHZ.".".$this->FBHZ)));
+  }
+
   function save() {
     try {
       $arr_fields['group2user_user_id'] = $this->id;
@@ -71,7 +75,6 @@ class player extends \user
   }
 
   function calc_BHZ($mode) {
-
     $BHZ = 0;
     $sets_won = 0; $sets_loose = 0;
     $points_won = 0; $points_loose = 0;
@@ -140,8 +143,6 @@ class player extends \user
         if($mode=='main') { $this->BHZ = $BHZ; } else { $this->FBHZ = $BHZ; }
         break;
     }
-
-
   }
 
   function get_tournament_info() {
@@ -220,16 +221,16 @@ class player extends \user
             $html_result.= "<h2 style='font-style:italic;'>Noch nicht gespielt</h2>";
           }
 
-          $left_player = "<div style='display:inline-block;'><img style='width:20vw;max-width:100px;' src='" . $u1->get_pic_path() . "'><br/>" . $u1->login . "</div>";
+          $left_player = "<div style='display:inline-block;'><img style='width:20vw;max-width:100px;' src='" . $u1->get_pic_path(true) . "'><br/>" . $u1->login . "</div>";
           if (isset($u3)) {
-              $left_player .= "<div style='display:inline-block; margin-left:10px;'><img style='width:20vw;max-width:100px;' src='" . $u3->get_pic_path() . "'><br/>" . $u3->login . "</div>";
+              $left_player .= "<div style='display:inline-block; margin-left:10px;'><img style='width:20vw;max-width:100px;' src='" . $u3->get_pic_path(true) . "'><br/>" . $u3->login . "</div>";
           }
           
           $html_result = "<div><h2>Runde " . $game->round->id . "</h2>" . $html_result . "</div>";
           
-          $right_player = "<div style='display:inline-block;'><img style='width:20vw;max-width:100px; cursor:pointer;' src='" . $u2->get_pic_path() . "' onclick=\"show_user_games('" . $u2->id . "');\"><br/>" . $u2->login . "</div>";
+          $right_player = "<div style='display:inline-block;'><img style='width:20vw;max-width:100px; cursor:pointer;' src='" . $u2->get_pic_path(true) . "' onclick=\"show_user_games('" . $u2->id . "');\"><br/>" . $u2->login . "</div>";
           if (isset($u4)) {
-              $right_player .= "<div style='display:inline-block; margin-left:10px;'><img style='width:20vw;max-width:100px; cursor:pointer;' src='" . $u4->get_pic_path() . "' onclick=\"show_user_games('" . $u4->id . "');\"><br/>" . $u4->login . "</div>";
+              $right_player .= "<div style='display:inline-block; margin-left:10px;'><img style='width:20vw;max-width:100px; cursor:pointer;' src='" . $u4->get_pic_path(true) . "' onclick=\"show_user_games('" . $u4->id . "');\"><br/>" . $u4->login . "</div>";
           }
           
           $html .= "<div style='display: flex; justify-content: center; align-items: center; width: 100%; overflow-x: auto;border-bottom:1px solid gray;'>";

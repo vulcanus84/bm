@@ -5,7 +5,7 @@ use Tournament\tournament;
 require_once('class_team.php');
 require_once('class_tournament.php');
 
-if(isset($_GET['user_id'])) { $myUser = new user($_GET['user_id']); } else { $myUser = new \user(); }
+if(isset($_GET['user_id'])&& $_GET['user_id'] < 100000) { $myUser = new user($_GET['user_id']); } else { $myUser = new \user(); }
 
 switch ($_GET['ajax']) {
   case 'load':
@@ -291,17 +291,17 @@ switch ($_GET['ajax']) {
         $user1_name = $curr_game->p1->login.'/'.$curr_game->p3->login; 
         $user2_name = $curr_game->p2->login.'/'.$curr_game->p4->login;
   
-        $left_side = "<img class='img_user' data-user-id='{$curr_game->p1->id}' style='width:{$pic_width};cursor:pointer;' src='{$curr_game->p1->get_pic_path()}'>
-                      <img class='img_user' data-user-id='{$curr_game->p1->id}' style='width:$pic_width;cursor:pointer;' src='".$curr_game->p3->get_pic_path()."'>"; 
-        $right_side = "<img class='img_user' data-user-id='{$curr_game->p2->id}' style='width:{$pic_width};cursor:pointer;' src='{$curr_game->p2->get_pic_path()}'>
-                      <img class='img_user' data-user-id='{$curr_game->p2->id}' style='width:$pic_width;cursor:pointer;' src='".$curr_game->p4->get_pic_path()."'>"; 
+        $left_side = "<img class='img_user' data-user-id='{$curr_game->p1->id}' style='width:{$pic_width};cursor:pointer;' src='{$curr_game->p1->get_pic_path(true)}'>
+                      <img class='img_user' data-user-id='{$curr_game->p1->id}' style='width:$pic_width;cursor:pointer;' src='".$curr_game->p3->get_pic_path(true)."'>"; 
+        $right_side = "<img class='img_user' data-user-id='{$curr_game->p2->id}' style='width:{$pic_width};cursor:pointer;' src='{$curr_game->p2->get_pic_path(true)}'>
+                      <img class='img_user' data-user-id='{$curr_game->p2->id}' style='width:$pic_width;cursor:pointer;' src='".$curr_game->p4->get_pic_path(true)."'>"; 
       } 
     else { 
       $pic_width='100px'; 
       $user1_name = $curr_game->p1->login; 
       $user2_name = $curr_game->p2->login; 
-      $left_side = "<img class='img_user' data-user-id='{$curr_game->p1->id}' style='width:{$pic_width};cursor:pointer;' src='{$curr_game->p1->get_pic_path()}'>"; 
-      $right_side = "<img class='img_user' data-user-id='{$curr_game->p2->id}' style='width:{$pic_width};cursor:pointer;' src='{$curr_game->p2->get_pic_path()}'>"; 
+      $left_side = "<img class='img_user' data-user-id='{$curr_game->p1->id}' style='width:{$pic_width};cursor:pointer;' src='{$curr_game->p1->get_pic_path(true)}'>"; 
+      $right_side = "<img class='img_user' data-user-id='{$curr_game->p2->id}' style='width:{$pic_width};cursor:pointer;' src='{$curr_game->p2->get_pic_path(true)}'>"; 
     }
   
     $html.= "<td style='text-align:center;'>{$left_side}<br/>{$user1_name}</td>";

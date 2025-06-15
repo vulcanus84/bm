@@ -58,8 +58,8 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 	
 	if(isset($user3))
 	{
-		imagecopyresized($im, $user1, 50, 60, 0, 0, $user1_width*$f1/1.5, $user1_height*$f1/1.5, $user1_width, $user1_height);
-		imagecopyresized($im, $user3, 140, 80, 0, 0, $user3_width*$f3/1.5, $user3_height*$f3/1.5, $user3_width, $user3_height);
+		imagecopyresized($im, $user1, 50, 60, 0, 0, intval($user1_width*$f1/1.5), intval($user1_height*$f1/1.5), $user1_width, $user1_height);
+		imagecopyresized($im, $user3, 140, 80, 0, 0, intval($user3_width*$f3/1.5), intval($user3_height*$f3/1.5), $user3_width, $user3_height);
 		$text = $c_user1->firstname."/".$c_user3->firstname;
 		$color = $mixed;
 	}
@@ -72,15 +72,15 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 
 	list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $text);
 	// Determine offset of text
-  $left_offset = ($right - $left) / 2;
+  $left_offset = intval(($right - $left) / 2);
 	// Generate coordinates
   $x = 145 - $left_offset;
 	imagettftext($im, $font_size, 0, $x, 210, $color, $font, $text);
 
 	if(isset($user3))
 	{
-		imagecopyresized($im, $user2, 320, 110, 0, 0, $user2_width*$f2/1.5, $user2_height*$f2/1.5, $user2_width, $user2_height);
-		imagecopyresized($im, $user4, 410, 130, 0, 0, $user4_width*$f4/1.5, $user4_height*$f4/1.5, $user4_width, $user4_height);
+		imagecopyresized($im, $user2, 320, 110, 0, 0, intval($user2_width*$f2/1.5), intval($user2_height*$f2/1.5), $user2_width, $user2_height);
+		imagecopyresized($im, $user4, 410, 130, 0, 0, intval($user4_width*$f4/1.5), intval($user4_height*$f4/1.5), $user4_width, $user4_height);
 		$text = $c_user2->firstname."/".$c_user4->firstname;
 		$color = $mixed;
 	}
@@ -93,7 +93,7 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 	
 	list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $text);
 	// Determine offset of text
-  $left_offset = ($right - $left) / 2;
+  $left_offset = intval(($right - $left) / 2);
 	// Generate coordinates
   $x = 425 - $left_offset;
 	imagettftext($im, $font_size, 0, $x, 250, $color, $font, $text);
@@ -103,11 +103,11 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 	$img_crown_height = imagesy($img_crown);
 	if($game_data->game_winner_id==$c_user1->id)
 	{
-		imagecopyresized($im, $img_crown, 65, -5, 0, 0, $img_crown_width/3, $img_crown_height/3, $img_crown_width, $img_crown_height);
+		imagecopyresized($im, $img_crown, 65, -5, 0, 0, intval($img_crown_width/3), intval($img_crown_height/3), $img_crown_width, $img_crown_height);
 	}
 	if($game_data->game_winner_id==$c_user2->id)
 	{
-		imagecopyresized($im, $img_crown, 344, 44, 0, 0, $img_crown_width/3, $img_crown_height/3, $img_crown_width, $img_crown_height);
+		imagecopyresized($im, $img_crown, 344, 44, 0, 0, intval($img_crown_width/3), intval($img_crown_height/3), $img_crown_width, $img_crown_height);
 	}
 	
 	if($game_data->game_set1_p1>0 OR $game_data->game_set1_p2>0)
@@ -120,21 +120,21 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 				$text = $game_data->game_set1_p1.':'.$game_data->game_set1_p2;
 				list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $text);
 				// Determine offset of text
-			  $left_offset = ($right - $left) / 2;
+			  $left_offset = intval(($right - $left) / 2);
 			  $x = 280 - $left_offset;
 				imagettftext($im, $font_size, 0, $x, 120, $black, $font, $text);
 
 				$text = $game_data->game_set2_p1.':'.$game_data->game_set2_p2;
 				list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $text);
 				// Determine offset of text
-			  $left_offset = ($right - $left) / 2;
+			  $left_offset = intval(($right - $left) / 2);
 			  $x = 280 - $left_offset;
 				imagettftext($im, $font_size, 0, $x, 160, $black, $font, $text);
 
 				$text = $game_data->game_set3_p1.':'.$game_data->game_set3_p2;
 				list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $text);
 				// Determine offset of text
-			  $left_offset = ($right - $left) / 2;
+			  $left_offset = intval(($right - $left) / 2);
 			  $x = 280 - $left_offset;
 				imagettftext($im, $font_size, 0, $x, 200, $black, $font, $text);
 			}
@@ -144,14 +144,14 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 				$text = $game_data->game_set1_p1.':'.$game_data->game_set1_p2;
 				list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $text);
 				// Determine offset of text
-			  $left_offset = ($right - $left) / 2;
+			  $left_offset = intval(($right - $left) / 2);
 			  $x = 280 - $left_offset;
 				imagettftext($im, $font_size, 0, $x, 135, $black, $font, $text);
 
 				$text = $game_data->game_set2_p1.':'.$game_data->game_set2_p2;
 				list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $text);
 				// Determine offset of text
-			  $left_offset = ($right - $left) / 2;
+			  $left_offset = intval(($right - $left) / 2);
 			  $x = 280 - $left_offset;
 				imagettftext($im, $font_size, 0, $x, 175, $black, $font, $text);
 			}
@@ -162,7 +162,7 @@ if(isset($_GET['action']) && $_GET['action']=='fill')
 			$text = $game_data->game_set1_p1.':'.$game_data->game_set1_p2;
 			list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $text);
 			// Determine offset of text
-		  $left_offset = ($right - $left) / 2;
+		  $left_offset = intval(($right - $left) / 2);
 		  $x = 280 - $left_offset;
 			imagettftext($im, $font_size, 0, $x, 150, $black, $font, $text);
 		}

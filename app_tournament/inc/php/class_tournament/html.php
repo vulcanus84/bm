@@ -279,7 +279,7 @@ class html
   	while($d = $this->db->get_next_res())
   	{
   		$my_user = new \user($d->group2user_user_id);
-  		$html.= "<div class='user_mit_BHZ' onclick='add_as_seeded($my_user->id);'>".$my_user->get_picture(false,null,'80px',true)."<br/>".$my_user->login."</div>";
+  		$html.= "<div class='user_pic' onclick='add_as_seeded($my_user->id);'>".$my_user->get_picture(false,null,'80px',true)."<br/>".$my_user->login."</div>";
   		$my_user = null;
   	}
   	return $html;
@@ -321,7 +321,8 @@ class html
           }
         }
         $last_wins = $team->arr_players[0]->wins;
-        $html.= "<div class='team_small' id='team_{$team->id}' data-team-id='{$team->id}'>{$team->arr_players[0]->get_picture(false,null,'80px',false)}{$team->arr_players[1]->get_picture(false,null,'80px',true)}<br/>{$team->arr_players[0]->login} & {$team->arr_players[1]->login}<br/>{$team->arr_players[0]->BHZ}.{$team->arr_players[0]->FBHZ}</div>";
+				$html.= $team->get_info();
+        //$html.= "<div class='team_small' id='team_{$team->id}' data-team-id='{$team->id}'>{$team->arr_players[0]->get_picture()}{$team->arr_players[1]->get_picture()}<br/>{$team->arr_players[0]->login} & {$team->arr_players[1]->login}<br/>{$team->arr_players[0]->BHZ}.{$team->arr_players[0]->FBHZ}</div>";
       }
 
     } else {
@@ -342,7 +343,7 @@ class html
           }
         }
         $last_wins = $player->wins;
-        $html.= "<div class='user_mit_BHZ' id='player_{$player->id}' data-player-id='{$player->id}'>{$player->get_picture(false)}<br/>{$player->login}<br/>{$player->BHZ}.{$player->FBHZ}</div>";
+        $html.= $player->get_picture();
       }
   
     }
@@ -425,7 +426,7 @@ class html
 				while($data = $this->db->get_next_res())
 				{
 					$my_user = new \user($data->user_id);
-					$html.= $my_user->get_picture(true,null,null,true);
+					$html.= $my_user->get_picture(true,array($my_user->login));
 					$my_user = null;
 				}
 			}
@@ -433,13 +434,17 @@ class html
 			if($group_by=='gender')
 			{
 				$this->db->sql_query("SELECT DISTINCT user_id, user_account FROM location2user 
+						LEFT JOIN users ON location2user_user_id = users.user_id 
+						$w_str AND user_gender='Frau' ORDER BY user_account ASC");
+
+				$this->db->sql_query("SELECT DISTINCT user_id, user_account FROM location2user 
 										LEFT JOIN users ON location2user_user_id = users.user_id 
 										$w_str AND user_gender='Frau' ORDER BY user_account ASC");
 				$html.= "<h1>Mädchen (".$this->db->count().")</h1>";
 				while($data = $this->db->get_next_res())
 				{
 					$my_user = new \user($data->user_id);
-					$html.= $my_user->get_picture(true,null,null,true);
+					$html.= $my_user->get_picture(true,array($my_user->login));
 					$my_user = null;
 				}
 				$html.="<div style='clear:both;border-bottom:1px solid gray;'>&nbsp;</div>";
@@ -450,7 +455,7 @@ class html
 				while($data = $this->db->get_next_res())
 				{
 					$my_user = new \user($data->user_id);
-					$html.= $my_user->get_picture(true,null,null,true);
+					$html.= $my_user->get_picture(true,array($my_user->login));
 					$my_user = null;
 				}
 			}
@@ -478,7 +483,7 @@ class html
 					while($data = $this->db->get_next_res())
 					{
 						$my_user = new \user($data->user_id);
-						$html.= $my_user->get_picture(true,null,null,true,true);
+						$html.= $my_user->get_picture(true,array($my_user->login));
 						$my_user = null;
 					}
 					$html.= "</section>";
@@ -522,7 +527,7 @@ class html
 					while($data = $this->db->get_next_res())
 					{
 						$my_user = new \user($data->user_id);
-						$html.= $my_user->get_picture(true,null,null,true);
+						$html.= $my_user->get_picture(true,array($my_user->login));
 						$my_user = null;
 					}
 					$html.="<div style='clear:both;border-bottom:1px solid gray;'>&nbsp;</div>";

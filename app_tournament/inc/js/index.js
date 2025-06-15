@@ -121,11 +121,11 @@ function setEvents() {
   switch ($('#content').data('status'))
   {
     case 'New':
-      $('#content').on('click','div.user_mit_name', (e) => add_user(e.currentTarget.id));
+      $('#content').on('click','div.user_pic', (e) => add_user(e.currentTarget.id));
       break;
 
     case 'Define_teams':
-      $('#content').on('click','.user_mit_name', (e) => add_as_partner(e.currentTarget));
+      $('#content').on('click','.user_pic', (e) => add_as_partner(e.currentTarget));
       break;
     
     case 'Started':
@@ -136,12 +136,12 @@ function setEvents() {
           check_result(court,gameId);
         });
       }
-      $('#content').on('click','.user_mit_BHZ', function(e) { show_user_games($(e.currentTarget).data('player-id')); });
+      $('#content').on('click','.user_pic', function(e) { show_user_games($(e.currentTarget).data('user-id')); });
       $('#content').on('click','.team_small', function(e) { show_user_games($(e.currentTarget).data('team-id')); });
       break;
 
     case 'Closed':
-      $('#content').on('click','.user_mit_BHZ', function(e) { show_user_games($(e.currentTarget).data('player-id')); });
+      $('#content').on('click','.user_pic', function(e) { show_user_games($(e.currentTarget).data('user-id')); });
       $('#content').on('click','.team_small', function(e) { show_user_games($(e.currentTarget).data('team-id')); });
       break;
   }
@@ -181,7 +181,7 @@ function setEvents() {
 
   //Handling open/close of left panel on smartphone screens
   $('#left_col').off('click').on('click', function(e) {
-    if (!$(e.target).closest('.user_mit_name, button, select, a, .dropdown,img').length) {
+    if (!$(e.target).closest('.user_pic, button, select, a, .dropdown,img').length) {
       $(this).toggleClass('open');
     }
   });
@@ -317,7 +317,7 @@ function get_tournament_form(tournament) {
 //***** Define players *****
 function add_user(user_tag_id) {
   var pos = $('#'+user_tag_id).parent().closest('div')[0].id;
-  var user_id = user_tag_id.replace(/user/g, "");
+  var user_id = user_tag_id.replace(/user_/g, "");
 
   if(pos=='left_content')
   {
@@ -350,7 +350,7 @@ function add_user(user_tag_id) {
         $('#section_'+ item).append(elem2);
         let $container = $('#section_'+item);
 
-        let $items = $container.find('.user_mit_name').get();        
+        let $items = $container.find('.user_pic').get();        
         $items.sort(function(a, b) {
           let altA = ($(a).find('img').attr('alt') || '').toLowerCase();
           let altB = ($(b).find('img').attr('alt') || '').toLowerCase();
@@ -382,7 +382,7 @@ function update_number_of_players()
   sections.each(function(index, element) {
     let $section = $(element);
 
-    let count = $section.find('.user_mit_name').length;
+    let count = $section.find('.user_pic').length;
     let $h1 = $section.find('h1');
 
     $h1.text(function(_, oldText) {
@@ -390,7 +390,7 @@ function update_number_of_players()
     });
   });
 
-  let count = $('#right_col').find('.user_mit_name').length;
+  let count = $('#right_col').find('.user_pic').length;
   let $h1 = $('#right_col').find('h1');
   $h1.text(function(_, oldText) {
     return oldText.replace(/\(\d+\)/, `(${count})`);
@@ -398,7 +398,7 @@ function update_number_of_players()
 }
 
 function add_as_partner(user_tag_id) {
-  perform_ajax('add_as_partner','user_id='+user_tag_id.id.replace(/user/g, ""));
+  perform_ajax('add_as_partner','user_id='+user_tag_id.id.replace(/user_/g, ""));
 }
 
 function delete_team(team_tag) {

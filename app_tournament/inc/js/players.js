@@ -12,7 +12,7 @@ for (const [key, value] of params) {
 }
 
 $(document).ready(function() {
-  playerId = $('#content').data('player-id');
+  playerId = $('#content').data('user-id');
   if(playerId>0) {
     $('#right_col').load(server_link+'&ajax=show_infos');
   }
@@ -43,11 +43,11 @@ function setEvents() {
 
 
   $('#left_col').off('click').on('click', function(e) {
-    if (!$(e.target).closest('.user_mit_name, button, select, a, .dropdown,img').length) {
+    if (!$(e.target).closest('.user_pic, button, select, a, .dropdown,img').length) {
       $(this).toggleClass('open');
     }
   });
-  $('#content').on('click','div.user_mit_name', (e) => show_infos(e.currentTarget.id));
+  $('#content').on('click','div.user_pic', (e) => show_infos(e.currentTarget.id));
 
   $('img.img_sort').off('click').on('click', (e) => change_group_by(e));
   
@@ -83,7 +83,7 @@ function setEvents() {
             $('#left_content').load(server_link+'&ajax=get_left_col_users', function() {
               $('select[name="location"]').val(oldVal);
               $('select[name="location"]').trigger('change');
-              show_infos('user' + response,true);
+              show_infos('user_' + response,true);
             });
           } 
           else 
@@ -127,7 +127,7 @@ function trigger_upload_pic_selection(id)
 }
 
 function show_infos(user_tag_id,pic_replace=false) {
-  var user_id = user_tag_id.replace(/user/g, "");
+  var user_id = user_tag_id.replace(/user_/g, "");
   $('#right_content').load(server_link+'&ajax=show_infos&user_id='+user_id, function() {
     if(pic_replace) {
       let neuesSrc = $('#user_pic_large').attr('src');

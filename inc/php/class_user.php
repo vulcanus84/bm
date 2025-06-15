@@ -149,33 +149,25 @@ class user
 	}
 
 
-	function get_picture($with_name=true,$javascript_function=null,$size='',$thumbnail=false,$with_random_id=false)
+	function get_picture($thumbnail=true,$arr_text_lines=array())
 	{
-		$css='';
-		$pic_path = $this->get_pic_path($thumbnail);
-		$custom_id = 'user'.$this->id;
-		
-		if($size!='') { $css = 'width:'.$size.';'; }
-		$js = null;
-		if($javascript_function)
-		{
-			$js = " onclick='".$javascript_function."(\"".$this->id."\");'"; 
-			$css.= "cursor:pointer;";
-		}
+		$css= "";
 
-		if($with_name)
+		$pic_path = $this->get_pic_path($thumbnail);
+
+		if($this->hidden) { $css.= "opacity:0.3"; }
+		$html = "<div class='user_pic' id='user_{$this->id}' data-user-id='{$this->id}'>";
+		$html.= "<img alt='{$this->login}' title='{$this->login}' style='{$css}' src='{$pic_path}'/>";
+		if(is_array($arr_text_lines) AND count($arr_text_lines)>0)
 		{
-			if($this->hidden) { $css.= "opacity:0.3"; }
-			$x = "<div class='user_mit_name' id='{$custom_id}'>";
-			$x.= "<img alt='$this->login' title='$this->login' style='$css' class='user' src='$pic_path' $js/>";
-			$x.= "<br/>".$this->login."</div>";
-			return $x;
+			foreach($arr_text_lines as $line)
+			{
+				$html.= "<br/>{$line}";
+			}
 		}
-		else
-		{
-			if($css!='') { $css = "style='".$css."'"; }
-			return "<img alt='$this->login' title='$this->login' $css class='user' src='$pic_path' $js/>";
-		}
+		$html.= "</div>";
+		return $html;	
+		
 	}
 
 	function get_ori_pic_path($thumbnail=false)

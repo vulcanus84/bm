@@ -146,9 +146,9 @@ class team
   }
 
   function get_info() {
-    $html = "<div class='team_small'>";
+    $html = "<div class='team_small' id='team_{$this->id}' data-team-id='{$this->id}'>";
     foreach ($this->arr_players as $player) {
-      $html.= $player->get_picture(false);
+      $html.= "<img src='{$player->get_pic_path(true)}' alt='{$player->firstname} {$player->lastname}'/>";
     }
     $html.= "<br/>{$this->team_name}";
     $html.= "</div>";
