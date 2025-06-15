@@ -64,7 +64,7 @@ elseif(isset($_GET['p1']))
 		$text = $my_user->login;
 		list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $text);
 		// Determine offset of text
-	  $left_offset = ($right - $left) / 2;
+	  $left_offset = intval(($right - $left) / 2);
 		// Generate coordinates
 	  $x = $x_pos[$i] - $left_offset + 100;
 		imagettftext($im, $font_size, 0, $x, $y_pos[$i]+205, $color, $font, $text);
@@ -74,7 +74,7 @@ elseif(isset($_GET['p1']))
 $img_crown = imagecreatefrompng(level.'inc/imgs/crown.png');
 $img_crown_width = imagesx($img_crown);
 $img_crown_height = imagesy($img_crown);
-imagecopyresized($im, $img_crown, 240, 0, 0, 0, $img_crown_width/2, $img_crown_height/2, $img_crown_width, $img_crown_height);
+imagecopyresized($im, $img_crown, 240, 0, 0, 0, intval($img_crown_width/2), intval($img_crown_height/2), $img_crown_width, $img_crown_height);
 
 imagepng($im);
 imagedestroy($im);
