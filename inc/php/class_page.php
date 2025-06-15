@@ -408,7 +408,6 @@ class page
 		$txt.= "</form>\n";
 		$txt.= "<a href='index.php'><button class='blue'>Zurück</button></a>";
 		$txt.= "<a href='app_drawing/excercises.php'><button class='orange'>Übungen</button></a>";
-		$txt.= "<a href='new/app_tournament/index.php'><button class='purple'>Login (Beta)</button></a>";
 	  $txt.= "</div>\n";
 	  return $txt;
 
