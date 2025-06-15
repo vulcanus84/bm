@@ -601,7 +601,31 @@ switch ($_GET['ajax']) {
           //Crop image to 1:1 ratio
           $filename = $folder.$name;
           $im = imagecreatefromstring(file_get_contents($filename));
+
+          $exif = @exif_read_data($filename);
   
+          if (isset($exif['Orientation']))
+          {
+            switch ($exif['Orientation'])
+            {
+            case 3:
+              // Need to rotate 180 deg
+                $im = imagerotate($im, 180, 0);
+              break;
+  
+            case 6:
+              // Need to rotate 90 deg clockwise
+                $im = imagerotate($im, -90, 0);
+              break;
+  
+            case 8:
+              // Need to rotate 90 deg counter clockwise
+                $im = imagerotate($im, 90, 0);
+              break;
+            }
+          }
+
+          
           $w = imagesx($im);
           $h = imagesy($im);
   
@@ -634,37 +658,14 @@ switch ($_GET['ajax']) {
           imagecolortransparent($mask,$transparent);
           imagefilledellipse($mask, $newwidth/2, $newheight/2, $newwidth-5, $newheight-5, $transparent);
   
-                  //Merge player picture in the mask with the transparent circle
+          //Merge player picture in the mask with the transparent circle
           imagecopymerge($image, $mask, 0, 0, 0, 0, $newwidth, $newheight, 100);
-                  //Define another color for transparency
-                  $red = imagecolorallocate($mask, 255, 0, 0);
+          //Define another color for transparency
+          $red = imagecolorallocate($mask, 255, 0, 0);
           imagecolortransparent($image,$red);
-                  //Fill it from the top left corner (like a fill function in a drawing app)
+          //Fill it from the top left corner (like a fill function in a drawing app)
           imagefill($image, 0, 0, $red);
-  
-          $exif = @exif_read_data($filename);
-  
-          if (isset($exif['Orientation']))
-          {
-            switch ($exif['Orientation'])
-            {
-            case 3:
-              // Need to rotate 180 deg
-                $image = imagerotate($image, 180, 0);
-              break;
-  
-            case 6:
-              // Need to rotate 90 deg clockwise
-                $image = imagerotate($image, -90, 0);
-              break;
-  
-            case 8:
-              // Need to rotate 90 deg counter clockwise
-                $image = imagerotate($image, 90, 0);
-              break;
-            }
-          }
-  
+    
           //output, save and free memory
           imagepng($image,$folder.$user_id.'.png');
   
@@ -695,28 +696,7 @@ switch ($_GET['ajax']) {
           imagecopymerge($image, $mask, 0, 0, 0, 0, $newwidth, $newheight, 100);
           imagecolortransparent($image,$red);
           imagefill($image, 0, 0, $red);
-  
-          if (isset($exif['Orientation']))
-          {
-            switch ($exif['Orientation'])
-            {
-            case 3:
-              // Need to rotate 180 deg
-                $image = imagerotate($image, 180, 0);
-              break;
-  
-            case 6:
-              // Need to rotate 90 deg clockwise
-                $image = imagerotate($image, -90, 0);
-              break;
-  
-            case 8:
-              // Need to rotate 90 deg counter clockwise
-                $image = imagerotate($image, 90, 0);
-              break;
-            }
-          }
-  
+
           //output, save and free memory
           imagepng($image,$folder.$user_id.'_t.png');
   
