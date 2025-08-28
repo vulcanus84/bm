@@ -292,11 +292,11 @@ class html
 			$html = "<h1>Teilnehmer (".Count($this->tournament->arr_players).")</h1>";
 			if(!isset($_GET['round']))
  			{
- 				$html.="<a href='match_pdf.php?tournament_id={$this->tournament->id}' target='_blank'>Alle Matchblätter</a>";
+ 				$html.="<a href='inc/php/match_pdf.php?tournament_id={$this->tournament->id}' target='_blank'>Alle Matchblätter</a>";
  			}
  			else
  			{
- 				$html.="<a href='match_pdf.php?tournament_id={$this->tournament->id}&round={$_GET['round']}' target='_blank'>Matchblätter Runde {$_GET['round']}</a>";
+ 				$html.="<a href='inc/php/match_pdf.php?tournament_id={$this->tournament->id}&round={$_GET['round']}' target='_blank'>Matchblätter Runde {$_GET['round']}</a>";
  			}
   	}
 

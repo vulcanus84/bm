@@ -35,7 +35,7 @@ class user
 	public function __construct($user_id=0)
 	{
 		$this->db = db::getInstance(); //with new db() each user displayed on page would get his own db connection (can be 100 users or even more)
-		if($user_id!=0) { $this->load_user_by_id($user_id); }
+		if($user_id!=0) { $this->load_user_by_id($user_id); } else { $this->id = 0; $this->login = ''; }
 	}
 
 	//To store the user object in session, the PDO Object must be exluded

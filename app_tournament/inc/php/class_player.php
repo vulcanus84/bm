@@ -42,14 +42,16 @@ class player extends \user
 
   function save() {
     try {
-      $arr_fields['group2user_user_id'] = $this->id;
-      $arr_fields['group2user_group_id'] = $this->tournament->id;
-      if($this->wins!==null) { $arr_fields['group2user_wins'] = $this->wins; }
-      if($this->seeding_no!==null) { $arr_fields['group2user_seeded'] = $this->seeding_no; }
-      if($this->BHZ!==null) { $arr_fields['group2user_BHZ'] = $this->BHZ; }
-      if($this->FBHZ!==null) { $arr_fields['group2user_FBHZ'] = $this->FBHZ; }
-      if($this->partner!==null) { $arr_fields['group2user_partner_id'] = $this->partner->id; } else { $arr_fields['group2user_partner_id'] = 'NULL'; }
-
+      $arr_fields = [
+          'group2user_user_id'    => $this->id,
+          'group2user_group_id'   => $this->tournament->id,
+          'group2user_wins'       => $this->wins ?? null,
+          'group2user_seeded'     => $this->seeding_no ?? null,
+          'group2user_BHZ'        => $this->BHZ ?? null,
+          'group2user_FBHZ'       => $this->FBHZ ?? null,
+          'group2user_partner_id' => $this->partner?->id ?? null
+      ];
+      
       if($this->tournament_user_id!==null)
       {
         $this->db->update($arr_fields,'group2user','group2user_id',$this->tournament_user_id);

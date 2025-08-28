@@ -1,17 +1,20 @@
 <?php 
-define("level","../");																//define the structur to to root directory (e.g. "../", for files in root set "")
-require_once(level."inc/standard_includes.php");		//Load all necessary files (DB-Connection, User-Login, etc.)
-require_once(level."inc/php/tcpdf-master/tcpdf_import.php");
-if(!isset($_SESSION['login_user'])) { header("Location: ../index.php"); }
+namespace Tournament;
 
-if(isset($_GET['tournament_id'])) { $myTournament = new tournament($db,$_GET['tournament_id']); }
+define("level","../../../");																//define the structur to to root directory (e.g. "../", for files in root set "")
+require_once(level."inc/standard_includes.php");						//Load all necessary files (DB-Connection, User-Login, etc.)
+require_once(level."inc/php/tcpdf-master/tcpdf_import.php");
+require_once("class_tournament.php");												//Load the tournament class
+if(!isset($_SESSION['login_user'])) { header("Location: ../../../index.php"); }
+
+if(isset($_GET['tournament_id'])) { $myTournament = new tournament($_GET['tournament_id']); }
 else
 {
 	die('Please send tournament ID by GET variable');
 }
 
 // Extend the TCPDF class to create custom Header and Footer
-class MYPDF extends TCPDF {
+class MYPDF extends \TCPDF {
 
     //Page header
     public function Header() {
@@ -76,8 +79,8 @@ $i = 1;
 $y_pic = 0;
 while($d = $db->get_next_res())
 {
-	$p1 = new user($d->game_player1_id);
-	$p2 = new user($d->game_player2_id);
+	$p1 = new \user($d->game_player1_id);
+	$p2 = new \user($d->game_player2_id);
 	
 	$p1_name = $p1->firstname.' '.$p1->lastname;
 	$p2_name = $p2->firstname.' '.$p2->lastname;

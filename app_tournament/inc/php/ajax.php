@@ -18,7 +18,7 @@ switch ($_GET['ajax']) {
 
   case 'delete_permission':
     $html = "<h1>Willst du folgendes Turnier wirklich löschen?</h1>";
-    $html.= "<h2>".$myTournament->title."</h2><h3>".nl2br($myTournament->description)."</h3>";
+    $html.= "<h2>".$myTournament->title."</h2><h3>".nl2br($myTournament->description ?? '')."</h3>";
     $html.= "<div style='display:flex;flex-direction:row;gap:5px;'>";
     $html.= "<button id='delete_tournament' data-tournament-id='{$myTournament->id}' class='red'>Ja</button>";
     $html.= "<button id='abort_tournament_delete' class='green'>Nein</button>";
