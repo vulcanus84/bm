@@ -1,218 +1,231 @@
 <?php
 //*****************************************************************************
-//26.03.2013 Claude Hübscher
+// 26.03.2013 Claude Hübscher (angepasst mit Logging-Verbesserung)
 //-----------------------------------------------------------------------------
-//this class can be used to access to a database
-//The class throws exception, therefor its necessary to try/catch
+// Diese Klasse kann für den Datenbankzugriff verwendet werden.
+// Sie verwendet PDO und wirft Exceptions -> deshalb try/catch notwendig.
+// Alle Queries werden mit Parametern interpoliert ins Log geschrieben.
 //*****************************************************************************
+
 class db
 {
-	/**
-	 *contain the id of the last INSERT statement in the database
-	 */
-  public $last_inserted_id=NULL;
-	/**
-	 *contain the connection string to the database
-	 */
-	public $connected_host=NULL;
-	/**
-	 *contain the name of the connected database
-	 */
-	public $connected_db=NULL;
+    public $last_inserted_id = null;
+    public $connected_host = null;
+    public $connected_db = null;
 
-  public $connection=NULL;
-  private $res=NULL;
-  private $counter=NULL;
-  private $logger;
-  private static $instance = null;
+    private $connection = null;
+    private $res = null;
+    private $counter = null;
+    private $logger;
+    private static $instance = null;
 
-  function __construct()
-  {
-    //connect to database
-    $user = "huebsche_bm";
-    $pw = "badminton123$";
-    $host = "localhost";
-    $db = "tournament";
+    public function __construct()
+    {
+        $user = "huebsche_bm";
+        $pw   = "badminton123$";
+        $host = "localhost";
+        $db   = "tournament";
 
-    $this->connection = new PDO("mysql:host=$host;dbname=$db", $user, $pw,array(PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
-    $this->connection->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
-    if ($this->connection===False)
-    { 
-      throw new Exception ("<table style='text-align:left;'>
-                              <tr>
-                                <td style='width:200px;'><b>SQL-Error (Connect):</b></td>
-                                <td>".$this->connection->e->getMessage()."</td>
-                              </tr>
-                            </table>");
-    }
-		else
-		{
-			$this->connected_host = $host;
-      $this->connected_db = $db;
-		}
-		$this->logger = new log($this);
-  }
+        $this->connection = new PDO(
+            "mysql:host=$host;dbname=$db;charset=utf8",
+            $user,
+            $pw,
+            [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"]
+        );
+        $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-  public static function getInstance()
-	{
-		if (self::$instance === null) {
-			self::$instance = new db();
-		}
-		return self::$instance;
-	}
-  
-  function insert($arr_fields,$table)
-  {
-    try
-    {
-      $str_keys = "";
-      $str_vals = "";
-      foreach($arr_fields as $k => $v)
-      {
-        $str_keys.=':'.$k.',';
-        $str_vals.=$v.',';
-      } 
-      $str_keys = substr($str_keys,0,-1);
-      $str_vals = substr($str_vals,0,-1);
-      $STH = $this->connection->prepare("INSERT INTO ".$table." (".str_replace(':','',$str_keys).") VALUES (".$str_keys.")");
-      $STH->execute($arr_fields);
-      if($table!='log') { 
-        $this->last_inserted_id = $this->connection->lastInsertId();
-        $this->logger->write_to_log('Database', "INSERT INTO ".$table." (".str_replace(':','',$str_keys).") VALUES (".$str_vals.")"); 
-      }
+        $this->connected_host = $host;
+        $this->connected_db   = $db;
+
+        $this->logger = new log($this);
     }
-    catch (PDOException $e)
+
+    public static function getInstance()
     {
-      throw new Exception("<div style='border:1px dotted black;color:red;text-align:center;padding:5px;margin:5px;font-weight:bold;'>
-                ".$e->getMessage()."<br/><span style='color:black;font-style:italic;'>INSERT INTO ".$table." (".str_replace(':','',$str_keys).") VALUES (".$str_vals.")</span>
-            </div>");
+        if (self::$instance === null) {
+            self::$instance = new db();
+        }
+        return self::$instance;
     }
-  }
-  
-  function update($arr_fields,$table,$id_column,$id)
-  {
-    try
+
+    // ------------------------------------------------------------
+    // Hilfsfunktion: Parameter in Query einsetzen (für Logging)
+    // ------------------------------------------------------------
+    private function interpolateQuery($query, array $params = [])
     {
-      $str_keys = "";
-      $str_vals = "";
-      $i=0;
-      foreach($arr_fields as $k => $v)
-      {
-      	if($v=='CURRENT_TIMESTAMP') { $str_keys.=$k."=CURRENT_TIMESTAMP,"; $str_vals.=$k."=CURRENT_TIMESTAMP,"; unset($arr_fields[$k]); }
-      	elseif($v=='NULL') { $str_keys.=$k."=NULL,"; $str_vals.=$k."=NULL,"; unset($arr_fields[$k]); }
-      	else { $str_keys.=$k."=:".$k.","; $str_vals.=$k."='".$v."',"; }
-      	$i++;
-      }
-      $str_keys = substr($str_keys,0,-1);       
-      $str_vals = substr($str_vals,0,-1);
-      
-      $STH = $this->connection->prepare("UPDATE ".$table." SET ".$str_keys." WHERE ".$id_column."=:my_id");
-			$arr_fields['my_id'] = $id;
-      $STH->execute($arr_fields);
-      if($table!='log') { $this->logger->write_to_log('Database', "UPDATE ".$table." SET ".$str_vals." WHERE ".$id_column."='".$id."'"); }
+        if (!$params) return $query;
+
+        $keys = [];
+        $values = [];
+
+        foreach ($params as $key => $value) {
+            $keys[] = is_string($key)
+                ? '/:' . preg_quote(ltrim($key, ':'), '/') . '/'
+                : '/[?]/';
+
+            if (is_null($value)) {
+                $values[] = 'NULL';
+            } elseif (is_string($value) && strtoupper($value) === 'NULL') {
+                // Falls jemand explizit "NULL" als String übergibt
+                $values[] = 'NULL';
+            } elseif (is_string($value)) {
+                $values[] = "'" . addslashes($value) . "'";
+            } elseif (is_bool($value)) {
+                $values[] = $value ? '1' : '0';
+            } else {
+                $values[] = $value;
+            }
+        }
+
+        return preg_replace($keys, $values, $query, 1);
     }
-    catch (PDOException $e)
-    {
-      throw new Exception("<div style='border:1px dotted black;color:red;text-align:center;padding:5px;margin:5px;font-weight:bold;'>
-                ".$e->getMessage()."<br/><span style='color:black;font-style:italic;'>UPDATE ".$table." SET ".$str_vals." WHERE ".$id_column."='".$id."'</span>
-            </div>");
-    }
-  }
 
 
-  function delete($table,$id_column,$id)
-  {
-    try
+    // ------------------------------------------------------------
+    // INSERT
+    // ------------------------------------------------------------
+    public function insert($arr_fields, $table)
     {
-      $STH = $this->connection->prepare("DELETE FROM ".$table." WHERE ".$id_column."=:my_id");
-			$arr_fields['my_id'] = $id;
-      $STH->execute($arr_fields);
-      if($table!='log') { $this->logger->write_to_log('Database', "DELETE FROM ".$table." WHERE ".$id_column."='".$id."'"); }
-    }
-    catch (PDOException $e)
-    {
-      throw new Exception("<div style='border:1px dotted black;color:red;text-align:center;padding:5px;margin:5px;font-weight:bold;'>
-                ".$e->getMessage()."
-            </div>");
-    }
-  }
+        try {
+            $columns = [];
+            $placeholders = [];
 
-  
-  function sql_query($sql,$parameters=null)
-  {
-    try
-    {
-      $this->res = $this->connection->prepare($sql,array(PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL ));
-      if(is_array($parameters)) { $this->res->execute($parameters); } else { $this->res->execute(); }
-    }
-    catch (PDOException $e)
-    {
-      throw new Exception("<table style='text-align:left;'>
-                              <tr>
-                                <td style='width:200px;'><b>SQL-Error (SQL-Query):</b></td>
-                                <td>".$e->getMessage()."</td>
-                              </tr>
-                              <tr>
-                                <td><b>SQL-Command:</b></td>
-                                <td>".$sql."</td>
-                              </tr>
-                            </table>");
-    }
-    
-    $this->counter = null;
-    return $this->res;
-  }
+            foreach ($arr_fields as $k => $v) {
+                $columns[] = $k;
+                $placeholders[] = ':' . $k;
+            }
 
-  //For SQL Statements with one result
-  function sql_query_with_fetch($sql,$parameters=null)
-  {
-    try
-    {
-      $this->res = $this->sql_query($sql,$parameters);
-      if($this->res)
-      {
-        return $this->res->fetchObject();
-      }
-    }
-    catch (PDOException $e)
-    {
-      throw new Exception("<table style='text-align:left;'>
-                              <tr>
-                                <td style='width:200px;'><b>SQL-Error (SQL-Query):</b></td>
-                                <td>".$e->getMessage()."</td>
-                              </tr>
-                              <tr>
-                                <td><b>SQL-Command:</b></td>
-                                <td>".$sql."</td>
-                              </tr>
-                            </table>");
-    }
-  }
-      
-  function get_next_res()
-  {
-    if($this->res)
-    {
-      return $this->res->fetchObject();
-    }
-  }
-  
-  public function count() 
-  {
-  	$this->counter=$this->res->rowCount();
- 	  return $this->counter;
-  }
+            $sql = "INSERT INTO $table (" . implode(',', $columns) . ") VALUES (" . implode(',', $placeholders) . ")";
+            $STH = $this->connection->prepare($sql);
+            $STH->execute($arr_fields);
 
-	/**
-	 *Set it to -1 to iterate from beginning with get_next_res
-	 */
-	public function seek($item)
-	{
-    if($this->res)
-    {
-      $this->res->fetch(PDO::FETCH_OBJ, PDO::FETCH_ORI_NEXT, $item);
+            if ($table != 'log') {
+                $this->last_inserted_id = $this->connection->lastInsertId();
+                $this->logger->write_to_log('Database', $this->interpolateQuery($sql, $arr_fields));
+            }
+        } catch (PDOException $e) {
+            throw new Exception(
+                "Insert-Error: " . $e->getMessage() . "<br><code>" .
+                $this->interpolateQuery($sql, $arr_fields) . "</code>"
+            );
+        }
     }
-	}
+
+    // ------------------------------------------------------------
+    // UPDATE
+    // ------------------------------------------------------------
+    public function update($arr_fields, $table, $id_column, $id)
+    {
+        try {
+            $set = [];
+            foreach ($arr_fields as $k => $v) {
+                $set[] = "$k = :$k";
+            }
+
+            $sql = "UPDATE $table SET " . implode(',', $set) . " WHERE $id_column = :my_id";
+            $arr_fields['my_id'] = $id;
+
+            $STH = $this->connection->prepare($sql);
+            $STH->execute($arr_fields);
+
+            if ($table != 'log') {
+                $this->logger->write_to_log('Database', $this->interpolateQuery($sql, $arr_fields));
+            }
+        } catch (PDOException $e) {
+            throw new Exception(
+                "Update-Error: " . $e->getMessage() . "<br><code>" .
+                $this->interpolateQuery($sql, $arr_fields) . "</code>"
+            );
+        }
+    }
+
+    // ------------------------------------------------------------
+    // DELETE
+    // ------------------------------------------------------------
+    public function delete($table, $id_column, $id)
+    {
+        try {
+            $sql = "DELETE FROM $table WHERE $id_column = :my_id";
+            $params = ['my_id' => $id];
+
+            $STH = $this->connection->prepare($sql);
+            $STH->execute($params);
+
+            if ($table != 'log') {
+                $this->logger->write_to_log('Database', $this->interpolateQuery($sql, $params));
+            }
+        } catch (PDOException $e) {
+            throw new Exception(
+                "Delete-Error: " . $e->getMessage() . "<br><code>" .
+                $this->interpolateQuery($sql, ['my_id' => $id]) . "</code>"
+            );
+        }
+    }
+
+    // ------------------------------------------------------------
+    // GENERISCHE QUERY
+    // ------------------------------------------------------------
+    public function sql_query($sql, $parameters = null)
+    {
+        try {
+            $this->res = $this->connection->prepare($sql, [PDO::ATTR_CURSOR => PDO::CURSOR_SCROLL]);
+            $this->res->execute(is_array($parameters) ? $parameters : null);
+
+            if(strtoupper(substr($sql,0,6))!=="SELECT" && 
+              strtoupper(substr($sql,0,4))!=="SHOW" &&
+              strtoupper(substr($sql,0,18))!=="UPDATE TRANSLATION" &&
+              strpos($sql," log ")===false
+              ) { $this->logger->write_to_log('Database', $this->interpolateQuery($sql, $parameters ?: [])); }
+        } catch (PDOException $e) {
+            throw new Exception(
+                "Query-Error: " . $e->getMessage() . "<br><code>" .
+                $this->interpolateQuery($sql, $parameters ?: []) . "</code>"
+            );
+        }
+
+        $this->counter = null;
+        return $this->res;
+    }
+
+    // ------------------------------------------------------------
+    // QUERY + FETCH EINZELNEN DATENSATZ
+    // ------------------------------------------------------------
+    public function sql_query_with_fetch($sql, $parameters = null)
+    {
+        try {
+            $this->res = $this->sql_query($sql, $parameters);
+            if ($this->res) {
+                return $this->res->fetchObject();
+            }
+        } catch (PDOException $e) {
+            throw new Exception(
+                "Query-Error (with fetch): " . $e->getMessage() . "<br><code>" .
+                $this->interpolateQuery($sql, $parameters ?: []) . "</code>"
+            );
+        }
+    }
+
+    // ------------------------------------------------------------
+    // HELFER
+    // ------------------------------------------------------------
+    public function get_next_res()
+    {
+        if ($this->res) {
+            return $this->res->fetchObject();
+        }
+    }
+
+    public function count()
+    {
+        $this->counter = $this->res->rowCount();
+        return $this->counter;
+    }
+
+    public function seek($item)
+    {
+        if ($this->res) {
+            $this->res->fetch(PDO::FETCH_OBJ, PDO::FETCH_ORI_NEXT, $item);
+        }
+    }
 }
-
 ?>
