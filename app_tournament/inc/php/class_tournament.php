@@ -121,7 +121,7 @@ class tournament
 					}
 					$curr_round->add_game($d->game_id);
 				}
-				if($curr_round->status=='Closed') 
+				if($curr_round->status=='Closed' && $this->system!=='Gruppenspiele') 
 				{ 
 					$this->add_round(); 
 				}
@@ -308,14 +308,16 @@ class tournament
 						break;
 				}
 
+				$iterator = new \ArrayIterator($this->arr_players);
+				$this->arr_rounds = [];
 				foreach($order_of_play as $round)
 				{
 					$curr_round = $this->add_round();
 					foreach($round as $game)
 					{
 						$curr_game = $curr_round->add_game();
-						$curr_game->p1 = $this->arr_players[$game[0]];
-						$curr_game->p2 = $this->arr_players[$game[1]];
+						$iterator->seek($game[0]); $curr_game->p1 = $iterator->current();
+						$iterator->seek($game[1]); $curr_game->p2 = $iterator->current();
 					}
 				}
 				$this->status = "Started";

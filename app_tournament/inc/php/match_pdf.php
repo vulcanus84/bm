@@ -91,17 +91,21 @@ while($d = $db->get_next_res())
 	$txt = "<table>";
 	
 	$txt.= "<tr>";
-	$txt.= "<td style=\"text-align:center;font-size:14pt;\"><div style=\"font-size:4pt\">&nbsp;</div>Runde ".$d->game_round."</td>";
-	$txt.= "<td style=\"text-align:center;font-size:20pt;font-weight:bold;\">".$myTournament->title."</td>";
+	$txt.= "<td style=\"text-align:center;font-size:14pt;width:15%;\"><div style=\"font-size:4pt\">&nbsp;</div>Runde ".$d->game_round."</td>";
+	$txt.= "<td style=\"text-align:center;font-size:20pt;font-weight:bold;width:70%;\">".$myTournament->title."</td>";
 	if(isset($d->court_no))
 	{
-		$txt.= "<td style=\"text-align:center;font-size:14pt;padding-top:2px;\"><div style=\"font-size:4pt\">&nbsp;</div>Feld $d->court_no</td>";
+		$txt.= "<td style=\"text-align:center;font-size:14pt;padding-top:2px;width:15%;\"><div style=\"font-size:4pt\">&nbsp;</div>Feld $d->court_no</td>";
 	}
 	else
 	{
-		$txt.= "<td style=\"text-align:center;font-size:14pt;padding-top:2px;\"><div style=\"font-size:4pt\">&nbsp;</div>Feld&nbsp;&nbsp;&nbsp;&nbsp;</td>";
+		$txt.= "<td style=\"text-align:center;font-size:14pt;padding-top:2px;width:15%;\"><div style=\"font-size:4pt\">&nbsp;</div>Feld&nbsp;&nbsp;&nbsp;&nbsp;</td>";
 	}
 	$txt.= "</tr>";
+	$txt.= "</table>";
+
+
+	$txt.= "<table>";
 	
 	$txt.= "<tr><td colspan=\"3\" style=\"text-align:center;font-size:8pt;\"></td></tr>";
 	$txt.= "<tr><td colspan=\"3\" style=\"text-align:center;font-size:8pt;\"><hr/></td></tr>";

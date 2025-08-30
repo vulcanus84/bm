@@ -51,7 +51,7 @@ class player extends \user
           'group2user_FBHZ'       => $this->FBHZ ?? null,
           'group2user_partner_id' => $this->partner?->id ?? null
       ];
-      
+
       if($this->tournament_user_id!==null)
       {
         $this->db->update($arr_fields,'group2user','group2user_id',$this->tournament_user_id);
@@ -70,7 +70,7 @@ class player extends \user
     foreach ($this->tournament->arr_rounds as $round) {
       foreach ($round->arr_games as $game) {
         //Wins
-        if($this->id==$game->winner->id OR $this->id==$game->winner2?->id) { $wins++; }
+        if($this->id==$game->winner?->id OR $this->id==$game->winner2?->id) { $wins++; }
       }
     }
     $this->wins = $wins;
@@ -85,19 +85,20 @@ class player extends \user
         switch ($this->tournament->system) {
           case 'Gruppenspiele':
             //Points
-            if($this->id==$game->p1->id OR $this->id==$game->p3->id) {
-              $points_won = $points_won + $game->set1_p1 + $game->set2_p1 + $game->set3_p1;
-              $points_loose = $points_loose + $game->set1_p2 + $game->set2_p2 + $game->set3_p2;
-              if($game->set1_p1>$game->set1_p2) { $sets_won++; } else { $sets_loose++; }
-              if($game->set2_p1>$game->set2_p2) { $sets_won++; } else { $sets_loose++; }
-              if($game->set3_p1>$game->set3_p2) { $sets_won++; } else { $sets_loose++; }
-            }
-            else {
-              $points_won = $points_won + $game->set1_p2 + $game->set2_p2 + $game->set3_p2;
-              $points_loose = $points_loose + $game->set1_p1 + $game->set2_p1+ $game->set3_p1;
-              if($game->set1_p1<$game->set1_p2) { $sets_won++; } else { $sets_loose++; }
-              if($game->set2_p1<$game->set2_p2) { $sets_won++; } else { $sets_loose++; }
-              if($game->set3_p1<$game->set3_p2) { $sets_won++; } else { $sets_loose++; }
+            if($this->id==$game->p1?->id) {
+              $points_won = $points_won + $game->set1_p1_points + $game->set2_p1_points + $game->set3_p1_points;
+              $points_loose = $points_loose + $game->set1_p2_points + $game->set2_p2_points + $game->set3_p2_points;
+              if($game->set1_p1_points+$game->set1_p2_points > 0) { if($game->set1_p1_points>$game->set1_p2_points) { $sets_won++; } else { $sets_loose++; } }
+              if($game->set2_p1_points+$game->set2_p2_points > 0) { if($game->set2_p1_points>$game->set2_p2_points) { $sets_won++; } else { $sets_loose++; } }
+              if($game->set3_p1_points+$game->set3_p2_points > 0) { if($game->set3_p1_points>$game->set3_p2_points) { $sets_won++; } else { $sets_loose++; } }
+            } 
+
+            if($this->id==$game->p2?->id) {
+              $points_won = $points_won + $game->set1_p2_points + $game->set2_p2_points + $game->set3_p2_points;
+              $points_loose = $points_loose + $game->set1_p1_points + $game->set2_p1_points+ $game->set3_p1_points;
+              if($game->set1_p1_points+$game->set1_p2_points > 0) { if($game->set1_p1_points<$game->set1_p2_points) { $sets_won++; } else { $sets_loose++; } }
+              if($game->set2_p1_points+$game->set2_p2_points > 0) { if($game->set2_p1_points<$game->set2_p2_points) { $sets_won++; } else { $sets_loose++; } }
+              if($game->set3_p1_points+$game->set3_p2_points > 0) { if($game->set3_p1_points<$game->set3_p2_points) { $sets_won++; } else { $sets_loose++; } }
             }
             break;
     

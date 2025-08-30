@@ -151,7 +151,7 @@ class page
   //Add content to the page
   public function add_content($txt)
   {
-    if(strpos($txt,"\n")===FALSE)
+    if(strpos($txt ?? '',"\n")===FALSE)
     {
       if(substr($this->content,strlen($this->content)-strlen($this->space))==$this->space)
       {

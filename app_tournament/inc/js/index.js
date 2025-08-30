@@ -156,26 +156,30 @@ function setEvents() {
 
 
   //Define which Buttons are shown
-  switch ($('#content').data('round-status')) {
-    case 'New':
-      $('#draw').show();
-      $('#stop_tournament').show();
-      if($('#content').data('round-id')>0) { $('#close_tournament').show(); } else { $('#close_tournament').hide(); }
-      break;
-
-    case 'Drawn':
-      $('#delete_draw').show();
-      $('#close_round').show();
-      break;
-
-    case 'Closed':
-      $('#reset_round').show();
+  switch($('#content').data('system')) {
+    case 'Gruppenspiele':
       $('#close_tournament').show();
       $('#stop_tournament').show();
-
       break;
-      
-    default:
+    case 'Schoch':
+      switch ($('#content').data('round-status')) {
+        case 'New':
+          $('#draw').show();
+          $('#stop_tournament').show();
+          if($('#content').data('round-id')>0) { $('#close_tournament').show(); } else { $('#close_tournament').hide(); }
+          break;
+
+        case 'Drawn':
+          $('#delete_draw').show();
+          $('#close_round').show();
+          break;
+
+        case 'Closed':
+          $('#reset_round').show();
+          $('#close_tournament').show();
+          $('#stop_tournament').show();
+          break;
+      }
       break;
   }
 
@@ -599,6 +603,7 @@ function set_points_and_winner(court) {
   var wins_p2=0;
   var points_p1=0;
   var points_p2=0;
+  var reset_result = false;
   
   court = court.replace(/court/g, "");
   const modus = $('#content').data('counting');
@@ -631,7 +636,7 @@ function set_points_and_winner(court) {
       if(i==3) { diff = Math.abs(set3_p1 - set3_p2); max_points = Math.max(set3_p1,set3_p2); points_p1 = parseInt(set3_p1); points_p2 = parseInt(set3_p2); }
 
       //If nothing is inserted skip checks
-      if(i==1 && max_points==0) break;
+      if(i==1 && max_points==0) { reset_result = true; break; }
 
       if(i==3 && wins_p1 - wins_p2 !=0)
       {
@@ -673,6 +678,9 @@ function set_points_and_winner(court) {
       if(i==2) { diff = Math.abs(set2_p1 - set2_p2); max_points = Math.max(set2_p1,set2_p2); points_p1 = parseInt(set2_p1); points_p2 = parseInt(set2_p2); }
       if(i==3) { diff = Math.abs(set3_p1 - set3_p2); max_points = Math.max(set3_p1,set3_p2); points_p1 = parseInt(set3_p1); points_p2 = parseInt(set3_p2); }
 
+      //If nothing is inserted skip checks
+      if(i==1 && max_points==0) { reset_result = true; break; }
+
       if(i==3 && wins_p1 - wins_p2 !=0)
       {
         if(set3_p1!=0 || set3_p2!=0)
@@ -682,11 +690,6 @@ function set_points_and_winner(court) {
         break;
       }
 
-      if(i==1 && max_points==0)
-      {
-        $('#court'+court).load(server_link+'&ajax=show&tournament_id=$_GET[tournament_id]&round=$_GET[round]&court_id='+court);
-        break;
-      }
       if(max_points==11)
       {
         if(diff < 1)
@@ -718,6 +721,9 @@ function set_points_and_winner(court) {
       if(i==2) { diff = Math.abs(set2_p1 - set2_p2); max_points = Math.max(set2_p1,set2_p2); points_p1 = parseInt(set2_p1); points_p2 = parseInt(set2_p2); }
       if(i==3) { diff = Math.abs(set3_p1 - set3_p2); max_points = Math.max(set3_p1,set3_p2); points_p1 = parseInt(set3_p1); points_p2 = parseInt(set3_p2); }
 
+      //If nothing is inserted skip checks
+      if(i==1 && max_points==0) { reset_result = true; break; }
+      
       if(i==3 && wins_p1 - wins_p2 !=0)
       {
         if(set3_p1!=0 || set3_p2!=0)
@@ -727,10 +733,6 @@ function set_points_and_winner(court) {
         break;
       }
 
-      if(i==1 && max_points==0)
-      {
-        break;
-      }
       if(diff < 1)
       {
         error +=  'Punktedifferenz in Satz ' + i + ' nicht gültig';
@@ -750,7 +752,11 @@ function set_points_and_winner(court) {
   }
   else
   {
-    $('#court'+court).load(server_link+'&ajax=set_points_and_winner&court='+court+'&set1_p1='+set1_p1+'&set1_p2='+set1_p2+'&set2_p1='+set2_p1+'&set2_p2='+set2_p2+'&set3_p1='+set3_p1+'&set3_p2='+set3_p2);
+    if(reset_result) {
+      $('#court'+court).load(server_link+'&ajax=set_points_and_winner&court='+court+'&set1_p1=0&set1_p2=0&set2_p1=0&set2_p2=0&set3_p1=0&set3_p2=0');
+    } else {
+      $('#court'+court).load(server_link+'&ajax=set_points_and_winner&court='+court+'&set1_p1='+set1_p1+'&set1_p2='+set1_p2+'&set2_p1='+set2_p1+'&set2_p2='+set2_p2+'&set3_p1='+set3_p1+'&set3_p2='+set3_p2);
+    }
   }
 }
 

@@ -22,7 +22,7 @@ try
 		if($myTournament->status=='Closed') {
 			if(!isset($_GET['mode'])) { $_GET['mode'] = 'award'; }
 		} 
-		if($myTournament->status=='Started') {
+		if($myTournament->status=='Started' && $myTournament->system!='Gruppenspiele') {
 			if(!isset($_GET['round'])) { $_GET['round'] = $myTournament->arr_rounds[$myTournament->curr_round-1]->id; }
 		}
 	}
@@ -125,8 +125,8 @@ try
 						}
 					}
 					else {
-						if($_GET['mode']=='details') { $myPage->add_content($myTournament->html->get_report()); }
-						if($_GET['mode']=='award') { $myPage->add_content($myTournament->html->get_award_ceremony()); }	
+						if(isset($_GET['mode']) && $_GET['mode']=='details') { $myPage->add_content($myTournament->html->get_report()); }
+						if(isset($_GET['mode']) && $_GET['mode']=='award') { $myPage->add_content($myTournament->html->get_award_ceremony()); }	
 					}
 					break;
 			}

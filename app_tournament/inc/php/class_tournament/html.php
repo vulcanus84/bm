@@ -45,15 +45,14 @@ class html
 						$html.="<div class='menu_item'><button class='change_round $class' data-round='{$round->id}'>Runde {$round->id}</button></div>";
 					}
 	
-					if(isset($_GET['round']))
-					{
+					if($this->tournament->system!='Gruppenspiele') {
 						$html.="<div class='menu_item'><button class='green' style='display:none;' id='draw'>Auslosen</button></div>";
 						$html.="<div class='menu_item'><button class='green' style='display:none;' id='delete_draw'>Auslosung löschen</button></div>";
 						$html.="<div class='menu_item'><button class='green' style='display:none;' id='close_round'>Runde abschliessen</button></div>";
 						$html.="<div class='menu_item'><button class='red' style='display:none;' id='reset_round' data-round='{$_GET['round']}'>Auf Runde {$_GET['round']} zurücksetzen</button></div>";
-						$html.="<div class='menu_item' style='border-left:5px solid gray;margin-left:5px;'><button class='orange' style='display:none;' id='stop_tournament'>Abbrechen</button></div>";
-						$html.="<div class='menu_item'><button class='purple' style='display:none;' id='close_tournament'>Abschliessen</button></div>";
 					}
+					$html.="<div class='menu_item' style='border-left:5px solid gray;margin-left:5px;'><button class='orange' style='display:none;' id='stop_tournament'>Abbrechen</button></div>";
+					$html.="<div class='menu_item'><button class='purple' style='display:none;' id='close_tournament'>Abschliessen</button></div>";
 	
 					break;
 	
@@ -793,10 +792,9 @@ class html
 
     //Fill Players
     $i = 1;
-    $arr_players = array();
     foreach($this->tournament->arr_players as $player) {
-      $arr_table[0][$i] = "<td style='text-align:center;'>{$player->get_picture(false,'show_user_games','80px',true)}<br/>{$player->login}</td>";
-      $arr_table[$i][0] = "<td style='text-align:center;'>{$player->get_picture(false,'show_user_games','80px',true)}<br/>{$player->login}</td>";
+      $arr_table[0][$i] = "<td style='text-align:center;'><img src='{$player->get_pic_path(true)}' style='width:100px;'/></td>";
+      $arr_table[$i][0] = "<td style='text-align:center;'>{$player->get_picture(false,array())}</td>";
       $i++;
     }
 
@@ -806,11 +804,11 @@ class html
       $this->db->sql_query("SELECT * FROM games WHERE game_group_id='{$this->tournament->id}' AND (game_player1_id='{$player->id}' OR game_player2_id='{$player->id}')");
       while($d = $this->db->get_next_res())
       {
-        if($d->game_player1_id == $player) { $opponent = $d->game_player2_id; $player_is_first_player = true; } else { $opponent = $d->game_player1_id; $player_is_first_player = false; }
+        if($d->game_player1_id == $player->id) { $opponent = $d->game_player2_id; $player_is_first_player = true; } else { $opponent = $d->game_player1_id; $player_is_first_player = false; }
         $j = 1;
-        foreach($arr_players as $player_tmp)
+        foreach($this->tournament->arr_players as $player_tmp)
         {
-          if($player_tmp==$opponent)
+          if($player_tmp->id==$opponent)
           {
             if($d->game_winner_id=='')
             {
@@ -870,7 +868,7 @@ class html
       $html.="</tr>";
     }
     $html.="</table>";
-    
+    return $html;
   }
 
   function debug_out_class() {
