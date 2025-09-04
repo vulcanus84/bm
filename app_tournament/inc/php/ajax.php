@@ -89,10 +89,10 @@ switch ($_GET['ajax']) {
     {
       if(substr($myTournament->system,0,6)=='Doppel')
       {
-        if($curr_game->p1->id==$_GET['winner_id']) { $winner2 = $curr_game->p3; }
-        if($curr_game->p2->id==$_GET['winner_id']) { $winner2 = $curr_game->p4; }
-        if($curr_game->p3->id==$_GET['winner_id']) { $winner2 = $curr_game->p1; }
-        if($curr_game->p4->id==$_GET['winner_id']) { $winner2 = $curr_game->p2; }
+        if($curr_game->p1?->id==$_GET['winner_id']) { $winner2 = $curr_game->p3; }
+        if($curr_game->p2?->id==$_GET['winner_id']) { $winner2 = $curr_game->p4; }
+        if($curr_game->p3?->id==$_GET['winner_id']) { $winner2 = $curr_game->p1; }
+        if($curr_game->p4?->id==$_GET['winner_id']) { $winner2 = $curr_game->p2; }
         $curr_game->winner = new user($_GET['winner_id']);
         $curr_game->winner2 = $winner2;
         $curr_game->save();
@@ -104,7 +104,7 @@ switch ($_GET['ajax']) {
       }
   
       //Insert information in tournament log
-      if(substr($myTournament->system,0,6)=='Doppel')
+      if($curr_game->p3)
       {
         if($curr_game->p1->id==$curr_game->winner->id) { $looser = $curr_game->p2; $looser2 = $curr_game->p4; } else { $looser = $curr_game->p1; $looser2 = $curr_game->p3; }
         $winner_txt = $curr_game->winner->login."/".$curr_game->winner2->login; 
@@ -120,7 +120,8 @@ switch ($_GET['ajax']) {
     }
   
     //Show court
-    print "<img src='inc/php/court.php?created_on=".time()."&action=fill&game_id={$curr_game->id}' class='img_court'/>";
+    if($curr_game->p1->id==1 OR $curr_game->p2->id==1) { $freilos=1; } else { $freilos=0; }
+    print "<img src='inc/php/court.php?created_on=".time()."&action=fill&game_id={$curr_game->id}' class='img_court' data-freilos-field='{$freilos}' data-game-id='{$curr_game->id}'/>";
   
     //Update winners in group table
     if($myTournament->system=='Gruppenspiele') { $myTournament->update_winners(); }
@@ -182,7 +183,8 @@ switch ($_GET['ajax']) {
     }
     $curr_game->save();
 
-    print "<img src='inc/php/court.php?created_on=".time()."&action=fill&game_id={$curr_game->id}' class='img_court'/>";
+    if($curr_game->p1->id==1 OR $curr_game->p2->id==1) { $freilos=1; } else { $freilos=0; }
+    print "<img src='inc/php/court.php?created_on=".time()."&action=fill&game_id={$curr_game->id}' class='img_court' data-freilos-field='{$freilos}' data-game-id='{$curr_game->id}'/>";
   
     if($myTournament->system=='Gruppenspiele')
     {

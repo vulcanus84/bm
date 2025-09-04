@@ -110,7 +110,8 @@ try
 								if(Count($myTournament->arr_rounds[$_GET['round']-1]->arr_games)>0)
 								{
 									$curr_game = $myTournament->arr_rounds[$_GET['round']-1]->arr_games[$i-1];
-									$myPage->add_content("<div class='court' id='court{$i}'><img src='inc/php/court.php?action=fill&game_id={$curr_game->id}' class='img_court' data-game-id='{$curr_game->id}'/></div>");
+									if($curr_game->p1->id==1 OR $curr_game->p2->id==1) { $freilos=1; } else { $freilos=0; }
+									$myPage->add_content("<div class='court' id='court{$i}'><img src='inc/php/court.php?action=fill&game_id={$curr_game->id}' class='img_court' data-freilos-field='{$freilos}' data-game-id='{$curr_game->id}'/></div>");
 									
 								}
 								else

@@ -28,237 +28,134 @@ class calc
 
   function define_games() {
 		
-		//Tournament with Freilos
-		$with_freilos=false;
 		$arr_players_available = $this->tournament->arr_players;
 		$arr_players_available_single = array();
 
-		$this->tournament->db->sql_query("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id='1'");
-		if($this->tournament->db->count()==1) { $with_freilos=true; $this->tournament->logger->write_to_log("Tournament","Freilos vorhanden"); }
-
 		if(substr($this->tournament->system,0,6)=='Doppel')
 		{
-			$users_on_court = null;
-			$arr_ids = null;
 			$arr_opponents = null;
-			$w_str = null;
-			$w_str2 = null;
-			$db2 = clone($this->tournament->db);
-			$db3 = clone($this->tournament->db);
 			$court_nr=1;
-
-			//Get players order by wins
-			$this->tournament->db->sql_query("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' ORDER BY group2user_wins DESC,group2user_BHZ DESC, RAND()");
 
 			if($this->tournament->system=='Doppel_dynamisch')
 			{
-				$p1=null;$p2=null;$p3=null;$p4=null;
-				
-				//If a Freilos is needed, define first
-				If($with_freilos) {
-					$arr_players_available_freilos = $this->tournament->arr_players;
-
-					//get all single games of current tournament and extract users
-					foreach($this->tournament->arr_rounds as $round)
-					{
-						foreach($round->arr_games as $game)
-						{
-							//remove players from available list, if they had already a Freilos
-							if($game->p1 == 1 || $game->p2 == 1) { 
-								$arr_players_available_freilos = array_filter($arr_players_available_freilos, function($user) use ($game) { return $user->id != $game->p1->id && $user->id != $game->p2->id; });
-								$arr_players_available_freilos = array_values($arr_players_available_freilos);
-							}
-						}
-					}
-					if(Count($arr_players_available_freilos)>0) {
-						$p1 = '1';
-						$p2 = $arr_players_available_freilos[0];
-					}
+				//Freilos Handling
+				$retVal = $this->freilos_handling();
+				if(is_numeric($retVal)) {
+					unset($arr_players_available[$retVal]);
+					unset($arr_players_available[1]);
+					$court_nr++;
+				} else {
+					//Fehlerhandling wenn alle bereits Freilos hatten
 				}
 
-				if(Count($this->tournament->arr_players)%4 != 0)
+				//If odd number of players, define single game
+				if(Count($arr_players_available)%4 != 0)
 				{
 					$this->tournament->logger->write_to_log("Tournament","Einzelspiel definieren");
-					$arr_players_available_single = $this->tournament->arr_players;
-					//select all player, but not Freilos
-					$w_str = "WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id!='1'";
+					$arr_players_available_single = $arr_players_available;
 
-					//get all single games of current tournament and extract users
-					foreach($this->tournament->arr_rounds as $round)
-					{
-						foreach($round->arr_games as $game)
-						{
-							//Is it a single game? Remove players from available list, except Freilos
-							if($game->p3<1) { 
-								$arr_players_available_single = array_filter($arr_players_available_single, function($user) use ($game) { return ($user->id != $game->p1->id && $user->id != $game->p2->id) || $user->id===1; });
-								$arr_players_available_single = array_values($arr_players_available_single);
-							}
-						}
+					// 1. Initialisiere alle Spieler mit 0 Einzelspielen
+					$singleCounts = [];
+					foreach ($arr_players_available_single as $user) {
+							$singleCounts[$user->id] = 0;
 					}
 
-					if(Count($arr_players_available_single)<2)
+					// 2. Einzelspiele mitzählen
+					foreach ($this->tournament->arr_rounds as $round) {
+							foreach ($round->arr_games as $game) {
+									if ($game->p3 === null) { // Einzelspiel
+										// Kein Freilos mitzählen
+										if($game->p1->id != 1 && $game->p2->id !=1) {
+											if (isset($singleCounts[$game->p1->id])) $singleCounts[$game->p1->id]++;
+											if (isset($singleCounts[$game->p2->id])) $singleCounts[$game->p2->id]++;
+										} 
+									}
+							}
+					}
+
+					// 3. Spieler nach minimalen Einzelspielen auswählen
+					$minSingles = min($singleCounts);
+					$available = array_filter($arr_players_available_single, fn($user) => $singleCounts[$user->id] === $minSingles);
+					if (count($available) === 1) {
+						$available_tmp = array_filter($arr_players_available_single, fn($user) => $singleCounts[$user->id] === $minSingles+1);
+						$available = array_merge($available, [$available_tmp[array_key_first($available_tmp)]]);
+					}
+					
+					$arr_players_available_single = array_values($available);
+
+					if(Count($arr_players_available_single)>1)
 					{
-						//if Freilos is activated, set always one of the single players with this user
-						if($with_freilos) { 
-							$p1 = '1'; 
-							$p2 = $arr_players_available_single[0]; 
-						} else { 
-							$p1 = $arr_players_available_single[0]; 
-							$p2 = $arr_players_available_single[1];
-						}
+						shuffle($arr_players_available_single);
+						$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
+						$curr_game->p1 = $arr_players_available_single[0];
+						$curr_game->p2 = $arr_players_available_single[1];
+						unset($arr_players_available[$curr_game->p1->id]);
+						unset($arr_players_available[$curr_game->p2->id]);
+						$curr_game->save();
+						$court_nr++;
 					} else {
 						print "Zu viele Runden für die Anzahl an Spieler";
-					}
-
-					$db3->sql_query("SELECT * FROM group2user $w_str ORDER BY group2user_wins ASC, rand() LIMIT $limit");
-					//if there are no more player which are not played single, choose randomly
-					if($db3->count()<$limit) 
-					{ 
-						$this->tournament->logger->write_to_log("Tournament","Keine Person fürs Freilos gefunden, suche per Zufall jemanden aus");
-						$db3->sql_query("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' ORDER BY rand() LIMIT $limit"); 
-					}
-					else
-					{
-						$this->tournament->logger->write_to_log("Tournament","Freilos sauber zugeteilt, folgender SQL String wurde verwendet");
-						$this->tournament->logger->write_to_log("Tournament","SELECT * FROM group2user $w_str ORDER BY group2user_wins ASC, rand() LIMIT $limit");
-					}
-					while($d = $db3->get_next_res())
-					{
-						if($p1==0) { $p1 = $d->group2user_user_id; } else { $p2 = $d->group2user_user_id; }
-					}
-
-					//insert games and set players on court, that they are not available anymore for the other games
-					if($limit==1) { $win_id = $p2; } else { $win_id = null; }
-					$db3->insert(array('game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$p1,'game_player2_id'=>$p2,'game_winner_id'=>$win_id,'game_location'=>$court_nr,'game_round'=>$_GET['round']),'games');
-					$court_nr++;
-					$users_on_court.= $p1.'/'.$p2.'/';
-					$p1=null;$p2=null;$p3=null;$p4=null;
-
-					$open_players = count($this->tournament->arr_players) - 2;
-					//Do we need a single game?
-					if($open_players % 4 > 0)
-					{
-						$this->tournament->logger->write_to_log("Tournament","Einzelspiel definieren");
-						//Combine where-string which excludes all player, which are allready assigned
-						$w_str = "WHERE group2user_group_id='$_GET[tournament_id]'";
-						$arr_users = explode('/',$users_on_court);
-						foreach($arr_users as $user)
-						{
-							if($user!='') { $w_str.= " AND group2user_user_id != '$user'"; }
-						}
-
-						//get all single games of current tournament and extract users
-						$db3->sql_query("SELECT * FROM games WHERE game_group_id='$_GET[tournament_id]' AND game_player3_id IS NULL AND game_player1_id!='1' AND game_player2_id!='1'");
-						if($db3->count()>0)
-						{
-							while($d = $db3->get_next_res())
-							{
-								$w_str .= " AND group2user_user_id!='".$d->game_player1_id."' AND group2user_user_id!='".$d->game_player2_id."'";
-							}
-						}
-
-						$db3->sql_query("SELECT * FROM group2user $w_str ORDER BY group2user_wins ASC, group2user_BHZ ASC, rand() LIMIT 2");
-						if($db3->count()==2)
-						{
-							//Found two players with no single games
-							while($d = $db3->get_next_res())
-							{
-								if($p1==0) { $p1 = $d->group2user_user_id; } else { $p2 = $d->group2user_user_id; }
-							}
-							$this->tournament->logger->write_to_log("Tournament","2 Spieler gefunden, die noch keine Einzel gespielt haben");
-
-							//insert games and set players on court, that they are not available anymore for the other games
-							$db3->insert(array('game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$p1,'game_player2_id'=>$p2,'game_location'=>$court_nr,'game_round'=>$_GET['round']),'games');
-							$court_nr++;
-							$users_on_court.= $p1.'/'.$p2.'/';
-							$p1=null;$p2=null;$p3=null;$p4=null;
-						}
-						else
-						{
-							$limit = 2;
-							if($db3->count()==1)
-							{
-								//Found one player with no single games
-								$d = $db3->get_next_res();
-								$p1 = $d->group2user_user_id;
-								$limit = 1;
-								$this->tournament->logger->write_to_log("Tournament","1 Spieler gefunden, der noch keine Einzel gespielt hat, suche noch jemanden per Zufall");
-							}
-							else
-							{
-								$this->tournament->logger->write_to_log("Tournament","Keine Spieler gefunden, die noch keine Einzel gespielt haben, suche per Zufall aus");
-							}
-							$db3->sql_query("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id!='1' AND group2user_user_id!=$p1 ORDER BY rand() LIMIT $limit");								
-							//Get another player randomly
-							while($d = $db3->get_next_res())
-							{
-								if($p1==0) { $p1 = $d->group2user_user_id; } else { $p2 = $d->group2user_user_id; }
-							}
-							//insert games and set players on court, that they are not available anymore for the other games
-							$db3->insert(array('game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$p1,'game_player2_id'=>$p2,'game_location'=>$court_nr,'game_round'=>$_GET['round']),'games');
-							$court_nr++;
-							$users_on_court.= $p1.'/'.$p2.'/';
-							$p1=null;$p2=null;$p3=null;$p4=null;
-						}
+						$this->tournament->arr_rounds[$this->tournament->curr_round-1]->delete();
+						return;
 					}
 				}
 
-				while($d = $this->tournament->db->get_next_res())
-				{
-					$w_str2 = null;
-					//Check if current player allready is assigned to a game
-					if(strpos($users_on_court,$d->group2user_user_id)===false)
-					{
-						$curr_user_id = $d->group2user_user_id;
-						if($p1==null) { $p1 = $curr_user_id; } else { $p2 = $curr_user_id; }
-						//Combine where-string which excludes all player, which are allready assigned
-						$w_str = "WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id!='$curr_user_id'";
-						$arr_users = explode('/',$users_on_court);
-						foreach($arr_users as $user)
-						{
-							if($user!='') { $w_str.= " AND group2user_user_id != '$user'"; }
+				// Define teams
+				while (Count($arr_players_available) > 0) {
+
+					if(Count($arr_players_available) < 2) {
+								error_log("Not enough players to form a team.");
+								break;
 						}
 
-						//Combine where-string with all players which are allready partner of current player
-						$db3->sql_query("SELECT * FROM games WHERE game_group_id='$_GET[tournament_id]' AND game_player1_id = '$curr_user_id'");
-						while($d3 = $db3->get_next_res()) { $w_str2.= " AND group2user_user_id != '".$d3->game_player3_id."'"; }
-						$db3->sql_query("SELECT * FROM games WHERE game_group_id='$_GET[tournament_id]' AND game_player2_id = '$curr_user_id'");
-						while($d3 = $db3->get_next_res()) { $w_str2.= " AND group2user_user_id != '".$d3->game_player4_id."'"; }
-						$db3->sql_query("SELECT * FROM games WHERE game_group_id='$_GET[tournament_id]' AND game_player3_id = '$curr_user_id'");
-						while($d3 = $db3->get_next_res()) { $w_str2.= " AND group2user_user_id != '".$d3->game_player1_id."'"; }
-						$db3->sql_query("SELECT * FROM games WHERE game_group_id='$_GET[tournament_id]' AND game_player4_id = '$curr_user_id'");
-						while($d3 = $db3->get_next_res()) { $w_str2.= " AND group2user_user_id != '".$d3->game_player2_id."'"; }
+						$player = $arr_players_available[array_key_first($arr_players_available)];
+						unset($arr_players_available[$player->id]);
 
+						$arr_partners = $arr_players_available;
 
-						//Search best opponent which is not allready assigned and has not allready played against current player
-						$db3->sql_query("SELECT * FROM group2user $w_str $w_str2 ORDER BY group2user_wins ASC, rand() LIMIT 1");
+						// Remove all players you have already played with
+						foreach ($this->tournament->arr_rounds as $round) {
+								foreach ($round->arr_games as $game) {
+										// Is a double game?
+										if ($game->p3) {
+												if ($game->p1->id == $player->id) { unset($arr_partners[$game->p3->id]); }
+												if ($game->p2->id == $player->id) { unset($arr_partners[$game->p4->id]); }
+												if ($game->p3->id == $player->id) { unset($arr_partners[$game->p1->id]); }
+												if ($game->p4->id == $player->id) { unset($arr_partners[$game->p2->id]); }
+										}
+								}
+						}
 
-						//If someone has been found take it
-						if($db3->count()==1)
-						{
-							$d3 = $db3->get_next_res();
-							if($p3==null) { $p3 = $d3->group2user_user_id; } else { $p4 = $d3->group2user_user_id; }
-							$users_on_court.= $curr_user_id.'/'.$d3->group2user_user_id.'/';
+						// If we found at least one partner, we don't played with him yet
+						if (count($arr_partners) > 0) { 
+								$random_key = array_rand($arr_partners);
+								$partner = $arr_partners[$random_key]; 
+						} else { // We have to play again with someone
+								$random_key = array_rand($arr_players_available);
+								$partner = $arr_players_available[$random_key];
 						}
-						//if nobody has been found, take one of the not allready assigned opponent by random
-						else
-						{
-							$db3->sql_query("SELECT * FROM group2user $w_str ORDER BY rand() LIMIT 1");
-							if($db3->count()==1)
-							{
-								$d3 = $db3->get_next_res();
-								if($p3==null) { $p3 = $d3->group2user_user_id; } else { $p4 = $d3->group2user_user_id; }
-								$users_on_court.= $curr_user_id.'/'.$d3->group2user_user_id.'/';
-							}
-						}
-						if($p4>0)
-						{
-							$db3->insert(array('game_group_id'=>$_GET['tournament_id'],'game_player1_id'=>$p1,'game_player2_id'=>$p2,'game_player3_id'=>$p3,'game_player4_id'=>$p4,'game_location'=>$court_nr,'game_round'=>$_GET['round']),'games');
-							$court_nr++;
-							$p1=null;$p2=null;$p3=null;$p4=null;
-						}
-					}
+						unset($arr_players_available[$partner->id]);
+
+						$this->tournament->add_team(intval($player->id), intval($partner->id));
 				}
+
+
+				$arr_teams = $this->tournament->arr_teams;
+				for ($court_nr=$court_nr; $court_nr <= $this->tournament->number_of_courts; $court_nr++) { 
+					$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
+					$curr_game->t1 = $arr_teams[array_key_first($arr_teams)];
+					unset($arr_teams[$curr_game->t1->id]);
+					$curr_game->t2 = $arr_teams[array_key_first($arr_teams)];
+					unset($arr_teams[$curr_game->t2->id]);
+					$curr_game->p1 = $curr_game->t1->arr_players[0];
+					$curr_game->p3 = $curr_game->t1->arr_players[1];
+					$curr_game->p2 = $curr_game->t2->arr_players[0];
+					$curr_game->p4 = $curr_game->t2->arr_players[1];
+					$curr_game->save();			
+				}
+
+				$this->tournament->db->insert(array('news_tournament_id'=>$this->tournament->id,'news_title'=>'Neue Runde ausgelost','news_text'=>"Im Turnier {$this->tournament->title} wurde eine neue Runde ausgelost."),'news');
+				print "OK";
 			}
 
 			if($this->tournament->system=='Doppel_fix')
@@ -287,6 +184,7 @@ class calc
 						// //Remove all teams with different number of wins
 						$arr_opponents = array_filter($arr_opponents, function ($team) use ($curr_team) { return $team->wins == $curr_team->wins; }); 
 						$arr_opponents = array_values($arr_opponents);
+						shuffle($arr_opponents);
 						if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
 
 						$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
@@ -312,10 +210,7 @@ class calc
 		}
 		else
 		{
-			$users_on_court = [];
-			$my_user = null;
 			$court_nr=1;
-
 			if(Count($this->tournament->arr_players)>Count($this->tournament->arr_rounds)) //Stop it, if they played against each opponent
 			{
 				//Freilos Handling
@@ -385,7 +280,7 @@ class calc
 	function freilos_handling() {
 			//Freilos Handling
 			$arr_players_available = $this->tournament->arr_players;
-			$freilos = new \user(1);
+			$freilos = new player($this->tournament,1);
 			$user_ids = array_map(fn($u) => $u->id, $this->tournament->arr_players);
 			if(in_array($freilos->id,$user_ids))
 			{

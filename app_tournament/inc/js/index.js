@@ -131,9 +131,12 @@ function setEvents() {
     case 'Started':
       if($('#content').data('round-status')=='Drawn') {
         $('#content').on('click','img.img_court', function (e) {
-          const gameId = $(e.currentTarget).data('game-id');
-          const court = $(e.currentTarget).closest('div').attr('id');
-          check_result(court,gameId);
+          const freilos_field = $(e.currentTarget).data('freilos-field');
+          if(freilos_field<1) {
+            const gameId = $(e.currentTarget).data('game-id');
+            const court = $(e.currentTarget).closest('div').attr('id');
+            check_result(court,gameId);
+          }
         });
       }
       $('#content').on('click','.user_pic', function(e) { show_user_games($(e.currentTarget).data('user-id')); });
@@ -162,6 +165,8 @@ function setEvents() {
       $('#stop_tournament').show();
       break;
     case 'Schoch':
+    case 'Doppel_fix':
+    case 'Doppel_dynamisch':
       switch ($('#content').data('round-status')) {
         case 'New':
           $('#draw').show();

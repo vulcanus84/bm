@@ -32,7 +32,6 @@ class tournament
 
 	function __construct($tournament_id=null) {
 		$this->db= new \db();
-		$this->db2 = new \db();
 		$this->logger = new \log();
 		require_once('class_tournament/html.php');
 		$this->html = new html($this);

@@ -20,8 +20,7 @@ class location
 
 	public function __construct($location_id=null)
 	{
-    $this->db = new db();
-
+		$this->db = db::getInstance(); // Immer Singleton
     if($location_id!=null) { $this->load($location_id); }
 	}
 

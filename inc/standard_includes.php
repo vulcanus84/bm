@@ -38,4 +38,4 @@
 
 	include_once(level."inc/settings.php");
 
-  $db = new db();
+  $db = db::getInstance(); // Immer Singleton

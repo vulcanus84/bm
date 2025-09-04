@@ -48,7 +48,7 @@ class user
 
 	public function __wakeup()
 	{
-		$this->db = new db();
+		$this->db = db::getInstance();
 	}
 
 	public function save()

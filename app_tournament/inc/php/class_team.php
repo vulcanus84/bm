@@ -17,7 +17,7 @@ class team
 
 	function __construct($tournament,$id=null,$id2=null) {
     //Get database connection
-		$this->db = new \db();
+		$this->db = \db::getInstance(); // Immer Singleton
     $this->tournament = $tournament;
     if($id!==null && $id2!==null) { $this->load($id,$id2); }
 	}
@@ -151,6 +151,7 @@ class team
       $html.= "<img src='{$player->get_pic_path(true)}' alt='{$player->firstname} {$player->lastname}'/>";
     }
     $html.= "<br/>{$this->team_name}";
+    $html.= "<br/>{$this->BHZ}.{$this->FBHZ}";
     $html.= "</div>";
     return $html;
   }

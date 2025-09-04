@@ -21,6 +21,7 @@ class db
 
     public function __construct()
     {
+        error_log("Neue DB-Verbindung erstellt! Stack: " . json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)));
         $user = "huebsche_bm";
         $pw   = "badminton123$";
         $host = "localhost";
@@ -30,9 +31,14 @@ class db
             "mysql:host=$host;dbname=$db;charset=utf8",
             $user,
             $pw,
-            [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"]
+            [
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8",
+                PDO::ATTR_PERSISTENT => false,          // Keine persistenten Verbindungen
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Fehler als Exceptions
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC // Standard-Fetch-Modus
+            ]
         );
-        $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 
         $this->connected_host = $host;
         $this->connected_db   = $db;

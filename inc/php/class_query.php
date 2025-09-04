@@ -1481,7 +1481,7 @@ class query
 		          else
 		          {
 	              //if HTML tags are used, don't do line breaks
-	              if(strpos($d->$db,"<")===FALSE) { $cell_txt = nl2br($d->$db); } else { $cell_txt = $d->$db; }
+	              if(strpos($d->$db ?? '',"<")===FALSE) { $cell_txt = nl2br($d->$db ?? ''); } else { $cell_txt = $d->$db; }
 								if($col->get_link()!='') { $cell_txt = "<a href='".$col->get_link().$cell_txt."' target='_blank'>$cell_txt</a>"; }
 		            if($i==$min OR $i==1)
 		            {

@@ -39,7 +39,7 @@ if(isset($_GET['p4']) && $_GET['p4']!='')
 		// Determine offset of text
 	  $left_offset = ($right - $left) / 2;
 		// Generate coordinates
-	  $x = $x_pos[$i] - $left_offset + 110;
+	  $x = round($x_pos[$i] - $left_offset + 110,0);
 		imagettftext($im, $font_size/1.5, 0, $x, $y_pos[$i]+145, $color, $font, $text);
 	}
 

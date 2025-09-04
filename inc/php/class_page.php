@@ -25,7 +25,7 @@ class page
 
   public function __construct()
   {
-    $this->db = new db();
+    $this->db = db::getInstance(); // Immer Singleton
     $this->logger = new log();
 
     //Used for adding/removing parameters to URL

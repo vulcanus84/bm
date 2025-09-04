@@ -35,7 +35,7 @@ class game
   
 	function __construct($round, $id=null) {
     //Get database connection
-		$this->db= new \db();
+		$this->db = \db::getInstance(); //with new db() each user displayed on page would get his own db connection (can be 100 users or even more)
     $this->round = $round;
 		if($id!=null) { $this->load($id); }
 	}
