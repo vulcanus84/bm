@@ -68,7 +68,8 @@ switch ($_GET['ajax']) {
   case 'show':
     if(Count($myTournament->arr_rounds[$myTournament->curr_round-1]->arr_games)>0) {
       $curr_game = $myTournament->arr_rounds[$myTournament->curr_round-1]->arr_games[$_GET['court_id']-1];
-      print "<img data-game-id='{$curr_game->id}' src='inc/php/court.php?action=fill&game_id={$curr_game->id}' class='img_court'/>";
+      if($curr_game->p1->id==1 OR $curr_game->p2->id==1) { $freilos=1; } else { $freilos=0; }
+      print "<img src='inc/php/court.php?created_on=".time()."&action=fill&game_id={$curr_game->id}' class='img_court' data-freilos-field='{$freilos}' data-game-id='{$curr_game->id}'/>";
     }
     else
     {

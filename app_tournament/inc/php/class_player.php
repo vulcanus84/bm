@@ -117,15 +117,15 @@ class player extends \user
             if($this->id==$game->p1?->id OR $this->id==$game->p2?->id OR $this->id==$game->p3?->id OR $this->id==$game->p4?->id) {
               //Calculcate BHZ by subtracting wins of partner and add wins of both opponents
               if($mode=='main') {
-                if($game->p1?->id==$this->id) { $BHZ = $BHZ - $game->p3?->wins + $game->p2?->wins + $game->p4?->wins; }
-                if($game->p2?->id==$this->id) { $BHZ = $BHZ - $game->p4?->wins + $game->p1?->wins + $game->p3?->wins; }
-                if($game->p3?->id==$this->id) { $BHZ = $BHZ - $game->p1?->wins + $game->p2?->wins + $game->p4?->wins; }
-                if($game->p4?->id==$this->id) { $BHZ = $BHZ - $game->p2?->wins + $game->p1?->wins + $game->p3?->wins; }
+                if($game->p1?->id==$this->id) { $BHZ = $BHZ - $game->p3?->wins + $game->p2?->wins + $game->p4?->wins + $game->p1?->wins; }
+                if($game->p2?->id==$this->id) { $BHZ = $BHZ - $game->p4?->wins + $game->p1?->wins + $game->p3?->wins + $game->p2?->wins; }
+                if($game->p3?->id==$this->id) { $BHZ = $BHZ - $game->p1?->wins + $game->p2?->wins + $game->p4?->wins + $game->p3?->wins; }
+                if($game->p4?->id==$this->id) { $BHZ = $BHZ - $game->p2?->wins + $game->p1?->wins + $game->p3?->wins + $game->p4?->wins; }
               } else {
-                if($game->p1?->id==$this->id) { $BHZ = $BHZ - $game->p3?->BHZ + $game->p2?->BHZ + $game->p4?->BHZ; }
-                if($game->p2?->id==$this->id) { $BHZ = $BHZ - $game->p4?->BHZ + $game->p1?->BHZ + $game->p3?->BHZ; }
-                if($game->p3?->id==$this->id) { $BHZ = $BHZ - $game->p1?->BHZ + $game->p2?->BHZ + $game->p4?->BHZ; }
-                if($game->p4?->id==$this->id) { $BHZ = $BHZ - $game->p2?->BHZ + $game->p1?->BHZ + $game->p3?->BHZ; }
+                if($game->p1?->id==$this->id) { $BHZ = $BHZ - $game->p3?->BHZ + $game->p2?->BHZ + $game->p4?->BHZ + $game->p1?->BHZ; }
+                if($game->p2?->id==$this->id) { $BHZ = $BHZ - $game->p4?->BHZ + $game->p1?->BHZ + $game->p3?->BHZ + $game->p2?->BHZ; }
+                if($game->p3?->id==$this->id) { $BHZ = $BHZ - $game->p1?->BHZ + $game->p2?->BHZ + $game->p4?->BHZ + $game->p3?->BHZ; }
+                if($game->p4?->id==$this->id) { $BHZ = $BHZ - $game->p2?->BHZ + $game->p1?->BHZ + $game->p3?->BHZ + $game->p4?->BHZ; }
               }
             }
             break;

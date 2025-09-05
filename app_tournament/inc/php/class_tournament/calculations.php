@@ -103,40 +103,55 @@ class calc
 				// Define teams
 				while (Count($arr_players_available) > 0) {
 
+					// Safety check to avoid infinite loop
 					if(Count($arr_players_available) < 2) {
-								error_log("Not enough players to form a team.");
-								break;
-						}
+							error_log("Not enough players to form a team.");
+							break;
+					}
 
-						$player = $arr_players_available[array_key_first($arr_players_available)];
-						unset($arr_players_available[$player->id]);
+					$player = $arr_players_available[array_key_first($arr_players_available)];
+					unset($arr_players_available[$player->id]);
 
+					$arr_partners = $arr_players_available;
+
+					// Remove all players you have already played with
+					foreach ($this->tournament->arr_rounds as $round) {
+							foreach ($round->arr_games as $game) {
+									// Is a double game?
+									if ($game->p3) {
+											if ($game->p1->id == $player->id) { unset($arr_partners[$game->p3->id]); }
+											if ($game->p2->id == $player->id) { unset($arr_partners[$game->p4->id]); }
+											if ($game->p3->id == $player->id) { unset($arr_partners[$game->p1->id]); }
+											if ($game->p4->id == $player->id) { unset($arr_partners[$game->p2->id]); }
+									}
+							}
+					}
+
+					// If no partners left, reset the list (have to play again with someone)
+					if (count($arr_partners) == 0) {
 						$arr_partners = $arr_players_available;
+					}
 
-						// Remove all players you have already played with
-						foreach ($this->tournament->arr_rounds as $round) {
-								foreach ($round->arr_games as $game) {
-										// Is a double game?
-										if ($game->p3) {
-												if ($game->p1->id == $player->id) { unset($arr_partners[$game->p3->id]); }
-												if ($game->p2->id == $player->id) { unset($arr_partners[$game->p4->id]); }
-												if ($game->p3->id == $player->id) { unset($arr_partners[$game->p1->id]); }
-												if ($game->p4->id == $player->id) { unset($arr_partners[$game->p2->id]); }
-										}
-								}
-						}
+					// Get partners with the biggest distance in wins
+					$maxDistanz = 0;
+					$besteKandidaten = [];
 
-						// If we found at least one partner, we don't played with him yet
-						if (count($arr_partners) > 0) { 
-								$random_key = array_rand($arr_partners);
-								$partner = $arr_partners[$random_key]; 
-						} else { // We have to play again with someone
-								$random_key = array_rand($arr_players_available);
-								$partner = $arr_players_available[$random_key];
-						}
-						unset($arr_players_available[$partner->id]);
+					foreach ($arr_partners as $k) {
+							$distanz = abs($player->wins - $k->wins);
 
-						$this->tournament->add_team(intval($player->id), intval($partner->id));
+							if ($distanz > $maxDistanz) {
+									$maxDistanz = $distanz;
+									$besteKandidaten = [$k];
+							} elseif ($distanz === $maxDistanz) {
+									$besteKandidaten[] = $k;
+							}
+					}
+
+					// Choose randomly one of the best candidates
+					$partner =  $besteKandidaten[array_rand($besteKandidaten)];
+					unset($arr_players_available[$partner->id]);
+
+					$this->tournament->add_team(intval($player->id), intval($partner->id));
 				}
 
 
