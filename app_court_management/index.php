@@ -100,7 +100,7 @@
 		$btn_play = $main_path."play.png";
 		$btn_stop = $main_path."stop.png";
 		$btn_clear = $main_path."clear.png";
-		$btn_save = $main_path."big_save.png";
+		$btn_save = $main_path."save_big.png";
 		$btn_match = $main_path."match_paper.png";
 
 		if($db->count()==1) {
