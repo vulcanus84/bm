@@ -48,9 +48,9 @@ class query
 
 
   //Initialize class
-  public function __construct($db)
+  public function __construct()
   {
-    $this->db = $db;
+		$this->db = new \db;
     //******************************
     //CUSTOMIZING
     //******************************
@@ -1445,12 +1445,12 @@ class query
           $id_col = $this->id_column;
 	        if($i==$min OR $i==1)
 	        {
-						$txt_temp = str_replace('[ID]',$d->$id_col,$btn_txt);
+						$txt_temp = str_replace('[ID]',$d->$id_col ?? '',$btn_txt);
 						$txt .= str_replace("<td>","<td class='first_row'>",$txt_temp);
 					}
 					else
 					{
-						$txt .= str_replace('[ID]',$d->$id_col,$btn_txt);
+						$txt .= str_replace('[ID]',$d->$id_col ?? '',$btn_txt);
 					}
 	        //---------------------------------------------------------------------------------------------
 	        //---------------------------------------------------------------------------------------------

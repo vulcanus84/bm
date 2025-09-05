@@ -25,7 +25,7 @@
     $myPage->set_subtitle("Passwort setzen");
     include('menu.php');
     $myPage->menu = $myMenu->create_menu("tabsJ");
-    $myHTML = new html($db);
+    $myHTML = new html();
     $db->sql_query($myPage->get_setting('sql_user_selection'));
     $myPage->add_content("<form name='change_password' action='' method='POST'>");
     $myPage->add_content("<table><tr><td>Select user</td><td>Password</td></tr><tr>");

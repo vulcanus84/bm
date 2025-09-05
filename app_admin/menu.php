@@ -1,5 +1,5 @@
 <?php
-      $myMenu = new menu($db);
+      $myMenu = new menu();
       $myMenu->add_item("Benutzer berechtigen","index.php");
       $myMenu->add_item("Trainingsorte berechtigen","location_permissions.php");
       $myMenu->add_item("Berechtigungen auswerten","permission_report.php");

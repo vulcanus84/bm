@@ -5,7 +5,7 @@
 
   try
   {
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("trans_german");
     $myQuery->set_sql_table("translation");
     $myQuery->set_edit_mode("full");

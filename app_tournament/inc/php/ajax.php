@@ -317,7 +317,7 @@ switch ($_GET['ajax']) {
       
       case 'pointsOneSet':
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
-        $myHTML = new HTML($db);
+        $myHTML = new html();
         $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1_points;
         $_POST[$curr_game->location.'_set1_p2']=$curr_game->set1_p2_points;
         $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p1',false);
@@ -329,7 +329,7 @@ switch ($_GET['ajax']) {
       
       case 'official2sets':
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
-        $myHTML = new HTML($db);
+        $myHTML = new html();
         $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1_points;
         $_POST[$curr_game->location.'_set1_p2']=$curr_game->set1_p2_points;
         $_POST[$curr_game->location.'_set2_p1']=$curr_game->set2_p1_points;
@@ -354,7 +354,7 @@ switch ($_GET['ajax']) {
       
       case '2sets11points':
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
-        $myHTML = new HTML($db);
+        $myHTML = new html();
         $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1_points;
         $_POST[$curr_game->location.'_set1_p2']=$curr_game->set1_p2_points;
         $_POST[$curr_game->location.'_set2_p1']=$curr_game->set2_p1_points;
@@ -379,7 +379,7 @@ switch ($_GET['ajax']) {
   
       case '2setswinning':
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
-        $myHTML = new HTML($db);
+        $myHTML = new html();
         $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1_points;
         $_POST[$curr_game->location.'_set1_p2']=$curr_game->set1_p2_points;
         $_POST[$curr_game->location.'_set2_p1']=$curr_game->set2_p1_points;

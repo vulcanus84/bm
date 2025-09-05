@@ -32,7 +32,7 @@
       $myPage->add_content("<canvas id='canvas' width='1000' height='500'></canvas>");
       $myPage->add_content("</div>");
       $myPage->add_content("<canvas style='display:none;border:5px solid green;' id='canvas2' width='1000' height='500'></canvas>");
-      $myHTML = new html($db);
+      $myHTML = new html();
 
       $myPage->add_content("<div>");
       $myPage->add_content("<table cellspacing='0'><tr>");

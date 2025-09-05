@@ -80,7 +80,7 @@
     }
     if(!isset($_GET['user_id'])) { $_GET['user_id'] = ""; }
 
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("permission_path");
     $myQuery->set_default_where("user_id='$_GET[user_id]'");
     $myQuery->set_sql_table("permissions");
@@ -104,7 +104,7 @@
         $compare_string .= $data->permission_path.";";
       }
 
-      $myHTML = new html($db);
+      $myHTML = new html();
       $myPage->add_content("<div style='float:left;width:500px;'>");
       $myPage->add_content("<div>");
       $myPage->add_content("<h2>Benutzer auswählen</h2>");

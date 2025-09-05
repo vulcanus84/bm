@@ -7,7 +7,7 @@
   try
   {
     $myPage = new page();
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("user_account");
     $myQuery->set_default_sort_dir("ASC");
     $myQuery->set_sql_table("users");

@@ -10,10 +10,10 @@
     private $entries;
 		private $db;
 
-    function __construct($db)
+    function __construct()
     {
       $this->menu_typ = 'simple';
-			$this->db = $db;
+      $this->db = db::getInstance(); // Immer Singleton
     }
 
     function create_menu($id,$own_css=false)

@@ -6,7 +6,7 @@
   try
   {
     $myPage = new page();
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("exam_category");
     $myQuery->set_sql_table("exams");
     $sql_table = $myQuery->get_sql_table();

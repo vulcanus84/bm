@@ -107,7 +107,7 @@
       $myPage->set_subtitle("Passwort setzen");
       include('menu.php');
       $myPage->menu = $myMenu->create_menu("tabsJ");
-      $myHTML = new html($db);
+      $myHTML = new html();
       $myPage->add_content("<h1>Benutzer zusammenführen</h1>");
       $myPage->add_content("<div style=''>");
 

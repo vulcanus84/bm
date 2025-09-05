@@ -4,7 +4,7 @@ class html
   private $txt;
 	private $t;
 
-  function __construct($db)
+  function __construct()
   {
     if(isset($_SESSION['login_user']))
 		{
