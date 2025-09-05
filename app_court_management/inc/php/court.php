@@ -1,9 +1,9 @@
 <?php
 //header("Content-type: image/png");
-define("level","../");                              //define the structur to to root directory (e.g. "../", for files in root set "")
+define("level","../../../");                              //define the structur to to root directory (e.g. "../", for files in root set "")
 require_once(level."inc/standard_includes.php");    //Load all necessary files (DB-Connection, User-Login, etc.)
 
-$im    = imagecreatefrompng("spielfeld.png");
+$im    = imagecreatefrompng("../imgs/spielfeld.png");
 $background = imagecolorallocate($im , 255, 255, 255);
 imagecolortransparent($im, $background);
 

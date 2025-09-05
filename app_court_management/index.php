@@ -5,11 +5,8 @@
   try
   {
     $myPage = new page();
-		$myPage->add_js_link('index.js');
-		$myPage->add_css_link('index.css');
-
-		$page->change_parameter('x','1');
-		$_SERVER['link'] = $page->get_link();
+		$myPage->add_js_link('inc/js/index.js');
+		$myPage->add_css_link('inc/css/index.css');
 
     if(!IS_AJAX)
     {
@@ -23,14 +20,13 @@
 				$myPage->add_js("t_courts[".$d->court_no."] = setInterval(function() { makeTimer('$d->court_no','$d->js_date+02:00'); }, 1000);");
   		}  		
   		  
-  		$myPage->add_content("<div id='open_games' style='float:left;height:80vh;border-right:5px solid #CCC;width:25vw;'>");
-  		$myPage->add_content("</div>");
+  		$myPage->add_content("<div id='open_games'></div>");
       $myPage->add_content(get_court_table($db,2,3));
       print $myPage->get_html_code();
     }
     else
     {
-			include('ajax.php');
+			include('inc/php/ajax.php');
     }
   }
   catch (Exception $e)
@@ -58,7 +54,7 @@
 		
 		 		$data = $db->sql_query_with_fetch("SELECT * FROM courts WHERE court_no='$court_no_eff'"); 
 				if($data) { $game_id = $data->court_game_id; } else { $game_id = ''; }
-				$x.= "			<div id='court".$court_no_eff."' data-game-id='{$game_id}' class='droppable real_court'>";
+				$x.= "			<div id='court{$court_no_eff}' data-game-id='{$game_id}' class='droppable real_court'>";
 	  		$x.= get_court($db, $court_no_eff);
 		 		$x.= "			</div>";
 	  		$x.= "		</td>";
@@ -84,7 +80,7 @@
  		}
  		
 		// linke Box mit Court-Nr.
-		$x = "<div class='court_no'>$court_no</div>";
+		$x = "<div class='court_no'>{$court_no}</div>";
 
 		// jetzt der mittlere Bereich mit dem Court-Bild
 		$data2 = $db->sql_query_with_fetch("SELECT *,(TIME_TO_SEC(court_stopped_on) - TIME_TO_SEC(court_started_on)) AS seconds FROM courts WHERE court_no='$court_no'");
@@ -92,50 +88,56 @@
 
 		$x .= "
 			<div class='court_middle'>
-				<img src='court.php?action=$txt' class='court' style='opacity:0.4;'/>
-				<div class='court_timer' id='timer_court$court_no'>{$time_txt}</div>
+				<img src='inc/php/court.php?action=$txt' class='court'/>
+				<div class='court_timer' id='timer_court{$court_no}'>{$time_txt}</div>
 			</div>";
 
 		// rechts die Icons – auch wieder flex
 		$x .= "<div class='court_buttons'>";
 
-
+		// Buttons
+		$main_path = 'inc/imgs/';
+		$btn_play = $main_path."play.png";
+		$btn_stop = $main_path."stop.png";
+		$btn_clear = $main_path."clear.png";
+		$btn_save = $main_path."big_save.png";
+		$btn_match = $main_path."match_paper.png";
 
 		if($db->count()==1) {
 				if($data->court_status=='empty' OR $data->court_status=='') {
-						$x .= "<img src='play.png' id='play_court$court_no' class='button_inactive''/>
-									<img src='stop.png' id='stop_court$court_no' class='button_inactive''/>
-									<img src='clear.png' id='clear_court$court_no' class='button_inactive''/>";
+						$x .= "<img src='{$btn_play}' id='play_court{$court_no}' class='button_inactive''/>
+									<img src='{$btn_stop}' id='stop_court{$court_no}' class='button_inactive''/>
+									<img src='{$btn_clear}' id='clear_court{$court_no}' class='button_inactive''/>";
 				}
 
 				if($data->court_status=='assigned') {
-						$x .= "<img src='play.png' id='play_court$court_no' class='button_active' onclick='play_court($court_no,".$data->court_game_id.");'/>
-									<a href='../app_tournament/inc/php/match_pdf.php?tournament_id=$data->game_group_id&game_id=$data->court_game_id' target='_blank'>
-											<img src='match_paper.png' id='stop_court$court_no' class='button_active'/>
+						$x .= "<img src='{$btn_play}' id='play_court{$court_no}' class='button_active' onclick='play_court({$court_no},{$data->court_game_id});'/>
+									<a href='../app_tournament/inc/php/match_pdf.php?tournament_id={$data->game_group_id}&game_id={$data->court_game_id}' target='_blank'>
+											<img src='{$btn_match}' id='stop_court{$court_no}' class='button_active'/>
 									</a>
-									<img src='clear.png' id='clear_court$court_no' class='button_active' onclick='clear_court($court_no);'/>";
+									<img src='{$btn_clear}' id='clear_court{$court_no}' class='button_active' onclick='clear_court({$court_no});'/>";
 				}
 
 				if($data->court_status=='play') {
-						$x .= "<a href='../app_tournament/inc/php/match_pdf.php?tournament_id=$data->game_group_id&game_id=$data->court_game_id' target='_blank'>
-											<img src='match_paper.png' id='stop_court$court_no' style='width:3vw;opacity:1;cursor:pointer;'/>
+						$x .= "<a href='../app_tournament/inc/php/match_pdf.php?tournament_id={$data->game_group_id}&game_id={$data->court_game_id}' target='_blank'>
+											<img src='{$btn_match}' id='stop_court{$court_no}' style='width:3vw;opacity:1;cursor:pointer;'/>
 									</a>
-									<img src='stop.png' id='stop_court$court_no' class='button_active' onclick='stop_court($court_no);'/>
-									<img src='clear.png' id='clear_court$court_no' class='button_inactive''/>";
+									<img src='{$btn_stop}' id='stop_court{$court_no}' class='button_active' onclick='stop_court({$court_no});'/>
+									<img src='{$btn_clear}' id='clear_court{$court_no}' class='button_inactive''/>";
 				}
 
 				if($data->court_status=='stopped') {
-						$data = $db->sql_query_with_fetch("SELECT *,(TIME_TO_SEC(court_stopped_on) - TIME_TO_SEC(court_started_on)) AS seconds FROM courts WHERE court_no='$court_no'");
+						$data = $db->sql_query_with_fetch("SELECT *,(TIME_TO_SEC(court_stopped_on) - TIME_TO_SEC(court_started_on)) AS seconds FROM courts WHERE court_no='{$court_no}'");
 						$time_txt = gmdate("H:i:s", $data->seconds);
 
-						$x .= "<img src='play.png' id='play_court$court_no' class='button_active' onclick='play_court($court_no,".$data->court_game_id.",true);'/>
-									<img src='save_big.png' id='save_court$court_no' class='button_active' onclick='save_court($court_no);'/>
-									<img src='clear.png' id='clear_court$court_no' class='button_active' onclick='clear_court($court_no);'/>";
+						$x .= "<img src='{$btn_play}' id='play_court{$court_no}' class='button_active' onclick='play_court({$court_no},".$data->court_game_id.",true);'/>
+									<img src='{$btn_save}' id='save_court{$court_no}' class='button_active' onclick='save_court({$court_no});'/>
+									<img src='{$btn_clear}' id='clear_court{$court_no}' class='button_active' onclick='clear_court({$court_no});'/>";
 				}
 		} else {
-				$x .= "<img src='play.png' id='play_court$court_no' class='button_inactive''/>
-							<img src='stop.png' id='stop_court$court_no' class='button_inactive''/>
-							<img src='clear.png' id='clear_court$court_no' class='button_inactive''/>";
+				$x .= "<img src='{$btn_play}' id='play_court{$court_no}' class='button_inactive''/>
+							<img src='{$btn_stop}' id='stop_court{$court_no}' class='button_inactive''/>
+							<img src='{$btn_clear}' id='clear_court{$court_no}' class='button_inactive''/>";
 		}
 
 		$x .= "</div>"; // Ende Icons

@@ -80,9 +80,9 @@ switch ($_GET['ajax']) {
       }
       if($resttime_p1<900 OR $resttime_p2<900) { $zus_txt = 'background-color:orange;'; } else { $zus_txt = ''; }
       print "<div class='draggable' style='border-radius:10px;padding:0px;margin-bottom:5px;$zus_txt' id='$d->game_id'>";
-      print "	<table style='border-spacing:0px;'><tr><td style='text-align:center;width:10%;'><img src='sleep.svg' style='width:100%;'/><br/>$resttime_p1_txt</td>";
-      print "	<td><img src='court.php?action=fill&game_id=$d->game_id' class='court'/></td>";
-      print "	<td style='text-align:center;width:10%;'><img src='sleep.svg' style='width:100%;'/><br/>$resttime_p2_txt</td></tr></table>";
+      print "	<table style='border-spacing:0px;'><tr><td style='text-align:center;width:10%;'><img src='inc/imgs/sleep.svg' style='width:100%;'/><br/>$resttime_p1_txt</td>";
+      print "	<td><img src='inc/php/court.php?action=fill&game_id=$d->game_id' class='court'/></td>";
+      print "	<td style='text-align:center;width:10%;'><img src='inc/imgs/sleep.svg' style='width:100%;'/><br/>$resttime_p2_txt</td></tr></table>";
       print "</div>";	
     }
     break;
