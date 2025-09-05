@@ -6,8 +6,8 @@ global $db;
 try
 {	
 	$myPage = new page();
-	$myPage->add_js_link('index.js');
-	$myPage->add_css_link('index.css');
+	$myPage->add_js_link('inc/js/index.js');
+	$myPage->add_css_link('inc/css/index.css');
 
 	if(!IS_AJAX)
 	{
@@ -50,7 +50,7 @@ try
 	}
 	else
 	{
-		include('ajax.php');
+		include('inc/php/ajax.php');
 	}
 }
 catch (Exception $e)

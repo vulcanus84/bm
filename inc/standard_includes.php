@@ -38,4 +38,4 @@
 
 	include_once(level."inc/settings.php");
 
-  $db = db::getInstance(); // Immer Singleton
+  $db = new db; //own db connector for connection external to classes (classes implement it on their own)
