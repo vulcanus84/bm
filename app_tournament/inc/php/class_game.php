@@ -9,7 +9,7 @@ class game
 	public $id;
   public $round;
 	private $db;
-  public $status;
+  public $status='New';
   public $location;
   
   public $p1;

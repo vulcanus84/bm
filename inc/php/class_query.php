@@ -972,7 +972,7 @@ class query
 
               default:
 								if($d === null) { if($col->get_default_value()) { $val = $col->get_default_value(); } else { $val = ''; } } else {  $val = $d->$db_col_name; }
-								$val = str_replace("'","&#39;",$val);
+								$val = str_replace("'","&#39;",$val ?? '');
                 $txt.= "<input type='text' name='".$col->db_col_name."' value='".$val."' style='width:".$col->get_width()*0.9."px;' ".$col->get_javascript()." />";
             }
           }

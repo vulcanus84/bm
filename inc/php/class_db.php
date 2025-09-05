@@ -21,7 +21,7 @@ class db
 
     public function __construct()
     {
-        error_log("Neue DB-Verbindung erstellt! Stack: " . json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)));
+        //error_log("Neue DB-Verbindung erstellt! Stack: " . json_encode(debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5)));
         $user = "huebsche_bm";
         $pw   = "badminton123$";
         $host = "localhost";
