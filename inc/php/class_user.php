@@ -492,13 +492,19 @@ class user
 		$html.= " 	</tr>";
 		$html.= " 	<tr><td>&nbsp;</td></tr>";
 		$html.= " 	<tr>";
-		$html.= " 		<td colspan='2'><button class='green' $(\"#new_user\").submit();'>Speichern</button>";
-		$html.= "		<button type='button' class='blue' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
+		$html.= " 		<td colspan='2'>";
+		$html.= " 		 	<button class='green' $(\"#new_user\").submit();'>Speichern</button>";
+		$html.= "				<button type='button' class='purple' onclick='show_history(".$this->id.");'>Infos</button>";
+		$html.= "			</td>";
+		$html.= " 	</tr>";
+		$html.= " 	<tr>";
+		$html.= " 		<td colspan='2'>";
+		$html.= "				<button type='button' class='blue' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
 		if($this->check_permission('app_user_admin')==false)
 		{
 			$html.= "		<button type='button' class='red' onclick='delete_permission(".$this->id.");'>Spieler löschen</button>";
 		}
-		$html.= "		<button type='button' class='purple' onclick='show_history(".$this->id.");'>Infos</button></td>";
+		$html.= "			</td>";
 		$html.= "	</tr>";
 		$html.= "</table>";
 		$html.= "</form>";
