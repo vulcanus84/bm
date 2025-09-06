@@ -117,7 +117,7 @@
         while($d = $db->get_next_res())
         {
           $my_user = new user($d->user_id);
-          print "<div style='float:left;margin:3px;text-align:center;'>".$my_user->get_picture(false,'filter_user','80px',true)."<br/><span style='font-size:9pt;'>".$my_user->firstname."</span></div>";
+          print "<div style='float:left;margin:3px;text-align:center;'>".$my_user->get_picture(true,array($my_user->firstname))."</div>";
         }
         print "</div>";
         print "<div id='excersises' style='width:50vw;float:left;overflow:auto;height:50vh;margin:5px;'>";

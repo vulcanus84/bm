@@ -369,11 +369,11 @@ class user
 
 				$x.= "<tr>";
 				$x.= "<td><h2>Runde ".$data->game_round."</h2></td>";
-				$x.= "<td><img src='".$u1->get_pic_path()."'><br/>".$u1->login."</td>";
-				if(isset($u3)) { $x.= "<td ><img src='".$u3->get_pic_path()."'><br/>".$u3->login."</td>"; }
+				$x.= "<td><img src='{$u1->get_pic_path(true)}'>";
+				if(isset($u3)) { $x.= "<img src='".$u3->get_pic_path(true)."'><br/>{$u1->login} / {$u3->login}</td>"; } else { $x.= "<br/>{$u1->login}</td>"; }
 				$x.= "<td><h2>gegen</h2></td>";
-				$x.= "<td><img src='".$u2->get_pic_path()."' onclick=\"show_user_games('".$u2->id."');\"><br/>".$u2->login."</td>";
-				if(isset($u4)) { $x.= "<td><img src='".$u4->get_pic_path()."' onclick=\"show_user_games('".$u4->id."');\"><br/>".$u4->login."</td>"; }
+				$x.= "<td><img src='{$u2->get_pic_path(true)}' onclick=\"show_user_games('".$u2->id."');\">";
+				if(isset($u4)) { $x.= "<img src='".$u4->get_pic_path(true)."' onclick=\"show_user_games('".$u4->id."');\"><br/>{$u2->login} / {$u4->login}</td>"; } else { $x.= "<br/>{$u2->login}</td>"; }
 
 				if($data->game_winner_id!='')
 				{
@@ -381,16 +381,16 @@ class user
 					{
 						if($data->game_winner_id==$_GET['user_id'] OR $data->game_winner2_id==$_GET['user_id'])
 						{
-							$x.= "<td style='text-align:center;'><h1 style='color:green;'>Gewonnen!</h1></td>";
+							$x.= "<td style='text-align:center;'><span style='color:green;font-size:2vw;'>Gewonnen!</span></td>";
 						}
 						else
 						{
-							$x.= "<td style='text-align:center;'><h1 style='color:red;'>Verloren!</h1></td>";
+							$x.= "<td style='text-align:center;'><span style='color:red;font-size:2vw;'>Verloren!</span></td>";
 						}
 					}
 					else
 					{
-						$txt = "<span style='font-size:16pt;font-weight:bold;'>";
+						$txt = "<span style='font-size:2vw;font-weight:bold;'>";
 						if($invert)
 						{
 							if($data->game_set1_p1>0 OR $data->game_set1_p2>0) {	$txt .= $data->game_set1_p1.":".$data->game_set1_p2; }
@@ -417,7 +417,7 @@ class user
 					}
 					if($data->game_duration>0)
 					{
-						$x.= "<td style='text-align:center;font-size:14pt;'>Spieldauer<br/>".gmdate("H:i:s", $data->game_duration)."</td>";
+						$x.= "<td style='text-align:center;font-size:2vw;'>Spieldauer<br/>".gmdate("H:i:s", $data->game_duration)."</td>";
 					}
 				}
 				else
