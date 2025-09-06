@@ -33,7 +33,7 @@ try
 			}
 			$trainer = new user($d->journal_created_by);
 			$myPage->add_content("<div class='row'>");
-			$myPage->add_content("<div class ='col_trainer' id='trainer_{$d->journal_id}'><img src='{$trainer->get_pic_path(true)}'/><br/>{$trainer->login}</div>");
+			$myPage->add_content("<div class ='col_trainer' id='trainer_{$d->journal_id}'><div class='deactivated'><img src='{$trainer->get_pic_path(true)}'/><br/>{$trainer->login}</div></div>");
 			$myPage->add_content("<div class ='col_player' id='players_{$d->journal_id}'>");
 			$db2->sql_query("SELECT * FROM journal2user WHERE journal2user_journal_id='{$d->journal_id}'");
 			while($d2 = $db2->get_next_res())

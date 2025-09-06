@@ -10,7 +10,6 @@ div.col_trainer { padding:5px;width:10vw;text-align:center;border-right:1px soli
 div.col_trainer img { width:8vw; }
 
 div.col_player { padding:5px;width:30vw;border-right:1px solid gray; }
-div.col_player img { width:8vw; }
 
 div.user_pic { float:left; }
 
@@ -24,9 +23,9 @@ button.abort_delete { background-color:green;margin:5px;font-size:5vh; }
 button.delete { background-color:red;margin:5px;font-size:5vh; }
 
 h1.show_players { clear:both;padding-top:10px; }
-div.activated { border:3px solid purple;float:left;font-size:1vw;text-align:center;border-radius:10px; }
-div.deactivated { border:3px solid white;float:left;font-size:1vw;text-align:center;border-radius:10px; }
-div.activated img, div.deactivated img { width:8vw; } 
+div.activated { border:3px solid purple;float:left;font-size:10pt;text-align:center;border-radius:10px; }
+div.deactivated { border:3px solid white;float:left;font-size:10pt;text-align:center;border-radius:10px; }
+div.activated img, div.deactivated img { width:100px; } 
 
 hr.end_line {clear:both; }
 
