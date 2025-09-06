@@ -15,9 +15,14 @@ div.user_pic {
 }
 
 div.user_pic img { 
-  width:100%; 
+  width:100%;
 }
 
+img#user_pic_large { 
+  width:70vw; 
+  max-width: 500px;
+
+}
 
 /* ****************** */
 /* Teams */
