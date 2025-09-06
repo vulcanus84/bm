@@ -38,19 +38,41 @@ function edit_players(id)
     function(data)
     {
       $('#myModalText').html(data); 
+      $("div[id^='div_location_']").hide();
       $('#myModal').show();
-      $('.activated').on('click', (e) => toggle_activation(e.currentTarget.id.replace('img_','')));
-      $('.deactivated').on('click', (e) => toggle_activation(e.currentTarget.id.replace('img_','')));
+      $('.activated, .deactivated').on('click', (e) => {
+          // e.currentTarget.id = "img_316_7"
+          const fullId = e.currentTarget.id;         // "img_316_7"
+          const mainId = fullId.split('_')[1];       // "316"
+          toggle_activation(mainId);
+      });
       $('.save_players').on('click', (e) => save_players(e.currentTarget.id.replace('save_players_','')));
+      $('.location_select').on('click', (e) => change_location(e.currentTarget.id.replace('btn_location_','')));
     });
 }
+
+function change_location(location_id)
+{
+  $('.location_select').removeClass('orange');
+  $('#btn_location_' + location_id).addClass('orange');
+  
+  $("div[id^='div_location_']").hide();
+  $('#div_location_' + location_id).show();
+}
+
 function save_players(journal_id)
 {
-  let players = '';
-  $('.activated').each(function() {
-      players = players + $(this).attr('id').replace('img_','') + ';';
-  });
-  let my_url = 'index.php?ajax=save_players&players=' + players + '&journal_id=' + journal_id
+  // IDs aus allen aktivierten Elementen sammeln
+  let players = $('.activated')
+      .map(function() {
+          return $(this).attr('id').split('_')[1]; // nur die mittlere Zahl
+      })
+      .get(); // jQuery-Objekt in normales Array umwandeln
+
+  // Duplikate entfernen und wieder zu String zusammenfügen
+  let uniqueStr = [...new Set(players)].join(';');
+
+  let my_url = 'index.php?ajax=save_players&players=' + uniqueStr + '&journal_id=' + journal_id
   $.ajax({ url: my_url }).done(
     function(data)
     {
@@ -122,11 +144,15 @@ function confirm_delete(id)
 
 function toggle_activation(img_id)
 {
-  if($('#img_' + img_id).hasClass('activated')) { $('#img_' + img_id).removeClass('activated'); $('#img_' + img_id).addClass('deactivated'); }
-  else
-  {
-    if($('#img_' + img_id).hasClass('deactivated')) { $('#img_' + img_id).removeClass('deactivated'); $('#img_' + img_id).addClass('activated'); }
-  }
+  $('[id^="img_' + img_id + '"]').each(function() {
+    if ($(this).hasClass('activated')) {
+      $(this).removeClass('activated'); 
+      $(this).addClass('deactivated');
+    } else {
+      $(this).removeClass('deactivated'); 
+      $(this).addClass('activated');
+    }
+  });
 }
 
 function change_activation(img_id)

@@ -39,10 +39,10 @@ try
 			while($d2 = $db2->get_next_res())
 			{
 				$player = new user($d2->journal2user_user_id);
-				$myPage->add_content($player->get_picture(true));
+				$myPage->add_content("<div class='deactivated'><img src='".$player->get_pic_path(true)."'/><br/>".$player->login."</div>");
 			}
 			$myPage->add_content("</div>");
-			$myPage->add_content("<div class='col_text' id='text_".$d->journal_id."'>".nl2br($d->journal_text)."</div>");
+			$myPage->add_content("<div class='col_text' id='text_".$d->journal_id."'>".nl2br($d->journal_text ?? '')."</div>");
 			$myPage->add_content("<div class='col_delete' id='delete_".$d->journal_id."'><img src='../inc/imgs/query/delete_big.png'/></div>");
 			$myPage->add_content("</div>");
 		}

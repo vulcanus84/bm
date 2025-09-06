@@ -65,31 +65,38 @@ if($_GET['ajax']=='show_players')
 {
   $last_group = null;
   //$db->sql_query("SELECT * FROM journal2user WHERE journal2user_journal_id='".$_GET['journal_id']."'");
+  $db->sql_query("SELECT * FROM locations ORDER BY location_name");
+  while($d = $db->get_next_res()) {
+    print "<button class='location_select' id='btn_location_{$d->location_id}'>{$d->location_name}</button>";
+  }
+
   $db->sql_query("SELECT * FROM users 
                   LEFT JOIN (SELECT * FROM journal2user WHERE journal2user_journal_id='$_GET[journal_id]') as journal_temp ON journal_temp.journal2user_user_id = users.user_id 
                   LEFT JOIN location2user ON location2user.location2user_user_id = users.user_id 
                   LEFT JOIN locations ON location2user.location2user_location_id = locations.location_id 
-                  WHERE user_hide!='1' AND user_id>1 AND (locations.location_name = 'BCZ 1' OR locations.location_name = 'BCZ 2')
+                  WHERE user_hide!='1' AND user_id>1
                   ORDER BY locations.location_name, user_account
   ");
   while($d = $db->get_next_res())
   {
     if($last_group!=$d->location_name)
     {
-      print "<h1 class='show_players'>".$d->location_name."</h1><hr/>";
+      if($last_group!=null) { print "</div>"; }
+      print "<div class='location' id='div_location_{$d->location_id}'>";
       $last_group = $d->location_name;
     }
     if($d->journal2user_user_id!='')
     {
       $player = new user($d->journal2user_user_id);
-      print "<div class='activated' id='img_".$d->user_id."' ><img src='".$player->get_pic_path(true)."'/><br/>".$player->login."</div>";
+      print "<div class='activated' id='img_{$d->user_id}_{$d->location_id}' ><img src='".$player->get_pic_path(true)."'/><br/>".$player->login."</div>";
     }
     else
     {
       $player = new user($d->user_id);
-      print "<div class='deactivated' id='img_".$d->user_id."'><img src='".$player->get_pic_path(true)."'/><br/>".$player->login."</div>";
+      print "<div class='deactivated' id='img_{$d->user_id}_{$d->location_id}'><img src='".$player->get_pic_path(true)."'/><br/>".$player->login."</div>";
     }
   }
+  print "</div>";
   print "<hr class='end_line' /><p/><button class='save_players' id='save_players_".$_GET['journal_id']."'>Speichern</button>";
 }
 
