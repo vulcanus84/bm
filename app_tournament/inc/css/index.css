@@ -24,6 +24,26 @@ img#user_pic_large {
 
 }
 
+div#statistics, div#all_games {
+  width:60vw;
+}
+
+div#statistics img {
+  width:100%;
+}
+
+div#all_games img {
+  width:5vw;
+}
+
+div#all_games td {
+  text-align: center;
+}
+div#all_games h1 {
+  margin-bottom:0px;
+}
+
+
 /* ****************** */
 /* Teams */
 /* Left side with the BHZ */

@@ -248,7 +248,8 @@ class user
 		if($this->db->count()>0)
 		{
 
-			$x.= "<h1>Infos von ".$this->fullname."</h1>";
+			$x.= "<h1>Infos von {$this->fullname}</h1>";
+			$x.= "<div id='played_tournaments'>";
 			$x.= "<h2>Gespielte Turniere</h2>";
 			$x.= "<ul>";
 			while($d = $this->db->get_next_res())
@@ -262,19 +263,16 @@ class user
 			$this->db->sql_query("SELECT * FROM games WHERE game_winner_id='$this->id' OR game_winner2_id='$this->id'");
 			$games_won = $this->db->count();
 
+			$x.= "</div>";
+			$x.= "<div id='statistics'>";
 			$x.= "<h2>Statistiken</h2>";
 
-			$x.= "<table>";
-			$x.= "<tr>";
-			$x.= "<td>Anzahl Spiele:</td>";
-			$x.= "<td>$games_played</td>";
-			$x.= "</tr>";
-			$x.= "</table>";
+			$x.= "<p>Anzahl Spiele: {$games_played}</p>";
 
 			$myChart = new chart("circle","Gewonnen/Verloren", "",700,200);
 	 		$myChart->add_row('Gewonnen',$games_won,'#AAFF00');
 	 		$myChart->add_row('Verloren',$games_played-$games_won,'#FF0000');
-	 		$x.= "<img style='width:100%;' src='data:image/jpeg;base64," . base64_encode($myChart->create()) . "'/>";
+	 		$x.= "<img src='data:image/jpeg;base64," . base64_encode($myChart->create()) . "'/>";
 			$myChart = null;
 
 
@@ -316,24 +314,29 @@ class user
 			}
 			$myChart->set_max_value($max_count);
 
-	 		$x.= "<img style='width:100%;' src='data:image/jpeg;base64," . base64_encode($myChart->create()) . "'/>";
+	 		$x.= "<img src='data:image/jpeg;base64," . base64_encode($myChart->create()) . "'/>";
 			$myChart = null;
+			$x.= "</div>";
 
+
+			$x.= "<div id='all_games'>";
 			$x.= "<h2>Alle Spiele</h2>";
-			$this->db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM games
+			$db_games = clone($this->db);
+			$db_games->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM games
 													LEFT JOIN `groups` ON game_group_id = `groups`.group_id
 													WHERE game_player1_id='$this->id' OR game_player2_id='$this->id' OR game_player3_id='$this->id' OR game_player4_id='$this->id'
 													ORDER BY group_created DESC,game_round ASC");
 
-			$x.= "<table style='width:100%;'>";
 			$last_tournament_id = 0;
-			while($data = $this->db->get_next_res())
+			while($data = $db_games->get_next_res())
 			{
 				if($last_tournament_id != $data->game_group_id)
 				{
+					if($last_tournament_id!=0) { $x.= "</table>"; }
 					$myTournament = new Tournament\tournament($data->game_group_id);
 					$last_tournament_id = $data->game_group_id;
-					$x.= "<tr><td colspan='6'><h1 style='margin-bottom:0px;'>{$myTournament->title}</h1><h2 style='font-style:italic;'>{$data->group_created_c}</h2></td></tr>";
+					$x.= "<hr/><h1>{$myTournament->title}</h1><h2 style='font-style:italic;'>{$data->group_created_c}</h2>";
+					$x.= "<table style='width:100%;'>";
 				}
 
 				$u1 = null; $u2 = null; $u3 = null; $u4 = null;
@@ -365,12 +368,12 @@ class user
 				}
 
 				$x.= "<tr>";
-				$x.= "<td style='text-align:center;'><h2>Runde ".$data->game_round."</h2></td>";
-				$x.= "<td style='text-align:center;'><img style='width:100px;' src='".$u1->get_pic_path()."'><br/>".$u1->login."</td>";
-				if(isset($u3)) { $x.= "<td style='text-align:center;'><img style='width:100px;' src='".$u3->get_pic_path()."'><br/>".$u3->login."</td>"; }
-				$x.= "<td style='text-align:center;'><h2>gegen</h2></td>";
-				$x.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u2->get_pic_path()."' onclick=\"show_user_games('".$u2->id."');\"><br/>".$u2->login."</td>";
-				if(isset($u4)) { $x.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u4->get_pic_path()."' onclick=\"show_user_games('".$u4->id."');\"><br/>".$u4->login."</td>"; }
+				$x.= "<td><h2>Runde ".$data->game_round."</h2></td>";
+				$x.= "<td><img src='".$u1->get_pic_path()."'><br/>".$u1->login."</td>";
+				if(isset($u3)) { $x.= "<td ><img src='".$u3->get_pic_path()."'><br/>".$u3->login."</td>"; }
+				$x.= "<td><h2>gegen</h2></td>";
+				$x.= "<td><img src='".$u2->get_pic_path()."' onclick=\"show_user_games('".$u2->id."');\"><br/>".$u2->login."</td>";
+				if(isset($u4)) { $x.= "<td><img src='".$u4->get_pic_path()."' onclick=\"show_user_games('".$u4->id."');\"><br/>".$u4->login."</td>"; }
 
 				if($data->game_winner_id!='')
 				{
@@ -422,9 +425,9 @@ class user
 					$x.= "<td style='text-align:center;' colspan='2'><h2 style='font-style:italic;'>Noch nicht gespielt</h2></td>";
 				}
 				$x.= "</tr>";
-				$x.= "<tr><td colspan='6'><hr/></td></tr>";
 			}
 			$x.= "</table>";
+			$x.= "</div>";
 
 		}
 		else
@@ -526,35 +529,35 @@ class user
 
   			//$pos_x[] = $img_width/2-$img_star_width/2; $pos_y[] = 5;
 
-  			$pos_x[] = $img_width/1.5-$img_star_width/2; $pos_y[] = 25;
-  			$pos_x[] = $img_width/3-$img_star_width/2; $pos_y[] = 25;
+  			$pos_x[] = intval($img_width/1.5-$img_star_width/2); $pos_y[] = 25;
+  			$pos_x[] = intval($img_width/3-$img_star_width/2); $pos_y[] = 25;
 
-  			$pos_x[] = $img_width/1.24-$img_star_width/2; $pos_y[] = 70;
-  			$pos_x[] = $img_width/5-$img_star_width/2; $pos_y[] = 70;
+  			$pos_x[] = intval($img_width/1.24-$img_star_width/2); $pos_y[] = 70;
+  			$pos_x[] = intval($img_width/5-$img_star_width/2); $pos_y[] = 70;
 
-  			$pos_x[] = $img_width-$img_star_width*1.25; $pos_y[] = 140;
+  			$pos_x[] = intval($img_width-$img_star_width*1.25); $pos_y[] = 140;
   			$pos_x[] = 20; $pos_y[] = 140;
 
   			//Mitte
-  			$pos_x[] = $img_width-$img_star_width; $pos_y[] = 220;
+  			$pos_x[] = intval($img_width-$img_star_width); $pos_y[] = 220;
   			$pos_x[] = 5; $pos_y[] = 220;
 
-  			$pos_x[] = $img_width-$img_star_width*1.25; $pos_y[] = 300;
+  			$pos_x[] = intval($img_width-$img_star_width*1.25); $pos_y[] = 300;
   			$pos_x[] = 20; $pos_y[] = 300;
 
-  			$pos_x[] = $img_width/1.24-$img_star_width/2; $pos_y[] = 360;
-  			$pos_x[] = $img_width/5-$img_star_width/2; $pos_y[] = 360;
+  			$pos_x[] = intval($img_width/1.24-$img_star_width/2); $pos_y[] = 360;
+  			$pos_x[] = intval($img_width/5-$img_star_width/2); $pos_y[] = 360;
 
-  			$pos_x[] = $img_width/1.5-$img_star_width/2; $pos_y[] = 400;
-  			$pos_x[] = $img_width/3-$img_star_width/2; $pos_y[] = 400;
+  			$pos_x[] = intval($img_width/1.5-$img_star_width/2); $pos_y[] = 400;
+  			$pos_x[] = intval($img_width/3-$img_star_width/2); $pos_y[] = 400;
 
-  			$pos_x[] = $img_width/2-$img_star_width/2; $pos_y[] = 420;
+  			$pos_x[] = intval($img_width/2-$img_star_width/2); $pos_y[] = 420;
 
 			$black = imagecolorallocate($im, 50, 50, 50);
 			$font = level."inc/CSM.ttf";
 			$font_size = 48;
 			list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $anz_stars);
-			imagettftext($im, $font_size, 0, 250-(($right-$left)/2), 70, $black, $font, $anz_stars);
+			imagettftext($im, $font_size, 0, intval(250-(($right-$left)/2)), 70, $black, $font, $anz_stars);
 
 			$i=0;
   			foreach($pos_x as $cur_pos_x)

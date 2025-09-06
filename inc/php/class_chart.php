@@ -122,12 +122,15 @@ class chart
         $dia_width = $this->width-$this->text_height;
         $dia_height = $this->height-$title_height*1.5;
 
-        $font_size = ($dia_width/20)*$f;
+        $font_size = round(($dia_width/20)*$f);
         if($font_size>30*$f) { $font_size = 30*$f; }
         if($font_size<10*$f) { $font_size = 10*$f; }
 
-        $sx = $dia_width*$f*0.95;$sy=$dia_height*$f;$sz=$dia_width/20*$f;// Set Size-dimensions. SizeX,SizeY,SizeZ
-        $cx = $dia_width/2*$f;$cy=($dia_height/2+$title_height)*$f; //Set Pie Postition. CenterX,CenterY
+        $sx = round($dia_width*$f*0.95); 
+        $sy = $dia_height*$f; 
+        $sz = round($dia_width/20*$f);// Set Size-dimensions. SizeX,SizeY,SizeZ
+        $cx = round($dia_width/2*$f);
+        $cy = round(($dia_height/2+$title_height)*$f); //Set Pie Postition. CenterX,CenterY
 
         $items = count($this->arr_data);
         $imgx=$this->width*$f;	$imgy=$this->height*$f;//Set Image Size. ImageX,ImageY
@@ -145,7 +148,7 @@ class chart
           $winkel = (($row['value'] / $data_sum) * 360);
           if ($winkel<1) { $winkel = 1; }
           $angle[] = $winkel;
-          $angle_sum[] = array_sum($angle);
+          $angle_sum[] = round(array_sum($angle));
         }
 
         $im  = imagecreate($imgx,$imgy);
@@ -158,7 +161,7 @@ class chart
         foreach($this->arr_data as $row)
         {
           $colors[] = imagecolorallocate($im,$row['color_r'],$row['color_g'],$row['color_b']);
-          $colord[] = imagecolorallocate($im,($row['color_r']/1.5),($row['color_g']/1.5),($row['color_b']/1.5));
+          $colord[] = imagecolorallocate($im,round($row['color_r'] / 1.5),round($row['color_g'] / 1.5),round($row['color_b'] / 1.5));
         }
 
         //3D effect.
@@ -188,8 +191,8 @@ class chart
         imagettftext($im,$this->font_size_title*$f,0,10,25*$f,$schwarz,$this->font_path,$this->title);
         imagettftext($im,$this->font_size_subtitle*$f,0,10,$this->font_angle_bottom*$f,$schwarz,$this->font_path,$this->subtitle);
 
-        $pos_y = $dia_height*0.05;
-        $pos_x = $dia_width*$f*1.05;
+        $pos_y = round($dia_height*0.05);
+        $pos_x = round($dia_width*$f*1.05);
 
         if($this->legend_visible)
         {
@@ -246,13 +249,13 @@ class chart
         //Draw dashed line
         $style = array($schwarz,$schwarz,$schwarz,$schwarz,$schwarz, $weiss, $weiss, $weiss, $weiss, $weiss);
         imagesetstyle($im, $style);
-        $y1 = $title_height*$f;
-        $y2 = $y1 + $dia_height*$f;
+        $y1 = round($title_height*$f);
+        $y2 = round($y1 + $dia_height*$f);
         $step = ($y2-$y1)/5;
         for($i = 0;$i<6;$i++)
         {
-          imageline($im,10,$y2-$i*$step-$bar_deep,$f*$this->width*0.9,$y2-$i*$step-$bar_deep,IMG_COLOR_STYLED);
-          imagettftext($im,$this->font_size_right,0,$f*$this->width*0.92,$y2-$i*$step-$bar_deep,$schwarz,$this->font_path,$this->data_max/5*$i);
+          imageline($im,10,round($y2-$i*$step-$bar_deep),round($f*$this->width*0.9),round($y2-$i*$step-$bar_deep),IMG_COLOR_STYLED);
+          imagettftext($im,$this->font_size_right,0,round($f*$this->width*0.92),round($y2-$i*$step-$bar_deep),$schwarz,$this->font_path,round($this->data_max/5*$i));
         }
 
         //Draw bars
@@ -264,9 +267,9 @@ class chart
           $color_top = $this->createcolor($im,$row['color_r'],$row['color_g'],$row['color_b']);
           $color_side = $this->createcolor($im,($row['color_r']/1.5),($row['color_g']/1.5),($row['color_b']/1.5));
           $color_front = $this->createcolor($im,($row['color_r']/1.2),($row['color_g']/1.2),($row['color_b']/1.2));
-          $x1 = $i*$bar_width+30*$f;
-          $x2 = ($i+1)*$bar_width+30*$f;
-          $y1 = ($dia_height+$title_height)*$f-($f1*$row['value']);
+          $x1 = round($i*$bar_width+30*$f);
+          $x2 = round(($i+1)*$bar_width+30*$f);
+          $y1 = round(($dia_height+$title_height)*$f-($f1*$row['value']));
           $j=0;
           while ($j<$bar_deep)
           {
@@ -281,7 +284,7 @@ class chart
 					$text_width = abs($box[4] - $box[0])*$f;
 					$text_height = abs($box[5] - $box[1])*$f;
 					$y_offset = ($this->text_height*2)-$text_height;
-          if(!isset($step_legend) OR $legend_write == $step_legend) { imagettftext($im,$this->font_size_bottom,$this->font_angle_bottom,$x1+($bar_width/2)-($text_width/2),$ty1-($y_offset/2),$schwarz,$this->font_path,$row['description']); $legend_write=1; } else { $legend_write++; }
+          if(!isset($step_legend) OR $legend_write == $step_legend) { imagettftext($im,$this->font_size_bottom,$this->font_angle_bottom,round($x1+($bar_width/2)-($text_width/2)),round($ty1-($y_offset/2)),$schwarz,$this->font_path,$row['description']); $legend_write=1; } else { $legend_write++; }
           $i = $i+2;
         }
 				break;
@@ -457,6 +460,9 @@ class chart
 
 	private	function createcolor($pic,$c1,$c2,$c3)
 	{
+    $c1 = round($c1);
+    $c2 = round($c2);
+    $c3 = round($c3);
 	  //get color from palette
 	  $color = imagecolorexact($pic, $c1, $c2, $c3);
 	  if($color==-1)
