@@ -6,7 +6,7 @@ div.add_entry img { height:25px; }
 section { margin-top:5px;float:left;width:30%;text-align:center;background-color:#CCC;border-radius:10px 10px 0px 10px;padding:5px; }
 div.row { width:100%;border:1px solid gray;display:flex;border-radius:10px; }
 
-div.col_trainer { padding:5px;width:10vw;text-align:center;border-right:1px solid gray; }
+div.col_trainer { padding:5px;width:12vw;text-align:center;border-right:1px solid gray; }
 div.col_trainer img { width:8vw; }
 
 div.col_player { padding:5px;width:30vw;border-right:1px solid gray; }
@@ -23,9 +23,9 @@ button.abort_delete { background-color:green;margin:5px;font-size:5vh; }
 button.delete { background-color:red;margin:5px;font-size:5vh; }
 
 h1.show_players { clear:both;padding-top:10px; }
-div.activated { border:3px solid purple;float:left;font-size:10pt;text-align:center;border-radius:10px; }
-div.deactivated { border:3px solid white;float:left;font-size:10pt;text-align:center;border-radius:10px; }
-div.activated img, div.deactivated img { width:100px; } 
+div.activated { border:3px solid purple;float:left;font-size:clamp(8pt,1vw,24pt);text-align:center;border-radius:10px; }
+div.deactivated { border:3px solid white;float:left;font-size:clamp(8pt,1vw,24pt);text-align:center;border-radius:10px; }
+div.activated img, div.deactivated img { width:10vw;max-width: 100px; } 
 
 hr.end_line {clear:both; }
 
