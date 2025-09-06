@@ -88,52 +88,45 @@ if($_GET['ajax']=='show_players')
     if($d->journal2user_user_id!='')
     {
       $player = new user($d->journal2user_user_id);
-      print "<div class='activated' id='img_{$d->user_id}_{$d->location_id}' ><img src='".$player->get_pic_path(true)."'/><br/>".$player->login."</div>";
+      print "<div class='activated' id='img_{$d->user_id}_{$d->location_id}' ><img src='".$player->get_pic_path(true)."'/><br/>{$player->login}</div>";
     }
     else
     {
       $player = new user($d->user_id);
-      print "<div class='deactivated' id='img_{$d->user_id}_{$d->location_id}'><img src='".$player->get_pic_path(true)."'/><br/>".$player->login."</div>";
+      print "<div class='deactivated' id='img_{$d->user_id}_{$d->location_id}'><img src='".$player->get_pic_path(true)."'/><br/>{$player->login}</div>";
     }
   }
   print "</div>";
-  print "<hr class='end_line' /><p/><button class='save_players' id='save_players_".$_GET['journal_id']."'>Speichern</button>";
+  print "<hr class='end_line' /><p/><button class='save_players' id='save_players_{$_GET['journal_id']}'>Speichern</button>";
 }
 
 
 if($_GET['ajax']=='show_trainer')
 {
-    try {
-        $d = $db->sql_query_with_fetch("SELECT *, DATE_FORMAT(journal_created_on,'%Y-%m-%d')  as curr_date FROM journal WHERE journal_id='$_GET[journal_id]'");
-    } catch (Exception $e) {
-
-    }
-    print "<h1>Datum</h1>";
+  $d = $db->sql_query_with_fetch("SELECT *, DATE_FORMAT(journal_created_on,'%Y-%m-%d')  as curr_date FROM journal WHERE journal_id='$_GET[journal_id]'");
+  print "<h1>Datum</h1>";
   print "<input id='journal_date' type='date' value='".$d->curr_date."'/>";
   print "<hr/>";
   print "<h1>Trainer</h1>";
-    try {
-        $db->sql_query("SELECT * FROM users 
-                        LEFT JOIN (SELECT * FROM journal WHERE journal_id='$_GET[journal_id]') as journal_temp ON journal_temp.journal_created_by = users.user_id
-                        LEFT JOIN location2user ON location2user.location2user_user_id = users.user_id 
-                        LEFT JOIN locations ON location2user.location2user_location_id = locations.location_id 
-                        WHERE user_hide!='1' AND user_id>1 AND locations.location_name = '_Trainer'
-                        ORDER BY locations.location_name, user_account
-        ");
-    } catch (Exception $e) {
+  $db->sql_query("SELECT * FROM users 
+                  LEFT JOIN (SELECT * FROM journal WHERE journal_id='$_GET[journal_id]') as journal_temp ON journal_temp.journal_created_by = users.user_id
+                  LEFT JOIN location2user ON location2user.location2user_user_id = users.user_id 
+                  LEFT JOIN locations ON location2user.location2user_location_id = locations.location_id 
+                  WHERE user_hide!='1' AND user_id>1 AND locations.location_name = '_Trainer'
+                  ORDER BY locations.location_name, user_account
+  ");
 
-    }
-    while($d = $db->get_next_res())
+  while($d = $db->get_next_res())
   {
     if($d->journal_created_by!='')
     {
       $player = new user($d->journal_created_by);
-      print "<div class='activated' id='img_".$d->user_id."'><img src='".$player->get_pic_path(true)."'/><br/>".$player->login."</div>";
+      print "<div class='activated' id='img_{$d->user_id}'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>";
     }
     else
     {
       $player = new user($d->user_id);
-      print "<div class='deactivated' id='img_".$d->user_id."'><img src='".$player->get_pic_path(true)."'/><br/>".$player->login."</div>";
+      print "<div class='deactivated' id='img_{$d->user_id}'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>";
     }
   }
   print "<hr class='end_line'/><p/><button class='save_trainer' id='save_trainer_".$_GET['journal_id']."'>Speichern</button>";

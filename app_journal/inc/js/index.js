@@ -48,6 +48,7 @@ function edit_players(id)
       });
       $('.save_players').on('click', (e) => save_players(e.currentTarget.id.replace('save_players_','')));
       $('.location_select').on('click', (e) => change_location(e.currentTarget.id.replace('btn_location_','')));
+      $('.location_select').first().click();
     });
 }
 
