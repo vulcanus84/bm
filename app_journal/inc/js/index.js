@@ -34,6 +34,8 @@ function save_text(id)
 function edit_players(id)
 {
   let my_url = 'index.php?ajax=show_players&journal_id=' + id
+  $('#myModalText').html("Data loading..."); 
+  $('#myModal').show();
   $.ajax({ url: my_url }).done(
     function(data)
     {
