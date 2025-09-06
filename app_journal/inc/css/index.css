@@ -28,6 +28,7 @@ div.deactivated { border:3px solid white;float:left;font-size:clamp(8pt,1vw,24pt
 div.activated img, div.deactivated img { width:10vw;max-width: 100px; } 
 
 hr.end_line {clear:both; }
+div.save { margin-bottom:100px; }
 
 div.location { 
   display: flex;

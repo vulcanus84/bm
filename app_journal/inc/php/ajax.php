@@ -97,7 +97,7 @@ if($_GET['ajax']=='show_players')
     }
   }
   print "</div>";
-  print "<hr class='end_line' /><p/><button class='save_players' id='save_players_{$_GET['journal_id']}'>Speichern</button>";
+  print "<hr class='end_line' /><p/><div class='save'><button class='save_players' id='save_players_{$_GET['journal_id']}'>Speichern</button></div>";
 }
 
 
@@ -129,6 +129,6 @@ if($_GET['ajax']=='show_trainer')
       print "<div class='deactivated' id='img_{$d->user_id}'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>";
     }
   }
-  print "<hr class='end_line'/><p/><button class='save_trainer' id='save_trainer_".$_GET['journal_id']."'>Speichern</button>";
+  print "<hr class='end_line'/><p/><div class='save'><button class='save_trainer' id='save_trainer_".$_GET['journal_id']."'>Speichern</button></div>";
 }
 //************************************************************************************
