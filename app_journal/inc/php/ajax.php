@@ -65,7 +65,10 @@ if($_GET['ajax']=='show_players')
 {
   $last_group = null;
   //$db->sql_query("SELECT * FROM journal2user WHERE journal2user_journal_id='".$_GET['journal_id']."'");
-  $db->sql_query("SELECT * FROM locations ORDER BY location_name");
+  $db->sql_query("SELECT * FROM locations 
+                  WHERE location_name != '_Trainer'
+                  ORDER BY location_name
+                ");
   while($d = $db->get_next_res()) {
     print "<button class='location_select' id='btn_location_{$d->location_id}'>{$d->location_name}</button>";
   }
@@ -74,7 +77,7 @@ if($_GET['ajax']=='show_players')
                   LEFT JOIN (SELECT * FROM journal2user WHERE journal2user_journal_id='$_GET[journal_id]') as journal_temp ON journal_temp.journal2user_user_id = users.user_id 
                   LEFT JOIN location2user ON location2user.location2user_user_id = users.user_id 
                   LEFT JOIN locations ON location2user.location2user_location_id = locations.location_id 
-                  WHERE user_hide!='1' AND user_id>1
+                  WHERE user_hide!='1' AND user_id>1 AND locations.location_name != '_Trainer'
                   ORDER BY locations.location_name, user_account
   ");
   while($d = $db->get_next_res())
