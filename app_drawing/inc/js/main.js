@@ -16,19 +16,19 @@ var isPublished = false;
 const backgrounds = [
   {
     'name' : 'Badmintonfeld',
-    'path' : 'imgs/bg_badminton_court.jpg'
+    'path' : 'inc/imgs/bg_badminton_court.jpg'
   },
   {
     'name' : '3D Badmintonfeld',
-    'path' : 'imgs/bg_court_3d.jpg'
+    'path' : 'inc/imgs/bg_court_3d.jpg'
   },
   {
     'name' : 'Liniert',
-    'path' : 'imgs/bg_line_paper.png'
+    'path' : 'inc/imgs/bg_line_paper.png'
   },
   {
     'name' : 'Weiss',
-    'path' : 'imgs/bg_white_paper.png'
+    'path' : 'inc/imgs/bg_white_paper.png'
   }
 ];
 
@@ -114,6 +114,8 @@ function show_modal()
   deactivate_touch_events();
   $('#myModal').show();
   drag_allowed =false;
+  $('.player_div').on('click', (e) => filter_user(e.currentTarget.id));
+
 }
 
 function hide_modal()
