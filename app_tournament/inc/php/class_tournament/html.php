@@ -297,27 +297,18 @@ class html
  			{
  				$html.="<a href='inc/php/match_pdf.php?tournament_id={$this->tournament->id}&round={$_GET['round']}' target='_blank'>Matchblätter Runde {$_GET['round']}</a>";
  			}
+			$html.= "<div style='clear:both;height:10px;margin-bottom:10px;border-bottom:2px solid #BBB;'></div>";
   	}
 
   	$last_wins = "";
-  	$first = true;
 
     if($this->tournament->system=='Doppel_fix'){ 
       foreach ($this->tournament->arr_teams as $team) {
         if($last_wins!=$team->arr_players[0]->wins)
         {
+					if($last_wins) { $html.= "<div style='clear:both;height:10px;margin-bottom:10px;border-bottom:2px solid #BBB;'></div>"; }
           if($team->arr_players[0]->wins<>1) { $txt = "Siege"; } else { $txt = "Sieg"; }
-  
-          if($mode=='narrow')
-          {
-            if(!$first) { $html.= "</div>"; }
-            $html.= "<div class='siege'>{$team->arr_players[0]->wins} {$txt}<p>";
-            $first = false;
-          }
-          else
-          {
-            $html.= "<hr style='clear:both;'/><div class='siege'>{$team->arr_players[0]->wins} {$txt}</div>";
-          }
+					$html.= "<div class='siege'>{$team->arr_players[0]->wins} {$txt}</div>";
         }
         $last_wins = $team->arr_players[0]->wins;
 				$html.= $team->get_info();
@@ -328,18 +319,9 @@ class html
       foreach ($this->tournament->arr_players as $player) {
         if($last_wins!=$player->wins)
         {
+					if($last_wins) { $html.= "<div style='clear:both;height:10px;margin-bottom:10px;border-bottom:2px solid #BBB;'></div>"; }
           if($player->wins<>1) { $txt = "Siege"; } else { $txt = "Sieg"; }
-  
-          if($mode=='narrow')
-          {
-            if(!$first) { $html.= "</div>"; }
-            $html.= "<div class='siege'>{$player->wins} {$txt}<p>";
-            $first = false;
-          }
-          else
-          {
-            $html.= "<hr style='clear:both;'/><div class='siege'>{$player->wins} {$txt}</div>";
-          }
+					$html.= "<div class='siege'>{$player->wins} {$txt}</div>";
         }
         $last_wins = $player->wins;
         $html.= $player->get_picture();
@@ -348,7 +330,6 @@ class html
     }
   
 
-  	if($mode=='narrow') { $html.= "</div>"; }
   	return $html;
   }
 
@@ -758,7 +739,7 @@ class html
       else
       {
         $i++;
-        $html.= "<div class='ranking'><b>Rang ".$i."</b><br/>".$my_user->get_picture(true,null,false,false)."</div>";
+        $html.= "<div class='ranking'><b>Rang ".$i."</b><br/><img src='{$my_user->get_pic_path(true)}'/></div>";
       }
       $my_user = null;
     }
@@ -793,8 +774,8 @@ class html
     //Fill Players
     $i = 1;
     foreach($this->tournament->arr_players as $player) {
-      $arr_table[0][$i] = "<td style='text-align:center;'><img src='{$player->get_pic_path(true)}' style='width:100px;'/></td>";
-      $arr_table[$i][0] = "<td style='text-align:center;'>{$player->get_picture(false,array())}</td>";
+      $arr_table[0][$i] = "<td style='text-align:center;border-left:1px solid gray;'><img src='{$player->get_pic_path(true)}' style='width:100px;'/></td>";
+      $arr_table[$i][0] = "<td style='text-align:center;border-top:1px solid gray;'><img src='{$player->get_pic_path(true)}' style='width:100px;'/></td>";
       $i++;
     }
 
@@ -812,7 +793,7 @@ class html
           {
             if($d->game_winner_id=='')
             {
-              $arr_table[$i][$j] = "<td style='text-align:center;'>Spiel in Runde<br/><span style='font-weight:bold;'>".$d->game_round."</span></td>";
+              $arr_table[$i][$j] = "<td style='text-align:center;border:1px solid gray;'>Spiel in Runde<br/><span style='font-weight:bold;'>".$d->game_round."</span></td>";
             }
             else
             {
@@ -847,7 +828,7 @@ class html
                 }
               }
 
-              $arr_table[$i][$j] = "<td style='text-align:center;'>".$txt."</td>";
+              $arr_table[$i][$j] = "<td style='text-align:center;border-left:1px solid gray;border-top:1px solid gray;'>".$txt."</td>";
           }
           }
           $j++;
@@ -856,8 +837,7 @@ class html
       $i++;
     }
     //Print array as table
-    $html ="<hr style='clear:both;'/>";
-    $html.="<table border='0' style='width:100%;'>";
+    $html ="<table border='0' style='width:100%;cell-padding:0px;border-collapse: collapse;'>";
     foreach($arr_table as $row)
     {
       $html.="<tr>";

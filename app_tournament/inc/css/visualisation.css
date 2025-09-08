@@ -1,0 +1,69 @@
+div#main {
+  clear: both;
+}
+
+div#logo {
+  float:left;
+}
+
+div#logo img {
+  height:50px;
+  padding-right:15px;
+  padding-left:5px;
+}
+
+div#title {
+  float:left;
+}
+
+div#left {
+  float:left;
+  width:20%;
+}
+
+div#users_title, div#news_title {
+  float:left;
+  padding-bottom:10px;
+}
+
+div#users, div#news {
+  box-sizing:border-box;
+  width:100%;
+  float:left;
+  height:calc(100vh - 120px);
+  border:10px solid #DDD;
+  padding:10px;
+  border-radius:20px;
+}
+
+
+div#middle {
+ float:left;
+ margin-right:10px;
+ width:calc(55% - 20px);
+}
+
+div#rounds {
+  padding-bottom:10px;
+}
+
+div#all_courts {
+  display:flex;
+  flex-wrap:wrap;
+  align-content:flex-start;
+  margin-left: 10px;
+  box-sizing:border-box;
+  width:100%;
+  float:left;
+  height:calc(100vh - 120px);
+  border:10px solid #DDD;
+  padding:10px;
+  border-radius:20px;
+}
+
+div#right {
+   float:left;
+   margin-left:10px;
+   min-height:100%;
+   width:25%;  
+}
