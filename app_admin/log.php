@@ -5,7 +5,7 @@
 
   try
   {
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("log_id");
     $myQuery->set_default_sort_dir("DESC");
     $myQuery->set_sql_table("log");

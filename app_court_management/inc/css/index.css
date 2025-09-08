@@ -1,0 +1,56 @@
+div.draggable { width:24vw;float:left;touch-action: none; }
+div.hover { background-color:#DDD; }
+
+div.court_table { width:73vw;float:right;position:fixed;right:10px; }
+table.court_table { width:100%;height:100%; }
+
+div#open_games { float:left;height:80vh;border-right:5px solid #CCC;width:25vw; }
+
+div.real_court { display:flex;align-items:center;gap:1rem;border:2px solid #ccc;border-radius:2vh;width:23vw;align-items: stretch; }
+img.court { width:100%;  }
+div.real_court img.court {  opacity: 0.5; }
+
+div.court_no {
+  text-align: center;
+  font-size: 24pt;
+  background-color: #CCC;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  display: flex;               /* optional: für zentrierten Text */
+  justify-content: center;
+  align-items: center;
+}
+
+div.court_middle {
+  flex-grow: 1;
+  display: flex;              /* Flex aktivieren */
+  justify-content: center;    /* horizontal zentrieren */
+  align-items: center;        /* vertikal zentrieren */
+  position: relative;         /* falls du Overlays (Timer etc.) platzierst */
+}
+
+div.court_timer {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  font-size:24pt;
+  font-weight:bold;
+}
+
+div.court_buttons {
+  display: flex;
+  flex-direction: column;   /* untereinander */
+  justify-content: center;  /* mittig ausrichten */
+}
+
+img.button_inactive {
+  width: 3vw;
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+img.button_active {
+  width: 3vw;
+  cursor: pointer;
+}

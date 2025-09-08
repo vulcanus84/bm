@@ -18,15 +18,14 @@ class page
   private $own_folder;                  //Foldername in which is page
   private $path;                        //Full path to page filename
   private $space="      ";              //used for better looking html source code
-  private $content;                     //save the text until it will be printed by get_html_code
+  private $content="";                     //save the text until it will be printed by get_html_code
   private $arr_header_lines = array();  //array with all header lines (filled by the functions add_header_line, add_css_link, add_js_link)
   private $logger;
+  private $arr_data = [];
 
   public function __construct()
   {
-    //Get database connection
-    include(level.'inc/db.php');
-    $this->db = $db;
+    $this->db = db::getInstance(); // Immer Singleton
     $this->logger = new log();
 
     //Used for adding/removing parameters to URL
@@ -58,7 +57,13 @@ class page
 		$this->add_header_line("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no\"/>");
 
     //Set standard style sheets for all files
-    $this->add_css_link(level."inc/css/styles.css");
+    //$this->add_css_link(level."inc/css/styles.css");
+    $this->add_css_link(level."inc/css/general.css");
+    $this->add_css_link(level."inc/css/main_menu.css");
+    $this->add_css_link(level."inc/css/buttons.css");
+    $this->add_css_link(level."inc/css/modal.css");
+    $this->add_css_link(level."inc/css/query.css");
+
     $this->add_css_link(level."inc/js/calendar/theme.css");
 
     //Set standard javascript includes for all files
@@ -80,11 +85,11 @@ class page
 
 	    if(isset($_SESSION['login_user']))
 			{
-				$this->t = new translation(clone($db),$_SESSION['login_user']->get_frontend_language());
+				$this->t = new translation($_SESSION['login_user']->get_frontend_language());
 			}
 			else
 			{
-				$this->t = new translation($db,"german");
+				$this->t = new translation("german");
 			}
 
 	    if(isset($_POST['user_login'])) { $this->check_login($_POST['user_login'],$_POST['pw']); }
@@ -95,7 +100,7 @@ class page
 	  catch (Exception $e)
 	  {
 	    $this->error_text = $e->getMessage();
-			$this->t = new translation($db,"german");
+			$this->t = new translation("german");
 	  }
   }
 
@@ -133,6 +138,10 @@ class page
 		return $txt;
 	}
 
+  public function add_data($key,$val) {
+    $this->arr_data[$key] = $val;
+  }
+
   //Add content to the page
   public function add_content_with_translation($txt)
 	{
@@ -142,7 +151,7 @@ class page
   //Add content to the page
   public function add_content($txt)
   {
-    if(strpos($txt,"\n")===FALSE)
+    if(strpos($txt ?? '',"\n")===FALSE)
     {
       if(substr($this->content,strlen($this->content)-strlen($this->space))==$this->space)
       {
@@ -359,7 +368,11 @@ class page
 
   private function get_content()
   {
-    $txt = "      <div class='content'>\n";
+    $str_data = "";
+    foreach($this->arr_data as $key => $val) {
+      $str_data.= "data-".$key."='".$val."' ";
+    }
+    $txt = "      <div id='content' $str_data>\n";
     $txt.= $this->content;
     $txt.= "      </div><!--End Content-->\n";
     return $txt;
@@ -384,22 +397,18 @@ class page
     return $txt;
   }
 
-  public function get_login_mask()
-  {
-  	$txt = "";
-	  $txt.= "<div id='login_mask'>\n";
+  public function get_login_mask() {
+	  $txt = "<div id='login_mask'>\n";
 		$txt.= "<form id='login' action='' method='POST' name='login'>\n";
 		$txt.= "<h2>Benutzer</h2>";
     $txt.= "<input type='text' name='user_login'>";
 		$txt.= "<h2>Passwort</h2>";
 		$txt.= "<input type='password' name='pw'/><br/>";
-		$txt.= "<button onclick='this.submit();'>Login</button>";
-		$my_user = null;
+		$txt.= "<button class='green' onclick='this.submit();'>Login</button>";
 		$txt.= "</form>\n";
-		$txt.= "<a href='index.php'><button style='background-color:blue;'>Zurück</button></a>";
-		$txt.= "<a href='app_drawing/excercises.php'><button style='background-color:orange;'>Übungen</button></a>";
-    $txt.= "<a href='new/app_tournament/index.php'><button class='purple'>Login (Beta)</button></a>";
-    $txt.= "</div>\n";
+		//$txt.= "<a href='index.php'><button class='blue'>Zurück</button></a>";
+		//$txt.= "<a href='app_drawing/excercises.php'><button class='orange'>Übungen</button></a>";
+	  $txt.= "</div>\n";
 	  return $txt;
 
   }
@@ -457,16 +466,6 @@ class page
 
   }
 
-  public function set_info($info)
-  {
-    $this->info = $info;
-  }
-
-  public function get_info()
-  {
-    if(isset($this->info)) { return $this->info; } else { return null; }
-  }
-
   public function set_title($title)
   {
     $this->title = $title;
@@ -479,12 +478,12 @@ class page
 
   public function set_subtitle($title)
   {
-    $this->sub_title = $title;
+    $this->subtitle = $title;
   }
 
   public function get_subtitle()
   {
-    if(isset($this->sub_title)) { return $this->sub_title; } else { return null; }
+    if(isset($this->sub_title)) { return $this->subtitle; } else { return null; }
   }
 
   public function get_path()

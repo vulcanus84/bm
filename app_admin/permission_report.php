@@ -5,7 +5,7 @@
 
   try
   {
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("permission_user_id");
     $myQuery->set_sql_table("permissions");
     $myQuery->set_sql_select("SELECT * FROM ".$myQuery->get_sql_table()." LEFT JOIN users ON permission_user_id = users.user_id");

@@ -23,20 +23,19 @@
   define('DATETIME_FIELD_SUPPORTED',$check);
 
   include_once(level."inc/php/class_log.php");
-	include_once(level."inc/db.php");                      //Set DB connection to variable $db
   include_once(level."inc/php/class_translation.php");   //Load class for translation
   include_once(level."inc/php/class_user.php");          //Load object for user (MUST included before session start)
-
+  include_once(level."inc/php/class_location.php");      //Load object for locations (MUST included before session start)
   session_start();
+
   include_once(level."inc/php/class_header_mod.php");    //Load class header_mod
   $page = new header_mod();                               //about the current page and header modification functions
   include_once(level."inc/php/class_page.php");          //Load class page
   include_once(level."inc/php/class_html.php");          //Load class for HTML Elements
   include_once(level."inc/php/class_menu.php");          //Load class menu
   include_once(level."inc/php/class_helper.php");        //Load class for helping functions
-	include_once(level."inc/php/class_tournament.php");
 	$helper = new helper();
 
 	include_once(level."inc/settings.php");
 
-?>
+  $db = new db; //own db connector for connection external to classes (classes implement it on their own)

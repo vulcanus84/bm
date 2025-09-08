@@ -10,10 +10,10 @@
     private $entries;
 		private $db;
 
-    function __construct($db)
+    function __construct()
     {
       $this->menu_typ = 'simple';
-			$this->db = $db;
+      $this->db = db::getInstance(); // Immer Singleton
     }
 
     function create_menu($id,$own_css=false)
@@ -201,6 +201,7 @@
   {
     public $menu_text;
     public $menu_link;
+    public $t;
 
     function __construct($text,$link,$db,$with_translation)
     {
@@ -208,11 +209,11 @@
 			{
   	    if(isset($_SESSION['login_user']))
   			{
-  				$this->t = new translation(clone($db),$_SESSION['login_user']->get_frontend_language());
+  				$this->t = new translation($_SESSION['login_user']->get_frontend_language());
   			}
   			else
   			{
-  				$this->t = new translation($db);
+  				$this->t = new translation();
   			}
 	      $this->menu_text = $this->t->translate($text);
 			}

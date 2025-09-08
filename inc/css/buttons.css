@@ -1,0 +1,206 @@
+div.menu_item {
+	float:left;
+}
+
+button {
+  border: none;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+  padding: 5px 10px 5px 10px;
+  text-align: center;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 12px;
+  border-color: gray;
+  -webkit-transition-duration: 0.4s; /* Safari */
+  transition-duration: 0.4s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Schatten hinzufügen für mehr Tiefe */
+}
+
+button:hover {
+  background-color: #45a049; /* Etwas dunkleres Grün für Hover */
+}
+
+button:focus {
+  outline: none; /* Entfernt die Standard-Fokus-Rahmen */
+  box-shadow: 0 0 5px 2px rgba(72, 183, 72, 0.6); /* Fokussierung mit Schatteneffekt */
+}
+
+button:active {
+  background-color: #398c39; /* Noch dunkleres Grün für die "gedrückte" Ansicht */
+}
+
+
+button.activated { 
+  border-left:5px solid gray; 
+  border-right:5px solid gray;  
+}
+
+
+button:disabled {
+  background-color: #d3d3d3; /* Grauer Hintergrund bei deaktiviertem Button */
+  cursor: not-allowed; /* Zeigt den "nicht erlauben" Cursor */
+}
+
+button.green {
+  background-color: #4CAF50;
+}
+
+button.green:hover {
+  background-color: #45a049; /* Etwas dunkleres Grün für Hover */
+}
+
+button.green:focus {
+  outline: none; /* Entfernt die Standard-Fokus-Rahmen */
+  box-shadow: 0 0 5px 2px rgba(72, 183, 72, 0.6); /* Fokussierung mit Schatteneffekt */
+}
+
+button.green:active {
+  background-color: #398c39; /* Noch dunkleres Grün für die "gedrückte" Ansicht */
+}
+
+/* Blau */
+button.blue {
+  background-color: #007BFF; /* Blau */
+}
+
+button.blue:hover {
+  background-color: #0056b3; /* Etwas dunkleres Blau für Hover */
+}
+
+button.blue:focus {
+  outline: none; /* Entfernt die Standard-Fokus-Rahmen */
+  box-shadow: 0 0 5px 2px rgba(0, 123, 255, 0.6); /* Fokussierung mit Schatteneffekt */
+}
+
+button.blue:active {
+  background-color: #0056b3; /* Noch dunkleres Blau für die "gedrückte" Ansicht */
+}
+
+/* Orange */
+button.orange {
+  background-color: #FFA500; /* Orange */
+}
+
+button.orange:hover {
+  background-color: #e68900; /* Etwas dunkleres Orange für Hover */
+}
+
+button.orange:focus {
+  outline: none;
+  box-shadow: 0 0 5px 2px rgba(255, 165, 0, 0.6); /* Fokussierung mit Schatteneffekt */
+}
+
+button.orange:active {
+  background-color: #cc8400; /* Noch dunkleres Orange für die "gedrückte" Ansicht */
+}
+
+/* Rot */
+button.red {
+  background-color: #FF5733; /* Rot */
+}
+
+button.red:hover {
+  background-color: #c04e29; /* Etwas dunkleres Rot für Hover */
+}
+
+button.red:focus {
+  outline: none;
+  box-shadow: 0 0 5px 2px rgba(255, 87, 51, 0.6); /* Fokussierung mit Schatteneffekt */
+}
+
+button.red:active {
+  background-color: #cc4426; /* Noch dunkleres Rot für die "gedrückte" Ansicht */
+}
+
+/* Violett */
+button.purple {
+  background-color: #8A2BE2; /* Violett */
+}
+
+button.purple:hover {
+  background-color: #7a1db5; /* Etwas dunkleres Violett für Hover */
+}
+
+button.purple:focus {
+  outline: none;
+  box-shadow: 0 0 5px 2px rgba(138, 43, 226, 0.6); /* Fokussierung mit Schatteneffekt */
+}
+
+button.purple:active {
+  background-color: #6a1a94; /* Noch dunkleres Violett für die "gedrückte" Ansicht */
+}
+
+/* Gelb */
+button.yellow {
+  background-color: #FFD700; /* Gelb */
+}
+
+button.yellow:hover {
+  background-color: #e6c200; /* Etwas dunkleres Gelb für Hover */
+}
+
+button.yellow:focus {
+  outline: none;
+  box-shadow: 0 0 5px 2px rgba(255, 215, 0, 0.6); /* Fokussierung mit Schatteneffekt */
+}
+
+button.yellow:active {
+  background-color: #e0b800; /* Noch dunkleres Gelb für die "gedrückte" Ansicht */
+}
+
+/* Pink */
+button.pink {
+  background-color: #FF69B4; /* Pink */
+}
+
+button.pink:hover {
+  background-color: #e05b9a; /* Etwas dunkleres Pink für Hover */
+}
+
+button.pink:focus {
+  outline: none;
+  box-shadow: 0 0 5px 2px rgba(255, 105, 180, 0.6); /* Fokussierung mit Schatteneffekt */
+}
+
+button.pink:active {
+  background-color: #e05b9a; /* Noch dunkleres Pink für die "gedrückte" Ansicht */
+}
+
+/* Sehr helles Grau */
+button.gray {
+  background-color: #EEEEEE; /* Sehr helles Grau */
+  color:black;
+}
+
+button.gray:hover {
+  background-color: #D3D3D3; /* Sehr helles Grau */
+}
+
+button.gray:focus {
+  outline: none;
+  box-shadow: 0 0 5px 2px rgba(211, 211, 211, 0.6); /* Fokussierung mit leichtem Schatteneffekt */
+}
+
+button.gray:active {
+  background-color: #A0A0A0; /* Dunkleres Grau für die "gedrückte" Ansicht */
+}
+
+button.olive {
+  background-color: #808000; /* Olive */
+}
+
+button.olive:hover {
+  background-color: #666600; /* Etwas dunkleres Olive für Hover */
+}
+
+button.olive:focus {
+  outline: none;
+  box-shadow: 0 0 5px 2px rgba(128, 128, 0, 0.6); /* Fokus-Schatten in Olive */
+}
+
+button.olive:active {
+  background-color: #4d4d00; /* Noch dunkleres Olive für Aktiv-Zustand */
+}
+

@@ -1,0 +1,33 @@
+.active { border-bottom:5px solid #AAAAFF;border-top:5px solid #AAAAFF; }
+.inactive { border:5px solid white; }
+
+.modal-content { height: 70vh; }
+
+div#players { 
+  width:20vw;
+  overflow:auto;
+  float:left;
+  border-right:3px solid gray;
+  margin:5px; 
+}
+  
+div#excersises {
+  width:50vw;
+  float:left;
+  overflow:auto;
+  margin:5px;
+} 
+
+div.player {
+  float:left;
+  margin:3px;
+  text-align:center;
+  width:80px;
+  font-size:9pt;
+}
+
+div.player img {
+  width:100%;
+  cursor:pointer;
+}
+

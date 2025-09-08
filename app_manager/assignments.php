@@ -7,7 +7,7 @@
   try
   {
     $myPage = new page();
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("group_created");
     $myQuery->set_default_sort_dir("DESC");
     $myQuery->set_sql_table("group2user");

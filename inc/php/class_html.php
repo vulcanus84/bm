@@ -4,15 +4,15 @@ class html
   private $txt;
 	private $t;
 
-  function __construct($db)
+  function __construct()
   {
     if(isset($_SESSION['login_user']))
 		{
-			$this->t = new translation(clone($db),$_SESSION['login_user']->get_frontend_language());
+			$this->t = new translation($_SESSION['login_user']->get_frontend_language());
 		}
 		else
 		{
-			$this->t = new translation($db);
+			$this->t = new translation();
 		}
   }
 

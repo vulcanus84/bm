@@ -6,7 +6,7 @@
   try
   {
     $myPage = new page();
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("group_title");
     $myQuery->set_sql_table("group2user");
     $sql_table = $myQuery->get_sql_table();

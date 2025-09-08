@@ -5,7 +5,7 @@
 
   try
   {
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("user_account");
     $myQuery->set_sql_table("location_permissions");
     $myQuery->set_sql_select("SELECT *,CONCAT(user_firstname,' ',user_lastname,' (',user_account,')') as user_fullname FROM ".$myQuery->get_sql_table()." 

@@ -6,7 +6,7 @@
   try
   {
     $myPage = new page();
-    $myQuery = new query($db);
+    $myQuery = new query();
     $myQuery->set_default_order_by("news_date");
     $myQuery->set_default_sort_dir("DESC");
     $myQuery->set_sql_table("news");

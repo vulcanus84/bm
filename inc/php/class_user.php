@@ -1,9 +1,13 @@
 <?php
+require_once('class_db.php');
+require_once('class_log.php');
+
 class user
 {
-	public $firstname;
-	public $lastname;
-	public $fullname;
+	public string $main_pic_path = 'app_tournament/user_pics/';
+	public string $firstname;
+	public string $lastname;
+	public string $fullname;
 	public $gender;
 	public $birthday;
 	public $training_location;
@@ -11,11 +15,11 @@ class user
 	public $hidden;
 
 	private $frontend_language;
-	private $db;
 
 	//Read-only konfiguriert
 	protected $id;
 	protected $login;
+	private $db;
 
 	public function __get($name)
 	{
@@ -28,17 +32,28 @@ class user
 		else { $this->$name = $value; }
 	}
 
-
 	public function __construct($user_id=0)
 	{
-		include(level.'inc/db.php');
-		if($user_id!=0) { $this->load_user_by_id($user_id); }
+		$this->db = db::getInstance(); //with new db() each user displayed on page would get his own db connection (can be 100 users or even more)
+		if($user_id!=0) { $this->load_user_by_id($user_id); } else { $this->id = 0; $this->login = ''; }
+	}
+
+	//To store the user object in session, the PDO Object must be exluded
+	public function __sleep()
+	{
+		$vars = get_object_vars($this);
+		unset($vars['db']);
+		return array_keys($vars);
+	}
+
+	public function __wakeup()
+	{
+		$this->db = db::getInstance();
 	}
 
 	public function save()
 	{
-		include(level.'inc/db.php');
-		$db->sql_query("UPDATE users SET
+		$this->db->sql_query("UPDATE users SET
 							user_firstname = '$this->firstname',
 							user_lastname = '$this->lastname',
 							user_language = '".$this->get_frontend_language()."'
@@ -48,26 +63,24 @@ class user
 
 	public function load_user_by_login($login)
 	{
-		include(level.'inc/db.php');
-		$res = $db->sql_query_with_fetch("SELECT * FROM users WHERE user_account=:uid",array('uid'=>$login));
+		$res = $this->db->sql_query_with_fetch("SELECT * FROM users WHERE user_account=:uid",array('uid'=>$login));
 		$this->load_user_by_id($res->user_id);
 	}
 
 	public function load_user_by_id($id)
 	{
-		include(level.'inc/db.php');
-
-		$db->sql_query("SELECT *, DATE_FORMAT(user_birthday,'%d.%m.%Y') as user_birthday FROM users	WHERE user_id=:uid",array('uid'=>$id));
-		if($db->count()>0)
+		$this->db->sql_query("SELECT *, DATE_FORMAT(user_birthday,'%d.%m.%Y') as user_birthday FROM users	WHERE user_id=:uid",array('uid'=>$id));
+		if($this->db->count()>0)
 		{
-			$res = $db->get_next_res();
+			$res = $this->db->get_next_res();
 			$this->id = $id;
 			$this->login = $res->user_account;
 
-			$this->firstname = $res->user_firstname;
-			$this->lastname = $res->user_lastname;
+			$this->firstname = (string)$res->user_firstname;
+			$this->lastname = (string)$res->user_lastname;
 			$this->fullname = $this->firstname." ".$this->lastname;
 			if(trim($this->fullname)=='') { $this->fullname = $this->login; }
+			if(trim($this->firstname)=='') { $this->firstname = $this->login; }
 			$this->gender = $res->user_gender;
 			$this->birthday = $res->user_birthday;
 
@@ -88,14 +101,13 @@ class user
 	 */
 	public function check_permission($path,$permission_typ='read')
 	{
-		include(level.'inc/db.php');
 		//links without required permission
 		if(substr($path,0,9)=='index.php') { return true; }
 		if(substr($path,0,10)=='/index.php') { return true; }
 
 			//evaluate normal permissions
-		$db->sql_query("SELECT * FROM permissions WHERE permission_user_id='$this->id'");
-		while($d = $db->get_next_res())
+		$this->db->sql_query("SELECT * FROM permissions WHERE permission_user_id='$this->id'");
+		while($d = $this->db->get_next_res())
 		{
 		switch($permission_typ)
 		{
@@ -137,48 +149,36 @@ class user
 	}
 
 
-	function get_picture($with_name=true,$javascript_function=null,$size='',$thumbnail=false)
+	function get_picture($thumbnail=true,$arr_text_lines=array())
 	{
-		$css='';
+		$css= "";
+
 		$pic_path = $this->get_pic_path($thumbnail);
 
-		if($size!='') { $css = 'width:'.$size.';'; }
-		if($with_name)
+		if($this->hidden) { $css.= "opacity:0.3"; }
+		$html = "<div class='user_pic' id='user_{$this->id}' data-user-id='{$this->id}'>";
+		$html.= "<img alt='{$this->login}' title='{$this->login}' style='{$css}' src='{$pic_path}'/>";
+		if(is_array($arr_text_lines) AND count($arr_text_lines)>0)
 		{
-			$js = null;
-			if($javascript_function)
+			foreach($arr_text_lines as $line)
 			{
-				$js = " onclick='".$javascript_function."(".$this->id.");'";
-				$css.= "cursor:pointer;";
+				$html.= "<br/>{$line}";
 			}
-			if($this->hidden) { $css.= "opacity:0.3"; }
-			$x = "<div class='user_mit_name' id='user".$this->id."'>";
-			$x.= "<img alt='$this->login' title='$this->login' style='$css' class='user' src='$pic_path' $js/>";
-			$x.= "<br/>".$this->login."</div>";
-			return $x;
 		}
-		else
-		{
-			$js = null;
-			if($javascript_function)
-			{
-				$js = " onclick='".$javascript_function."(".$this->id.");'";
-				$css.= "cursor:pointer;";
-			}
-			if($css!='') { $css = "style='".$css."'"; }
-			return "<img alt='$this->login' title='$this->login' $css class='user' src='$pic_path' $js/>";
-		}
+		$html.= "</div>";
+		return $html;	
+		
 	}
 
 	function get_ori_pic_path($thumbnail=false)
 	{
 		if($thumbnail)
 		{
-			$pic_path = level."app_user_admin/user_pics/".$this->id."_t.png";
+			$pic_path = level.$this->main_pic_path.$this->id."_t.png";
 		}
 		else
 		{
-			$pic_path = level."app_user_admin/user_pics/".$this->id.".png";
+			$pic_path = level.$this->main_pic_path.$this->id.".png";
 		}
 		if(!file_exists($pic_path))
 		{
@@ -192,13 +192,13 @@ class user
 	{
 		if($thumbnail)
 		{
-			$pic_path = level."app_user_admin/user_pics/".$this->id."_t.png";
-			$pic_path_star = level."app_user_admin/user_pics/".$this->id."_stars_t.png";
+			$pic_path = level.$this->main_pic_path.$this->id."_t.png";
+			$pic_path_star = level.$this->main_pic_path.$this->id."_stars_t.png";
 		}
 		else
 		{
-			$pic_path = level."app_user_admin/user_pics/".$this->id.".png";
-			$pic_path_star = level."app_user_admin/user_pics/".$this->id."_stars.png";
+			$pic_path = level.$this->main_pic_path.$this->id.".png";
+			$pic_path_star = level.$this->main_pic_path.$this->id."_stars.png";
 		}
 		if(!file_exists($pic_path_star))
 		{
@@ -217,15 +217,13 @@ class user
 
 	function get_comments()
 	{
-    include(level.'inc/db.php');
-
 		$txt = "<h1>".$this->fullname."</h1>";
 		$txt.= "<button style='margin-bottom:20px;' onclick='new_comment(".$this->id.");'>Neuer Kommentar</button>";
 		$txt.= "<table style='width:100%;'>";
-		$db->sql_query("SELECT *, DATE_FORMAT(comment_date,'%d.%m.%Y') as c_date FROM comments WHERE comment_user_id='".$this->id."' ORDER BY comment_date DESC");
-		while($data = $db->get_next_res())
+		$this->db->sql_query("SELECT *, DATE_FORMAT(comment_date,'%d.%m.%Y') as c_date FROM comments WHERE comment_user_id='".$this->id."' ORDER BY comment_date DESC");
+		while($data = $this->db->get_next_res())
 		{
-			$trainer = new user(clone($db),$data->comment_created_by);
+			$trainer = new user(clone($this->db),$data->comment_created_by);
 			$txt.= "<tr>";
 			$txt.= "<td>".$trainer->get_picture(false)."</td>";
 			$txt.= "<td style='font-size:12pt;width:100px;'>".$data->c_date."</td>";
@@ -240,53 +238,49 @@ class user
 
 	function get_user_history()
 	{
-    include(level.'inc/db.php');
-
 		$x = "";
 		include('class_chart.php');
 
-		$db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM group2user
-													LEFT JOIN groups ON group2user_group_id = groups.group_id
+		$this->db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM group2user
+													LEFT JOIN `groups` ON group2user_group_id = `groups`.group_id
 													WHERE group2user_user_id='$this->id'
 													ORDER BY group_created DESC");
-		if($db->count()>0)
+		if($this->db->count()>0)
 		{
 
-			$x.= "<h1>Infos von ".$this->fullname."</h1>";
+			$x.= "<h1>Infos von {$this->fullname}</h1>";
+			$x.= "<div id='played_tournaments'>";
 			$x.= "<h2>Gespielte Turniere</h2>";
 			$x.= "<ul>";
-			while($d = $db->get_next_res())
+			while($d = $this->db->get_next_res())
 			{
-				$x.= "<li><a href='".level."app_tournaments/index.php?tournament_id=".$d->group_id."'>".$d->group_created_c." - ".$d->group_title."</a></li>";
+				$x.= "<li><a href='".level."app_tournament/index.php?tournament_id=".$d->group_id."'>".$d->group_created_c." - ".$d->group_title."</a></li>";
 			}
 			$x.= "</ul>";
-			$db->sql_query("SELECT * FROM games WHERE game_player1_id='$this->id' OR game_player2_id='$this->id' OR game_player3_id='$this->id' OR game_player4_id='$this->id'");
-			$games_played = $db->count();
+			$this->db->sql_query("SELECT * FROM games WHERE game_player1_id='$this->id' OR game_player2_id='$this->id' OR game_player3_id='$this->id' OR game_player4_id='$this->id'");
+			$games_played = $this->db->count();
 
-			$db->sql_query("SELECT * FROM games WHERE game_winner_id='$this->id' OR game_winner2_id='$this->id'");
-			$games_won = $db->count();
+			$this->db->sql_query("SELECT * FROM games WHERE game_winner_id='$this->id' OR game_winner2_id='$this->id'");
+			$games_won = $this->db->count();
 
+			$x.= "</div>";
+			$x.= "<div id='statistics'>";
 			$x.= "<h2>Statistiken</h2>";
 
-			$x.= "<table>";
-			$x.= "<tr>";
-			$x.= "<td>Anzahl Spiele:</td>";
-			$x.= "<td>$games_played</td>";
-			$x.= "</tr>";
-			$x.= "</table>";
+			$x.= "<p>Anzahl Spiele: {$games_played}</p>";
 
 			$myChart = new chart("circle","Gewonnen/Verloren", "",700,200);
 	 		$myChart->add_row('Gewonnen',$games_won,'#AAFF00');
 	 		$myChart->add_row('Verloren',$games_played-$games_won,'#FF0000');
-	 		$x.= "<img style='width:100%;' src='data:image/jpeg;base64," . base64_encode($myChart->create()) . "'/>";
+	 		$x.= "<img src='data:image/jpeg;base64," . base64_encode($myChart->create()) . "'/>";
 			$myChart = null;
 
 
 			$myChart = new chart("bars","Ränge", "",700,200);
 
-			$db->sql_query("SELECT * FROM group2user ORDER BY group2user_group_id, group2user_wins DESC, group2user_BHZ DESC");
+			$this->db->sql_query("SELECT * FROM group2user ORDER BY group2user_group_id, group2user_wins DESC, group2user_BHZ DESC");
 			$pos = 0; $found=false;
-			while($d = $db->get_next_res())
+			while($d = $this->db->get_next_res())
 			{
 				if(!isset($last_group)) { $last_group=$d->group2user_group_id; }
 				if($d->group2user_group_id!=$last_group)
@@ -320,24 +314,29 @@ class user
 			}
 			$myChart->set_max_value($max_count);
 
-	 		$x.= "<img style='width:100%;' src='data:image/jpeg;base64," . base64_encode($myChart->create()) . "'/>";
+	 		$x.= "<img src='data:image/jpeg;base64," . base64_encode($myChart->create()) . "'/>";
 			$myChart = null;
+			$x.= "</div>";
 
+
+			$x.= "<div id='all_games'>";
 			$x.= "<h2>Alle Spiele</h2>";
-			$db->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM games
-													LEFT JOIN groups ON game_group_id = groups.group_id
+			$db_games = clone($this->db);
+			$db_games->sql_query("SELECT *, DATE_FORMAT(group_created,'%d.%m.%Y') as group_created_c FROM games
+													LEFT JOIN `groups` ON game_group_id = `groups`.group_id
 													WHERE game_player1_id='$this->id' OR game_player2_id='$this->id' OR game_player3_id='$this->id' OR game_player4_id='$this->id'
 													ORDER BY group_created DESC,game_round ASC");
 
-			$x.= "<table style='width:100%;'>";
 			$last_tournament_id = 0;
-			while($data = $db->get_next_res())
+			while($data = $db_games->get_next_res())
 			{
 				if($last_tournament_id != $data->game_group_id)
 				{
-					$myTournament = new tournament(clone($db),$data->game_group_id);
+					if($last_tournament_id!=0) { $x.= "</table>"; }
+					$myTournament = new Tournament\tournament($data->game_group_id);
 					$last_tournament_id = $data->game_group_id;
-					$x.= "<tr><td colspan='6'><h1 style='margin-bottom:0px;'>".$myTournament->get_title()."</h1><h2 style='font-style:italic;'>".$data->group_created_c."</h2></td></tr>";
+					$x.= "<hr/><h1>{$myTournament->title}</h1><h2 style='font-style:italic;'>{$data->group_created_c}</h2>";
+					$x.= "<table style='width:100%;'>";
 				}
 
 				$u1 = null; $u2 = null; $u3 = null; $u4 = null;
@@ -369,29 +368,29 @@ class user
 				}
 
 				$x.= "<tr>";
-				$x.= "<td style='text-align:center;'><h2>Runde ".$data->game_round."</h2></td>";
-				$x.= "<td style='text-align:center;'><img style='width:100px;' src='".$u1->get_pic_path()."'><br/>".$u1->login."</td>";
-				if(isset($u3)) { $x.= "<td style='text-align:center;'><img style='width:100px;' src='".$u3->get_pic_path()."'><br/>".$u3->login."</td>"; }
-				$x.= "<td style='text-align:center;'><h2>gegen</h2></td>";
-				$x.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u2->get_pic_path()."' onclick=\"show_user_games('".$u2->id."');\"><br/>".$u2->login."</td>";
-				if(isset($u4)) { $x.= "<td style='text-align:center;'><img style='width:100px;cursor:pointer;' src='".$u4->get_pic_path()."' onclick=\"show_user_games('".$u4->id."');\"><br/>".$u4->login."</td>"; }
+				$x.= "<td><h2>Runde ".$data->game_round."</h2></td>";
+				$x.= "<td><img src='{$u1->get_pic_path(true)}'>";
+				if(isset($u3)) { $x.= "<img src='".$u3->get_pic_path(true)."'><br/>{$u1->login} / {$u3->login}</td>"; } else { $x.= "<br/>{$u1->login}</td>"; }
+				$x.= "<td><h2>gegen</h2></td>";
+				$x.= "<td><img src='{$u2->get_pic_path(true)}' onclick=\"show_user_games('".$u2->id."');\">";
+				if(isset($u4)) { $x.= "<img src='".$u4->get_pic_path(true)."' onclick=\"show_user_games('".$u4->id."');\"><br/>{$u2->login} / {$u4->login}</td>"; } else { $x.= "<br/>{$u2->login}</td>"; }
 
 				if($data->game_winner_id!='')
 				{
-					if($myTournament->get_counting()=='win')
+					if($myTournament->counting=='win')
 					{
 						if($data->game_winner_id==$_GET['user_id'] OR $data->game_winner2_id==$_GET['user_id'])
 						{
-							$x.= "<td style='text-align:center;'><h1 style='color:green;'>Gewonnen!</h1></td>";
+							$x.= "<td style='text-align:center;'><span style='color:green;font-size:2vw;'>Gewonnen!</span></td>";
 						}
 						else
 						{
-							$x.= "<td style='text-align:center;'><h1 style='color:red;'>Verloren!</h1></td>";
+							$x.= "<td style='text-align:center;'><span style='color:red;font-size:2vw;'>Verloren!</span></td>";
 						}
 					}
 					else
 					{
-						$txt = "<span style='font-size:16pt;font-weight:bold;'>";
+						$txt = "<span style='font-size:2vw;font-weight:bold;'>";
 						if($invert)
 						{
 							if($data->game_set1_p1>0 OR $data->game_set1_p2>0) {	$txt .= $data->game_set1_p1.":".$data->game_set1_p2; }
@@ -418,7 +417,7 @@ class user
 					}
 					if($data->game_duration>0)
 					{
-						$x.= "<td style='text-align:center;font-size:14pt;'>Spieldauer<br/>".gmdate("H:i:s", $data->game_duration)."</td>";
+						$x.= "<td style='text-align:center;font-size:2vw;'>Spieldauer<br/>".gmdate("H:i:s", $data->game_duration)."</td>";
 					}
 				}
 				else
@@ -426,9 +425,9 @@ class user
 					$x.= "<td style='text-align:center;' colspan='2'><h2 style='font-style:italic;'>Noch nicht gespielt</h2></td>";
 				}
 				$x.= "</tr>";
-				$x.= "<tr><td colspan='6'><hr/></td></tr>";
 			}
 			$x.= "</table>";
+			$x.= "</div>";
 
 		}
 		else
@@ -439,141 +438,77 @@ class user
 		print $x;
 	}
 
-	function get_user_infos($with_form=true,$with_pic=true)
+	function get_user_form($fields='all',$with_pic=true)
 	{
-		include(level.'inc/db.php');
-		$page = new header_mod();                               //about the current page and header modification functions
-		$x = "";
-
-		if($with_form)
-		{
-			$x.= "<form id='new_user' action='".$page->change_parameter('action','modify_user')."' method='post' enctype='multipart/form-data'>";
-			$x.= "<input type='hidden' id='user_id' name='user_id' value='".$this->id."' />";
-		}
-		$x.= "<table>";
+		$html = "";
+		$html.= "<form id='new_user'>";
+		$html.= "<input type='hidden' id='user_id' name='user_id' value='".$this->id."' />";
+		$html.= "<table>";
 		if($with_pic)
 		{
-			$x.= " 	<tr>";
-			$x.= " 		<td colspan='2'>";
-			$x.= 				$this->get_picture(false,'test');
-			$x.= "		</td>";
-			$x.= "	</tr>";
-			$x.= " 	<tr>";
-			$x.= " 		<td></td>";
-			$x.= " 		<td>";
-			$x.= "			<input style='visibility:hidden;' onchange='$(\"#new_user\").submit();' name='pictures[]' id='inpPicture' type='file' accept='image/*'/>";
-			$x.= "		</td>";
-			$x.= "	</tr>";
-			$x.= "	<tr>";
+			//$html.= " <tr><td colspan='2'>{$this->get_picture(false,'trigger_upload_pic_selection')}</td></tr>";
+			$html.= " <tr><td colspan='2'><img id='user_pic_large' src='{$this->get_pic_path()}?t=".round(microtime(true) * 1000)."' onclick='trigger_upload_pic_selection();'/></td></tr>";
+			$html.= " <tr><td colspan='2'><input style='visibility:hidden;' onchange='$(\"#new_user\").submit();' name='pictures[]' id='inpPicture' type='file' accept='image/*'/></td></tr>";
 		}
-		$x.= "		<td>Anrede:</td>";
-		$x.= " 		<td>";
-		$x.= " 			<select name='user_gender'>";
-		$x.= " 				<option"; if($this->gender=='Herr') { $x.=" selected='1'"; } $x.=" value='Herr'>Herr</option>";
-		$x.= " 				<option"; if($this->gender=='Frau') { $x.=" selected='1'"; } $x.=" value='Frau'>Frau</option>";
-		$x.= " 			</select>";
-		$x.= " 		</td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Nickname:</td>";
-		$x.= " 		<td><input type='text' name='user_account' value='".$this->login."'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Vorname:</td>";
-		$x.= " 		<td><input type='text' name='user_firstname' value='".$this->firstname."'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Nachname:</td>";
-		$x.= " 		<td><input type='text' name='user_lastname' value='".$this->lastname."'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Geburtsdatum:</td>";
-		$x.= " 		<td><input type='text' name='user_birthday' value='".$this->birthday."'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Trainingsort(e):</td>";
-		$x.= " 		<td style='width:300px;'>";
+		$html.= "		<tr>";
+		$html.= "			<td>Anrede:</td>";
+		$html.= " 		<td>";
+		$html.= " 			<select name='user_gender'>";
+		$html.= " 				<option"; if($this->gender=='Herr') { $html.=" selected='1'"; } $html.=" value='Herr'>Herr</option>";
+		$html.= " 				<option"; if($this->gender=='Frau') { $html.=" selected='1'"; } $html.=" value='Frau'>Frau</option>";
+		$html.= " 			</select>";
+		$html.= " 		</td>";
+		$html.= " 	</tr>";
+		$html.= "		<tr>";
+		$html.= "			<td>Nickname:</td>";
+		$html.= " 		<td><input type='text' name='user_account' value='".$this->login."' required/></td>";
+		$html.= " 	</tr>";
 
-		$db->sql_query("SELECT * FROM location_permissions
+		if($fields=='all') {
+			$html.= "	<tr><td>Vorname:</td><td><input type='text' name='user_firstname' value='".$this->firstname."'/></td></tr>";
+			$html.= "	<tr><td>Nachname:</td><td><input type='text' name='user_lastname' value='".$this->lastname."'/></td></tr>";
+			$html.= "	<tr><td>Geburtsdatum:</td><td><input type='text' name='user_birthday' value='".$this->birthday."'/></td></tr>";
+		}
+		$html.= "	<tr>";
+		$html.= "		<td>Trainingsort(e):</td>";
+		$html.= " 		<td style='width:300px;'>";
+
+		$this->db->sql_query("SELECT * FROM location_permissions
 										LEFT JOIN locations ON loc_permission_loc_id = location_id
 										LEFT JOIN (SELECT * FROM location2user WHERE location2user_user_id='".$this->id."') as lj ON lj.location2user_location_id = locations.location_id
 										WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
 										ORDER BY location_name");
-		while($d = $db->get_next_res())
+		while($d = $this->db->get_next_res())
 		{
-			$x.= "	   <input style='width:20px;' type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if($d->location2user_id>0) { $x.= " checked='checked'"; } $x.= "/>".$d->location_name."<br/>";
+			$html.= "	   <input style='width:20px;' type='checkbox' name='loc_".$d->location_id."' value='$d->location_id' "; if($d->location2user_id>0) { $html.= " checked='checked'"; } $html.= "/>".$d->location_name."<br/>";
 		}
-		$x.= " 		</td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Ausgeblendet:</td>";
+		$html.= " 		</td>";
+		$html.= " 	</tr>";
+		$html.= "	<tr>";
+
+		$html.= "		<td>Ausgeblendet:</td>";
 		if($this->hidden) { $val = 'checked=checked'; } else { $val = ""; }
-		$x.= " 		<td><input type='checkbox' name='user_hide' $val/></td>";
-		$x.= " 	</tr>";
-		$x.= " 	<tr><td>&nbsp;</td></tr>";
-		if($with_form)
+		$html.= " 		<td><input type='checkbox' name='user_hide' $val/></td>";
+		$html.= " 	</tr>";
+		$html.= " 	<tr><td>&nbsp;</td></tr>";
+		$html.= " 	<tr>";
+		$html.= " 		<td colspan='2'>";
+		$html.= " 		 	<button class='green' $(\"#new_user\").submit();'>Speichern</button>";
+		$html.= "				<button type='button' class='purple' onclick='show_history(".$this->id.");'>Infos</button>";
+		$html.= "			</td>";
+		$html.= " 	</tr>";
+		$html.= " 	<tr>";
+		$html.= " 		<td colspan='2'>";
+		$html.= "				<button type='button' class='blue' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
+		if($this->check_permission('app_user_admin')==false)
 		{
-			$x.= " 	<tr>";
-			$x.= " 		<td colspan='2'><button onclick='$('#right_col').hide(); $(\"#new_user\").submit();'>Speichern</button>";
-			$x.= "		<button type='button' style='background-color:blue;' onclick='delete_pic(".$this->id.");'>Bild entfernen</button>";
-			if($this->check_permission('app_user_admin')==false)
-			{
-				$x.= "		<button type='button' style='background-color:red;' onclick='delete_permission(".$this->id.");'>Spieler löschen</button>";
-			}
-			$x.= "		<button type='button' style='background-color:purple;' onclick='show_history(".$this->id.");'>Infos</button></td>";
-			$x.= "	</tr>";
-	    }
-		$x.= "</table>";
-		if($with_form) { $x.= "</form>"; }
-		$my_user = null;
-		return $x;
-	}
-
-	function get_new_user()
-	{
-		include(level.'inc/db.php');
-
-	  	$page = new header_mod();                               //about the current page and header modification functions
-		$x = "<h1>Neuer Spieler</h1>";
-		$x.= "<form id='new_user' action='".$page->change_parameter('action','create_new_user')."' method='POST'>";
-		$x.= "<input type='hidden' name='user_lastname'/>";
-		$x.= "<input type='hidden' name='user_firstname'/>";
-		$x.= "<table>";
-		$x.= "	<tr>";
-		$x.= "		<td>Anrede:</td>";
-		$x.= " 		<td>";
-		$x.= " 			<select name='user_gender'>";
-		$x.= " 				<option value='Herr'>Herr</option>";
-		$x.= " 				<option value='Frau'>Frau</option>";
-		$x.= " 			</select>";
-		$x.= " 		</td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Nickname:</td>";
-		$x.= " 		<td><input type='text' name='user_account'/></td>";
-		$x.= " 	</tr>";
-		$x.= "	<tr>";
-		$x.= "		<td>Trainingsort(e):</td>";
-		$x.= " 		<td style='width:300px;'>";
-
-		$db->sql_query("SELECT * FROM location_permissions
-										LEFT JOIN locations ON loc_permission_loc_id = location_id
-										LEFT JOIN (SELECT * FROM location2user WHERE location2user_user_id='".$this->id."') as lj ON lj.location2user_location_id = locations.location_id
-										WHERE loc_permission_user_id = '".$_SESSION['login_user']->id."'
-										ORDER BY location_name");
-		$is_checked = false;
-		while($d = $db->get_next_res())
-		{
-			$x.= "	   <input style='width:20px;' type='checkbox' onclick=\"check_locations();\" name='loc_".$d->location_id."' value='$d->location_id' "; if(!$is_checked) { $x.= " checked='checked'"; $is_checked = true; } $x.= "/>".$d->location_name."<br/>";
+			$html.= "		<button type='button' class='red' onclick='delete_permission(".$this->id.");'>Spieler löschen</button>";
 		}
-		$x.= " 		</td>";
-		$x.= " 	</tr>";
-		$x.= " 	<tr>";
-		$x.= " 		<td><button onclick='$(\"#new_user\").submit();'>Erstellen</button></td>";
-		$x.= "</table>";
-		$x.= "</form>";
-
-		return $x;
+		$html.= "			</td>";
+		$html.= "	</tr>";
+		$html.= "</table>";
+		$html.= "</form>";
+		return $html;
 	}
 
 	function create_star_image()
@@ -585,13 +520,11 @@ class user
 		{
 			$myPath = str_replace('_t.png','_stars.png',$myPath);
 
-	    include(level.'inc/db.php');
-
-	    $db->sql_query("SELECT * FROM exam2user WHERE exam2user_user_id='".$this->id."'");
-	    $anz_stars = $db->count();
+	    $this->db->sql_query("SELECT * FROM exam2user WHERE exam2user_user_id='".$this->id."'");
+	    $anz_stars = $this->db->count();
 	    if($anz_stars > 0)
 	    {
-        	$im  = imagecreatefrompng($this->get_ori_pic_path());
+        $im  = imagecreatefrompng($this->get_ori_pic_path());
   			$img_width = imagesx($im);
   			$img_height = imagesy($im);
 
@@ -602,35 +535,35 @@ class user
 
   			//$pos_x[] = $img_width/2-$img_star_width/2; $pos_y[] = 5;
 
-  			$pos_x[] = $img_width/1.5-$img_star_width/2; $pos_y[] = 25;
-  			$pos_x[] = $img_width/3-$img_star_width/2; $pos_y[] = 25;
+  			$pos_x[] = intval($img_width/1.5-$img_star_width/2); $pos_y[] = 25;
+  			$pos_x[] = intval($img_width/3-$img_star_width/2); $pos_y[] = 25;
 
-  			$pos_x[] = $img_width/1.24-$img_star_width/2; $pos_y[] = 70;
-  			$pos_x[] = $img_width/5-$img_star_width/2; $pos_y[] = 70;
+  			$pos_x[] = intval($img_width/1.24-$img_star_width/2); $pos_y[] = 70;
+  			$pos_x[] = intval($img_width/5-$img_star_width/2); $pos_y[] = 70;
 
-  			$pos_x[] = $img_width-$img_star_width*1.25; $pos_y[] = 140;
+  			$pos_x[] = intval($img_width-$img_star_width*1.25); $pos_y[] = 140;
   			$pos_x[] = 20; $pos_y[] = 140;
 
   			//Mitte
-  			$pos_x[] = $img_width-$img_star_width; $pos_y[] = 220;
+  			$pos_x[] = intval($img_width-$img_star_width); $pos_y[] = 220;
   			$pos_x[] = 5; $pos_y[] = 220;
 
-  			$pos_x[] = $img_width-$img_star_width*1.25; $pos_y[] = 300;
+  			$pos_x[] = intval($img_width-$img_star_width*1.25); $pos_y[] = 300;
   			$pos_x[] = 20; $pos_y[] = 300;
 
-  			$pos_x[] = $img_width/1.24-$img_star_width/2; $pos_y[] = 360;
-  			$pos_x[] = $img_width/5-$img_star_width/2; $pos_y[] = 360;
+  			$pos_x[] = intval($img_width/1.24-$img_star_width/2); $pos_y[] = 360;
+  			$pos_x[] = intval($img_width/5-$img_star_width/2); $pos_y[] = 360;
 
-  			$pos_x[] = $img_width/1.5-$img_star_width/2; $pos_y[] = 400;
-  			$pos_x[] = $img_width/3-$img_star_width/2; $pos_y[] = 400;
+  			$pos_x[] = intval($img_width/1.5-$img_star_width/2); $pos_y[] = 400;
+  			$pos_x[] = intval($img_width/3-$img_star_width/2); $pos_y[] = 400;
 
-  			$pos_x[] = $img_width/2-$img_star_width/2; $pos_y[] = 420;
+  			$pos_x[] = intval($img_width/2-$img_star_width/2); $pos_y[] = 420;
 
 			$black = imagecolorallocate($im, 50, 50, 50);
 			$font = level."inc/CSM.ttf";
 			$font_size = 48;
 			list($left, $bottom, $right, , , $top) = imageftbbox($font_size, 0, $font, $anz_stars);
-			imagettftext($im, $font_size, 0, 250-(($right-$left)/2), 70, $black, $font, $anz_stars);
+			imagettftext($im, $font_size, 0, intval(250-(($right-$left)/2)), 70, $black, $font, $anz_stars);
 
 			$i=0;
   			foreach($pos_x as $cur_pos_x)
@@ -688,11 +621,10 @@ class user
 
   function check_password($pw)
   {
-    include(level.'inc/db.php');
-    $db->sql_query("SELECT * FROM users
+    $this->db->sql_query("SELECT * FROM users
                            WHERE user_account = :user_account",array('user_account'=>$this->login));
-    $daten = $db->get_next_res();
-    if ($db->count()==1)
+    $daten = $this->db->get_next_res();
+    if ($this->db->count()==1)
     if (hash('sha256', $pw)==$daten->user_password)
     {
       return true;
@@ -704,10 +636,9 @@ class user
 
   function update_password($old_pw,$new_pw)
   {
-    include(level.'inc/db.php');
     if($this->check_password($old_pw))
     {
-      $db->update(array('user_password'=>hash('sha256', $new_pw)),'users','user_id',$this->id);
+      $this->db->update(array('user_password'=>hash('sha256', $new_pw)),'users','user_id',$this->id);
     }
     else {
       throw new Exception("Altes Passwort falsch");

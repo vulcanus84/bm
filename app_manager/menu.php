@@ -1,5 +1,5 @@
 <?php
-      $myMenu = new menu($db);
+      $myMenu = new menu();
       $myMenu->add_item("Turniere","index.php");
       $myMenu->add_item("Turniere zuweisen","group2user.php");
       $myMenu->add_item("Spiele","games.php");
@@ -11,5 +11,4 @@
       $myMenu->add_item("Prüfungen zuweisen","exam2user.php");
       $myMenu->add_item("Trainingsorte","locations.php");
       $myMenu->add_item("Trainingsorte zuweisen","location2user.php");
-      $myMenu->add_item("Admin Functions","admin.php");
       $myPage->menu = $myMenu->create_menu("tabsJ");

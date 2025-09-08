@@ -1,0 +1,58 @@
+/* Standard (Mobile) */
+div#topmenu {
+  background-color: #FFF;
+  border: 1px solid #DDD;
+  border-radius: 15px;
+  width: 50px;
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 60px;
+  z-index: 100;
+
+  display: flex;
+  flex-direction: column;  /* Bilder untereinander */
+  align-items: center;
+  padding: 5px;
+	display:none;
+}
+
+div#topmenu img { 
+	height: 80%; 
+	width: 80%; 
+	margin: 5px; 
+}
+
+div#topmenu_button { 
+	float: right; 
+	display: block; 
+	width: 50px; 
+	height: 50px; 
+	cursor: pointer; 
+}
+
+div#topmenu_button img { 
+	width: 100%; 
+	height: 100%; 
+	float: right; 
+	margin-top: 10%; 
+}
+
+/* Tablets und größer */
+@media screen and (min-width: 700px) {
+  div#topmenu { background-color: unset; border: unset; border-radius: 0; display: flex; position: relative; width: 100%; top: 0px;
+    flex-direction: row;   /* Bilder nebeneinander */
+		justify-content: flex-end; 
+    flex-wrap: wrap;
+    padding: 0;
+  }
+  div#topmenu img { 
+		height: 40px; 
+		width: auto; 
+		margin: 5px; 
+	}
+  
+	div#topmenu_button { 
+		display: none; 
+	}
+}
