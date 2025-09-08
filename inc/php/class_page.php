@@ -406,8 +406,8 @@ class page
 		$txt.= "<input type='password' name='pw'/><br/>";
 		$txt.= "<button class='green' onclick='this.submit();'>Login</button>";
 		$txt.= "</form>\n";
-		$txt.= "<a href='index.php'><button class='blue'>Zurück</button></a>";
-		$txt.= "<a href='app_drawing/excercises.php'><button class='orange'>Übungen</button></a>";
+		//$txt.= "<a href='index.php'><button class='blue'>Zurück</button></a>";
+		//$txt.= "<a href='app_drawing/excercises.php'><button class='orange'>Übungen</button></a>";
 	  $txt.= "</div>\n";
 	  return $txt;
 
