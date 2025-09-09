@@ -91,7 +91,7 @@ try
 						}
 						$txt.= "<tr><td style='width:10vw;border-right:2px solid black;border-bottom:2px solid black;text-align:center;'><h2 style='font-size:24pt;'>".$d->exam_level."</h2></td>";
 						$txt.= "<td style='padding-left:2vw;border-bottom:2px solid black;'><span style='margin-top:0px;font-weight:bold;font-size:14pt;'>".$d->exam_title."</span><br>";
-						$txt.= "<span style='font-size:12pt;'>".nl2br($d->exam_description)."</span>";
+						$txt.= "<div style='font-size:12pt;'>".nl2br($d->exam_description)."</div>";
 						$txt.= "</td></tr>";
 						$myPage->add_content($txt);
 					}
