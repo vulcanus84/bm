@@ -6,6 +6,8 @@ div.court { vertical-align:middle; }
 
 div.ranking { text-align: center; }
 
+div.ranking img { width:120px; }
+
 div.user_pic { 
   float:left;
   text-align:center; 
@@ -87,6 +89,7 @@ div.team button {
 
 
 img.img_court { width:100%; }
+img.img_sort { cursor: pointer; margin-left:5px; width:60px; vertical-align:middle; }
 
 /* Container für die Liste der Turniere */
 .tournament-list {

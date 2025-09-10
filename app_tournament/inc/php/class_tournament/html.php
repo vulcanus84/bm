@@ -339,6 +339,14 @@ class html
 		$html.="<img id='gender' class='img_sort' src='".level."inc/imgs/male_female.png' title='Geschlecht' alt='Geschlecht' />";
 		$html.="<img id='age' class='img_sort' src='".level."inc/imgs/sort_by_age.png' title='Alter' alt='Alter' />";
 		$html.="<img id='location' class='img_sort' src='".level."inc/imgs/sort_by_location.png' title='Trainingsort' alt='Trainingsort' />";
+		if(isset($_GET['show_hidden']) AND $_GET['show_hidden']=='1')
+		{
+			$html.="<a href='players.php'><img id='hidden' class='img_sort' src='".level."inc/imgs/show.png' title='Versteckte ausblenden' alt='Versteckte ausblenden' /></a>";
+		}
+		else
+		{
+			$html.="<a href='players.php?show_hidden=1'><img id='hidden' class='img_sort' src='".level."inc/imgs/hide.png' title='Ausgeblendete anzeigen' alt='Ausgeblendete anzeigen' /></a>";
+		}	
 		$html.="<hr>";
 		$this->db->sql_query("SELECT * FROM location_permissions
 										LEFT JOIN locations ON loc_permission_loc_id = location_id
@@ -549,18 +557,25 @@ class html
     if($this->tournament->system=='Doppel_fix')
     {
       $this->db->sql_query("SELECT MAX(group2user_wins) as group2user_wins,MAX(group2user_BHZ) as group2user_BHZ,MAX(group2user_FBHZ) as group2user_FBHZ,
-                        GROUP_CONCAT(COALESCE(user_firstname,''),' ',COALESCE(user_lastname,'') SEPARATOR ' & ') as user_full
+											GROUP_CONCAT(
+												COALESCE(
+													NULLIF(TRIM(CONCAT_WS(' ', user_firstname, user_lastname)), ''), 
+													user_account
+												) SEPARATOR ' & '
+											) AS user_full
                       FROM group2user
                       LEFT JOIN users ON group2user_user_id = user_id
                       WHERE group2user_group_id = '$_GET[tournament_id]'
                       GROUP BY group2user_wins
                       ORDER BY group2user_wins DESC, group2user_BHZ DESC, group2user_FBHZ DESC");
-
     }
     else
     {
       $this->db->sql_query("SELECT *, 
-                        CONCAT(COALESCE(user_firstname,''),' ',COALESCE(user_lastname,'')) as user_full
+												COALESCE(
+															NULLIF(CONCAT_WS(' ', user_firstname, user_lastname), ''), 
+															user_account
+														) AS user_full
                       FROM group2user
                       LEFT JOIN users ON group2user_user_id = user_id
                       WHERE group2user_group_id = '$_GET[tournament_id]'
@@ -598,18 +613,31 @@ class html
     $html.= "</table>";
 
     $html.= "<h1>Details</h1>";
-    $this->db->sql_query("SELECT *, 
-                      CONCAT(COALESCE(p1.user_firstname,''),' ',COALESCE(p1.user_lastname,'')) as p1_user,
-                      CONCAT(COALESCE(p2.user_firstname,''),' ',COALESCE(p2.user_lastname,'')) as p2_user, 	 
-                      CONCAT(COALESCE(p3.user_firstname,''),' ',COALESCE(p3.user_lastname,'')) as p3_user,
-                      CONCAT(COALESCE(p4.user_firstname,''),' ',COALESCE(p4.user_lastname,'')) as p4_user 	 
-                    FROM games
-                      LEFT JOIN users as p1 ON game_player1_id = p1.user_id
-                      LEFT JOIN users as p2 ON game_player2_id = p2.user_id
-                      LEFT JOIN users as p3 ON game_player3_id = p3.user_id
-                      LEFT JOIN users as p4 ON game_player4_id = p4.user_id
-                      WHERE game_group_id = '$_GET[tournament_id]'
-                      ORDER BY game_round ASC, p1.user_account");
+    $this->db->sql_query("SELECT g.*,
+														COALESCE(
+															NULLIF(CONCAT_WS(' ', p1.user_firstname, p1.user_lastname), ''), 
+															p1.user_account
+														) AS p1_user,
+														COALESCE(
+															NULLIF(CONCAT_WS(' ', p2.user_firstname, p2.user_lastname), ''), 
+															p2.user_account
+														) AS p2_user,
+														COALESCE(
+															NULLIF(CONCAT_WS(' ', p3.user_firstname, p3.user_lastname), ''), 
+															p3.user_account
+														) AS p3_user,
+														COALESCE(
+															NULLIF(CONCAT_WS(' ', p4.user_firstname, p4.user_lastname), ''), 
+															p4.user_account
+														) AS p4_user
+											FROM games g
+											LEFT JOIN users AS p1 ON g.game_player1_id = p1.user_id
+											LEFT JOIN users AS p2 ON g.game_player2_id = p2.user_id
+											LEFT JOIN users AS p3 ON g.game_player3_id = p3.user_id
+											LEFT JOIN users AS p4 ON g.game_player4_id = p4.user_id
+											WHERE g.game_group_id = '$_GET[tournament_id]'
+											ORDER BY g.game_round ASC, p1.user_account
+");
 
     $html.= "<table style='width:100%;'>";
     $html.= "<th style='text-align:left;'>Spieler 1</th>";
