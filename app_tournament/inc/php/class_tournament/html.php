@@ -759,7 +759,7 @@ class html
           $db2 = clone($this->db);
           $d2 = $db2->sql_query_with_fetch("SELECT * FROM group2user WHERE group2user_group_id='$_GET[tournament_id]' AND group2user_user_id='$my_user->id'");
           $partner = new \user($d2->group2user_partner_id);
-          $html.= "<div style='float:left;text-align:center;margin:10px;'><b>Rang ".$i."</b><br/>".$my_user->get_picture(false,null,'90px',true).$partner->get_picture(false,null,'90px',true)."<br/>".$my_user->login." & ".$partner->login."</div>";
+          $html.= "<div class='ranking'><b>Rang {$i}</b><br/><img src='{$my_user->get_pic_path(true)}'/><img src='{$partner->get_pic_path(true)}'/><br/>{$my_user->login} & {$partner->login}</div>";
           $arr_displayed[] = $my_user->id;
           $arr_displayed[] = $partner->id;
         }
@@ -767,7 +767,7 @@ class html
       else
       {
         $i++;
-        $html.= "<div class='ranking'><b>Rang ".$i."</b><br/><img src='{$my_user->get_pic_path(true)}'/></div>";
+        $html.= "<div class='ranking'><b>Rang ".$i."</b><br/><img src='{$my_user->get_pic_path(true)}'/><br/>{$my_user->login}</div>";
       }
       $my_user = null;
     }

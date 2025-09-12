@@ -79,7 +79,7 @@ switch ($_GET['ajax']) {
 
   case 'set_winner':
     $court_no = str_replace('court','',$_GET['court']);
-    $curr_game = $myTournament->arr_rounds[$myTournament->curr_round-1]->arr_games[$court_no-1];
+    $curr_game = $myTournament->arr_rounds[$_GET['round']-1]->arr_games[$court_no-1];
   
     if($_GET['winner_id']=='0')
     {
@@ -125,7 +125,7 @@ switch ($_GET['ajax']) {
     print "<img src='inc/php/court.php?created_on=".time()."&action=fill&game_id={$curr_game->id}' class='img_court' data-freilos-field='{$freilos}' data-game-id='{$curr_game->id}'/>";
   
     //Update winners in group table
-    if($myTournament->system=='Gruppenspiele') { $myTournament->update_winners(); }
+    if($myTournament->system=='Gruppenspiele') { $myTournament->calc->calc_ranking(); }
     break;
 
   case 'set_points_and_winner':  
