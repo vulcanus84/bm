@@ -182,7 +182,7 @@
 
       if($_GET['ajax']=='assign_pic')
       {
-        $main_path = '../app_user_admin/user_pics/';
+        $main_path = '../app_tournament/user_pics/';
         $s_user_id = $_GET['source_user_id'];
         $t_user_id = $_GET['target_user_id'];
         print "Path: ".$main_path.$s_user_id."\n";
