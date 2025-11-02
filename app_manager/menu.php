@@ -5,6 +5,7 @@
       $myMenu->add_item("Spiele","games.php");
       $myMenu->add_item("Kommentare","comments.php");
       $myMenu->add_item("Journal","journal.php");
+      $myMenu->add_item("Fehlergründe","match_analyze_reasons.php");
       $myMenu->add_item("News","news.php");
       $myMenu->add_item("Benutzer","users.php");
       $myMenu->add_item("Prüfungen","exams.php");
