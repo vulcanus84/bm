@@ -121,7 +121,6 @@ switch($_GET['ajax'])
         FROM locations l
         JOIN location_permissions lp ON lp.loc_permission_loc_id = l.location_id
         WHERE lp.loc_permission_user_id = '{$_SESSION['login_user']->id}'
-          AND l.location_name != '_Trainer'
         ORDER BY l.location_name
     ");
 
@@ -147,7 +146,6 @@ switch($_GET['ajax'])
                     WHERE 
                         (user_hide != '1' OR ma_temp.ma_trainee_id > 0)
                         AND user_id > 1
-                        AND locations.location_name != '_Trainer'
                     ORDER BY 
                         locations.location_name, 
                         user_account;

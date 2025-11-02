@@ -112,7 +112,7 @@ button.delete { background-color:red;margin:5px;font-size:5vh; }
 h1.show_players { clear:both;padding-top:10px; }
 div.activated { border:3px solid purple;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
 div.deactivated { border:3px solid white;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
-div.activated img, div.deactivated img { width:10vw;max-width: 150px; } 
+div.activated img, div.deactivated img { width:20vw;max-width: 150px; } 
 
 hr.end_line {clear:both; }
 div.save { margin-bottom:100px; }

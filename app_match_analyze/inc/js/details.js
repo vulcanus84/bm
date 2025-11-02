@@ -486,13 +486,13 @@ function new_point(id,winner, ...path)
     let btn_height = 50 / arr_options.length;
     for(const option of arr_options) {
       let color = colors[i % colors.length];
-      txt += `<button class='level1_option' style='font-size:${btn_height*1.5}pt;width:75vw;height:${btn_height}vh;margin:1vw;background-color:${color}' data-level1='${option}'>${option}</button>`;
+      txt += `<button class='level_option' style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height}vh;margin:1vw;background-color:${color}' data-level='${option}'>${option}</button>`;
       i++;
     }
     $('#myModalText').html(txt); 
     $('#myModal').show();
-    $('.level1_option').on('click', (e) => {
-      const newPath = [...path, e.currentTarget.getAttribute('data-level1')];
+    $('.level_option').on('click', (e) => {
+      const newPath = [...path, e.currentTarget.getAttribute('data-level')];
       new_point(null,winner, ...newPath);
     });
   }
