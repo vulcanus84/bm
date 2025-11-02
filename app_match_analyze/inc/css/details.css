@@ -10,7 +10,7 @@ img.delete {
 
 #chartMainReasons, #chartStrokes, #chartPointIncreases, #chartMainReasonsOpponent, #chartOuts {
   width: 70vw !important;
-  height: 300px !important;
+  height: 30vh !important;
 }
 
 table#points_table {

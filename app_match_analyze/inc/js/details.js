@@ -58,13 +58,19 @@ function prepareChartData(stats) {
   const strokes = Object.keys(stats); // z. B. ["Clear", "Drop", "Smash", ...]
   const categories = ['OutHinten', 'OutRechts', 'OutLinks', 'InsNetz'];
 
-  const datasets = categories.map(cat => ({
+  const datasets = categories.map((cat, i) => ({
     label: cat,
-    data: strokes.map(stroke => stats[stroke][cat] || 0)
+    data: strokes.map(stroke => stats[stroke][cat] || 0),
+    backgroundColor: colors[i % colors.length],
+    borderColor: colors[i % colors.length].replace('0.6', '1'),
+    borderWidth: 1,
+    fill: false,  // 🔹 wichtig für Line-Charts (keine Fläche unter der Linie)
+    tension: 0.3  // 🔹 sanfte Kurve, falls du Line-Chart verwendest
   }));
 
   return { labels: strokes, datasets };
 }
+
 
 function delete_entry(id) {
   let my_url = 'index.php?ajax=delete_point&point_id=' + id
@@ -144,17 +150,18 @@ $(document).ready(function() {
   chartMainReasons = new Chart(document.getElementById('chartMainReasons'), {
     type: 'pie',
     data: {
-      labels: ['Gewinner', 'Fehler des Gegners', 'Glück'],
+      labels: ['Fehler des Gegners','Gewinner', 'Glück'],
       datasets: [{
         data: reasons_data,
-        borderWidth: 1
+        borderWidth: 1,
+        backgroundColor: colors
       }]
     },
     options: {
       plugins: {
         title: {
           display: true,          // 👈 Titel aktivieren
-          text: 'Meine Punkte nach Hauptgründen', 
+          text: 'Meine Punktgewinne durch', 
           font: {
             size: 24,             // Schriftgröße
             weight: 'bold'
@@ -177,17 +184,18 @@ $(document).ready(function() {
   chartMainReasonsOpponent = new Chart(document.getElementById('chartMainReasonsOpponent'), {
     type: 'pie',
     data: {
-      labels: ['Gewinner', 'Meine Fehler', 'Glück'],
+      labels: ['Meine Fehler','Gewinner', 'Glück'],
       datasets: [{
         data: reasons_data_opponent,
-        borderWidth: 1
+        borderWidth: 1,
+        backgroundColor: colors
       }]
     },
     options: {
       plugins: {
         title: {
           display: true,          // 👈 Titel aktivieren
-          text: 'Gegnerische Punkte nach Hauptgründen', 
+          text: 'Punkte des Gegners durch', 
           font: {
             size: 24,             // Schriftgröße
             weight: 'bold'
@@ -213,7 +221,8 @@ $(document).ready(function() {
       labels: ['Angriffsclear', 'Drop', 'Smash', 'Drive', 'Netz', 'Täuschung', 'Kill'],
       datasets: [{
         data: strokes_data,
-        borderWidth: 1
+        borderWidth: 1,
+        backgroundColor: colors
       }]
     },
     options: {
@@ -247,7 +256,7 @@ $(document).ready(function() {
       plugins: {
         title: {
           display: true,          // 👈 Titel aktivieren
-          text: 'Meine Outs nach Position', 
+          text: 'Meine Fehler nach Schlag und Ort', 
           font: {
             size: 24,             // Schriftgröße
             weight: 'bold'
@@ -288,12 +297,16 @@ $(document).ready(function() {
         {
           label: 'Meine Punkte',
           data: [0],
-          borderWidth: 1
+          borderWidth: 1,
+          borderColor: colors[0],
+          backgroundColor: colors[0]
         },
         {
           label: 'Gegnerische Punkte',
           data: [0],
-          borderWidth: 1
+          borderWidth: 1,
+          borderColor: colors[1],
+          backgroundColor: colors[1]
         }
 
     ]
@@ -396,14 +409,16 @@ function new_point(id,winner, ...path)
     // Ende des Pfades erreicht, Punkt speichern
     $('#myModal').hide();
     let main_reason = path[0];
-    let reason_path = path.slice(1).join(' > ');
+    let reason_path = path.slice(1)
+      .filter(p => p && p.trim() !== '') // nur nicht-leere Werte behalten
+      .join(' / ');
     if ($('#points_table tbody').length === 0) { $('#points_table').append('<tbody></tbody>'); }
 
     if(winner=='trainee') {
-      if(main_reason=='Fehler') { reasons_data[1]++; }
+      if(main_reason=='Fehler') { reasons_data[0]++; }
       mypoints++;
       if(main_reason=='Gewinnschlag') { 
-        reasons_data[0]++; 
+        reasons_data[1]++; 
         if(path[1]=='Angriffsclear') { strokes_data[0]++; }
         if(path[1]=='Drop') { strokes_data[1]++; }
         if(path[1]=='Smash') { strokes_data[2]++; }
@@ -420,10 +435,10 @@ function new_point(id,winner, ...path)
     } else {
       opponentpoints++;
       if(main_reason=='Fehler') { 
-        reasons_data_opponent[1]++; 
+        reasons_data_opponent[0]++; 
         countErrors(path);
       }
-      if(main_reason=='Gewinnschlag') { reasons_data_opponent[0]++; }
+      if(main_reason=='Gewinnschlag') { reasons_data_opponent[1]++; }
       if(main_reason=='Glück') { reasons_data_opponent[2]++; }
       $('#points_table tbody').prepend(`<tr><td class='left'>${reason_path}</td><td class='middle'>${main_reason}<br/><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></td><td class='right'>${htmlCode}</td></tr>`);
       $('#points_opponent').text(parseInt($('#points_opponent').text()) + 1);
