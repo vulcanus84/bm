@@ -233,5 +233,12 @@ class db
             $this->res->fetch(PDO::FETCH_OBJ, PDO::FETCH_ORI_NEXT, $item);
         }
     }
+
+    public function fetch_all()
+    {
+        if ($this->res) {
+            return $this->res->fetchAll(PDO::FETCH_ASSOC);
+        }
+    }
 }
 ?>
