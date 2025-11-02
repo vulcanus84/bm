@@ -1,0 +1,125 @@
+div { font-size:14pt; }
+div#content { display:flex; align-items: center; flex-direction: column; }
+h3 { padding-top:0px; margin-top:0px; }
+
+img.delete {
+  width:6vw;
+  cursor:pointer;
+  margin-top:2px;
+}
+
+#chartMainReasons, #chartStrokes, #chartPointIncreases, #chartMainReasonsOpponent, #chartOuts {
+  width: 70vw !important;
+  height: 300px !important;
+}
+
+table#points_table {
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+table#points_table td.left {
+  text-align: right;
+  font-size:4vw;
+  padding-right:2vw;
+  border-bottom:1px dotted gray;
+}
+
+table#points_table td.middle {
+  text-align: center;
+  font-size:5vw;
+  padding:0vw 3vw 0vw 3vw;
+  border-right:3px solid gray;
+  border-left:3px solid gray;
+  border-bottom:1px dotted gray;
+}
+
+table#points_table td.right {
+  text-align: left;
+  font-size:4vw;
+  padding-left:2vw;
+  border-bottom:1px dotted gray;
+}
+
+.header_sets {
+  display: flex;
+  justify-content: space-between; /* verteilt die Buttons gleichmäßig */
+  width: 100%;
+  margin-top: 10px;
+  gap: 5px; /* etwas Abstand zwischen den Buttons (optional) */
+}
+
+.header_sets button {
+  flex: 1;              /* alle Buttons gleich breit */
+  padding: 5px;
+  text-align: center;
+  width:31vw;
+}
+
+.header_points {
+  display: inline-flex;      /* nur so breit wie nötig */
+  gap: 15px;
+  margin-top:1vh;
+  border: 2px solid black;
+  padding:1vh 20vw 1vh 20vw;
+  margin:2vh 20vw 2vh 20vw;
+  border-radius: 15px;
+}
+
+.header_points div {
+  font-size: 5vw;
+  font-weight: bold;
+  gap: 15px;
+}
+
+.header_players {
+  display: inline-flex;      /* nur so breit wie nötig */
+  gap: 5vw;
+}
+
+.header_players div.vs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 5vw;
+  font-weight: bold;
+}
+
+div.opponent {
+    width: 20vw;
+    height: 20vw;
+    max-width:150px;
+    max-height:150px;
+    background-color: #877af9; /* Kreisfarbe */
+    border-radius: 50%; /* Macht die Form rund */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* Textfarbe */
+    font-size: clamp(8pt, 3vw, 24pt);
+    font-weight: bold;
+    text-align: center;
+}
+
+div.point_description { display:flex; align-items: center; margin:5px; }
+#training_description { width:70vw;height:50vh; }
+#opponent_name { width:70vw; }
+
+h1.delete_confirmation { font-size:5vh; }
+button.abort_delete { background-color:green;margin:5px;font-size:5vh; }
+button.delete { background-color:red;margin:5px;font-size:5vh; }
+
+h1.show_players { clear:both;padding-top:10px; }
+div.activated { border:3px solid purple;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
+div.deactivated { border:3px solid white;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
+div.activated img, div.deactivated img { width:10vw;max-width: 150px; } 
+
+hr.end_line {clear:both; }
+div.save { margin-bottom:100px; }
+
+div.location { 
+  display: flex;
+  flex-wrap: wrap; 
+  flex-direction: row; /* oder row */   
+  margin-top:10px;
+}
