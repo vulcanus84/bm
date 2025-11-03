@@ -51,13 +51,18 @@ try
 		}
 
 
-		$myPage->add_content("<div>
-  <canvas id='chartMainReasons'></canvas>
-  <canvas id='chartMainReasonsOpponent'></canvas>
-	<canvas id='chartStrokes'></canvas>
-	<canvas id='chartOuts'></canvas>
-  <canvas id='chartPointIncreases'></canvas>
+		$myPage->add_content("<div class='chart-container'>
+  <button class='chart-nav-btn' id='btnPrev' title='Vorheriges Diagramm'>&lt;</button>
 
+  <div class='chart-wrapper'>
+    <canvas id='chartMainReasons'></canvas>
+    <canvas id='chartMainReasonsOpponent'></canvas>
+    <canvas id='chartStrokes'></canvas>
+    <canvas id='chartOuts'></canvas>
+    <canvas id='chartPointIncreases'></canvas>
+  </div>
+
+  <button class='chart-nav-btn' id='btnNext' title='Nächstes Diagramm'>&gt;</button>
 </div>");
 		$myPage->add_content("
 			<div class='header_points'>

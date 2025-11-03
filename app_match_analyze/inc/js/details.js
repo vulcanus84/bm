@@ -98,6 +98,8 @@ $(document).ready(function() {
   $('.close').on('click', () => $('#myModal').hide());
   $('#point_for_trainee').on('click', (e) => new_point(null,'trainee'));
   $('#point_for_opponent').on('click', (e) => new_point(null,'opponent'));
+  $('#btnNext').on('click', () => change_chart('next'));
+  $('#btnPrev').on('click', () => change_chart('previous'));
 
   let savedChart = sessionStorage.getItem("currentChart");
 
@@ -188,10 +190,7 @@ $(document).ready(function() {
           align: 'center'         // oder 'start' | 'end'
         }
       },
-      maintainAspectRatio: false,
-      onClick: (e) => {
-            change_chart();
-        }
+      maintainAspectRatio: false
     }
   });
 
@@ -222,10 +221,7 @@ $(document).ready(function() {
           align: 'center'         // oder 'start' | 'end'
         }
       },
-      maintainAspectRatio: false,
-      onClick: (e) => {
-            change_chart();
-        }
+      maintainAspectRatio: false
     }
   });
 
@@ -256,10 +252,7 @@ $(document).ready(function() {
           align: 'center'         // oder 'start' | 'end'
         }
       },
-      maintainAspectRatio: false,
-      onClick: (e) => {
-            change_chart();
-        }
+      maintainAspectRatio: false
     }
   });
 
@@ -296,10 +289,7 @@ $(document).ready(function() {
         }
       },
 
-      maintainAspectRatio: false,
-      onClick: (e) => {
-            change_chart();
-        }
+      maintainAspectRatio: false
     }
   });
 
@@ -351,25 +341,32 @@ $(document).ready(function() {
           }
         }
       },
-      maintainAspectRatio: false,
-      onClick: (e) => {
-            change_chart();
-        }
+      maintainAspectRatio: false
     }
   });
 });
 
-function change_chart() {
+function change_chart(direction = "next") {
+  // Aktuell sichtbares Chart finden
   let currentChart = arr_charts.find(id => $('#' + id).is(':visible'));
   let currentIndex = arr_charts.indexOf(currentChart);
-  // Nächstes Chart bestimmen (zyklisch, also wieder zum Anfang springen)
-  let nextIndex = (currentIndex + 1) % arr_charts.length;
+
+  // Falls kein Chart sichtbar ist (z. B. beim ersten Aufruf)
+  if (currentIndex === -1) currentIndex = 0;
+
+  // Nächstes oder vorheriges Chart bestimmen
+  let nextIndex;
+  if (direction === "previous") {
+    nextIndex = (currentIndex - 1 + arr_charts.length) % arr_charts.length;
+  } else {
+    nextIndex = (currentIndex + 1) % arr_charts.length;
+  }
 
   // Alle Charts ausblenden
   arr_charts.forEach(id => $('#' + id).hide());
 
-  // Nächstes Chart anzeigen
-  $('#' + arr_charts[nextIndex]).show();
+  // Nächstes Chart anzeigen (mit kleiner Fade-Animation)
+  $('#' + arr_charts[nextIndex]).fadeIn(300);
 
   // Aktuelle Chart-ID in der Session speichern
   sessionStorage.setItem("currentChart", arr_charts[nextIndex]);

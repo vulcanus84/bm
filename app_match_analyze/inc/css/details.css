@@ -123,3 +123,40 @@ div.location {
   flex-direction: row; /* oder row */   
   margin-top:10px;
 }
+
+
+  .chart-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .chart-wrapper {
+    position: relative;
+    width: 80%;
+    text-align: center;
+  }
+
+  .chart-nav-btn {
+    background-color: #5a8dee;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .chart-nav-btn:hover {
+    background-color: #3a6fd8;
+  }
+
+  canvas {
+    display: none;
+    width: 100%;
+    max-width: 800px;
+  }
