@@ -218,7 +218,7 @@ $(document).ready(function() {
   chartStrokes = new Chart(document.getElementById('chartStrokes'), {
     type: 'pie',
     data: {
-      labels: ['Angriffsclear', 'Drop', 'Smash', 'Drive', 'Netz', 'Täuschung', 'Kill'],
+      labels: ['Angriffsclear', 'Drop', 'Smash', 'Defense', 'Netz', 'Täuschung', 'Kill'],
       datasets: [{
         data: strokes_data,
         borderWidth: 1,
@@ -422,7 +422,7 @@ function new_point(id,winner, ...path)
         if(path[1]=='Angriffsclear') { strokes_data[0]++; }
         if(path[1]=='Drop') { strokes_data[1]++; }
         if(path[1]=='Smash') { strokes_data[2]++; }
-        if(path[1]=='Drive') { strokes_data[3]++; }
+        if(path[1]=='Defense') { strokes_data[3]++; }
         if(path[1]=='Netzdrop') { strokes_data[4]++; }
         if(path[1]=='Täuschung') { strokes_data[5]++; }
         if(path[1]=='Kill') { strokes_data[6]++; }
