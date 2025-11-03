@@ -28,10 +28,18 @@ const colors = [
   "#277DA1", // kühles Blau
   "#9C89B8", // sanftes Violett
   "#F3722C", // warmes Orange
-  "#43AA8B", // Türkisgrün
+  "#666666", // Dunkelgrau
   "#4D908E", // Graublau
   "#F9C74F", // helles Gelb
   "#577590"  // gedecktes Marineblau
+];
+
+const arr_charts = [
+  'chartMainReasons',
+  'chartMainReasonsOpponent',
+  'chartStrokes',
+  'chartOuts',
+  'chartPointIncreases'
 ];
 
 function countErrors(path) {
@@ -91,11 +99,17 @@ $(document).ready(function() {
   $('#point_for_trainee').on('click', (e) => new_point(null,'trainee'));
   $('#point_for_opponent').on('click', (e) => new_point(null,'opponent'));
 
-  $('#chartMainReasons').show();
-  $('#chartStrokes').hide();
-  $('#chartPointIncreases').hide();
-  $('#chartMainReasonsOpponent').hide();
-  $('#chartOuts').hide();
+  let savedChart = sessionStorage.getItem("currentChart");
+
+  // Alle ausblenden
+  arr_charts.forEach(id => $('#' + id).hide());
+
+  // Gespeichertes Chart anzeigen oder Standard (erstes)
+  if (savedChart && arr_charts.includes(savedChart)) {
+    $('#' + savedChart).show();
+  } else {
+    $('#' + arr_charts[0]).show();
+  }
 
   const params = new URLSearchParams(window.location.search);
   set = params.get('set');
@@ -345,25 +359,22 @@ $(document).ready(function() {
   });
 });
 
-function change_chart()
-{
-  if($('#chartMainReasons').is(':visible')) {
-    $('#chartMainReasonsOpponent').show();
-    $('#chartMainReasons').hide();
-  } else if($('#chartMainReasonsOpponent').is(':visible')) {
-    $('#chartStrokes').show();
-    $('#chartMainReasonsOpponent').hide();
-  } else if($('#chartStrokes').is(':visible')) {
-    $('#chartOuts').show();
-    $('#chartStrokes').hide();
-  } else if($('#chartOuts').is(':visible')) {
-    $('#chartPointIncreases').show();
-    $('#chartOuts').hide();
-  } else {
-    $('#chartMainReasons').show();
-    $('#chartPointIncreases').hide();
-  }
+function change_chart() {
+  let currentChart = arr_charts.find(id => $('#' + id).is(':visible'));
+  let currentIndex = arr_charts.indexOf(currentChart);
+  // Nächstes Chart bestimmen (zyklisch, also wieder zum Anfang springen)
+  let nextIndex = (currentIndex + 1) % arr_charts.length;
+
+  // Alle Charts ausblenden
+  arr_charts.forEach(id => $('#' + id).hide());
+
+  // Nächstes Chart anzeigen
+  $('#' + arr_charts[nextIndex]).show();
+
+  // Aktuelle Chart-ID in der Session speichern
+  sessionStorage.setItem("currentChart", arr_charts[nextIndex]);
 }
+
 
 function getLevelOptions(...path) {
   let current = tree;
