@@ -133,30 +133,21 @@ div.location {
     gap: 20px;
   }
 
-  .chart-wrapper {
-    position: relative;
-    width: 80%;
-    text-align: center;
-  }
 
   .chart-nav-btn {
     background-color: #5a8dee;
     color: white;
     border: none;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
+    width: 7vw;
+    height: 7vw;
+    max-width: 100px;
+    max-height: 100px;
+    font-size: clamp(1pt,5vw,36pt);;
     cursor: pointer;
     transition: background-color 0.2s ease;
   }
 
   .chart-nav-btn:hover {
     background-color: #3a6fd8;
-  }
-
-  canvas {
-    display: none;
-    width: 100%;
-    max-width: 800px;
   }

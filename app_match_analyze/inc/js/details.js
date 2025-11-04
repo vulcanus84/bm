@@ -492,17 +492,42 @@ function new_point(id,winner, ...path)
   else {
     let i = 0;
     let btn_height = 50 / arr_options.length;
+    if (path.length > 0) {
+      txt += `<button 
+        class='level_option' 
+        style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height/2}vh;margin:1vw;background-color:gray'
+        data-level='back'
+      >Zurück</button>`;
+    }
     for(const option of arr_options) {
       let color = colors[i % colors.length];
-      txt += `<button class='level_option' style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height}vh;margin:1vw;background-color:${color}' data-level='${option}'>${option}</button>`;
+      let arr_options = getLevelOptions(...path, option);
+      if(arr_options.length>0) {
+        suffix = '＋';
+      } else {
+        suffix = '✅';
+      }
+
+      txt += `<button class='level_option' style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height}vh;margin:1vw;background-color:${color}' data-level='${option}'>${option} ${suffix} </button>`;
       i++;
     }
     $('#myModalText').html(txt); 
     $('#myModal').show();
     $('.level_option').on('click', (e) => {
-      const newPath = [...path, e.currentTarget.getAttribute('data-level')];
-      new_point(null,winner, ...newPath);
+      const level = e.currentTarget.getAttribute('data-level');
+      let newPath;
+
+      if (level === 'back') {
+        // eine Stufe zurück
+        newPath = path.slice(0, -1);
+      } else {
+        // tiefer ins Menü
+        newPath = [...path, level];
+      }
+
+      new_point(null, winner, ...newPath);
     });
+
   }
 
 }
