@@ -11,14 +11,14 @@ const reasons_data_opponent = [0,0,0];
 const strokes_data = [0,0,0,0,0,0,0];
 const labels = [0];
 const stats = {
-  Clear: { OutHinten: 0, OutRechts: 0, OutLinks: 0, InsNetz: 0 },
-  Drop: { OutHinten: 0, OutRechts: 0, OutLinks: 0, InsNetz: 0 },
-  Smash: { OutHinten: 0, OutRechts: 0, OutLinks: 0, InsNetz: 0 },
-  Drive: { OutHinten: 0, OutRechts: 0, OutLinks: 0, InsNetz: 0 },
-  Kill: { OutHinten: 0, OutRechts: 0, OutLinks: 0, InsNetz: 0 },
-  Netzdrop: { OutHinten: 0, OutRechts: 0, OutLinks: 0, InsNetz: 0 },
-  Lift: { OutHinten: 0, OutRechts: 0, OutLinks: 0, InsNetz: 0 },
-  Anspiel: { OutHinten: 0, OutRechts: 0, OutLinks: 0, InsNetz: 0 }
+  Clear: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
+  Drop: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
+  Smash: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
+  Drive: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
+  Kill: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
+  Netzdrop: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
+  Lift: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
+  Anspiel: { OutHinten: 0, OutSeite: 0, InsNetz: 0 }
 };
 
 const colors = [
@@ -55,8 +55,7 @@ function countErrors(path) {
   // Fehlerarten unterscheiden
   if (errorType === 'Out') {
     if (direction === 'Hinten') stats[stroke].OutHinten++;
-    else if (direction === 'Rechts') stats[stroke].OutRechts++;
-    else if (direction === 'Links') stats[stroke].OutLinks++;
+    else if (direction === 'Seite') stats[stroke].OutSeite++;
   } else if (errorType === 'Netz') {
     stats[stroke].InsNetz++;
   }
@@ -64,7 +63,7 @@ function countErrors(path) {
 
 function prepareChartData(stats) {
   const strokes = Object.keys(stats); // z. B. ["Clear", "Drop", "Smash", ...]
-  const categories = ['OutHinten', 'OutRechts', 'OutLinks', 'InsNetz'];
+  const categories = ['OutHinten', 'OutSeite', 'InsNetz'];
 
   const datasets = categories.map((cat, i) => ({
     label: cat,

@@ -146,6 +146,7 @@ div.location {
     font-size: clamp(1pt,5vw,36pt);;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    padding: 0;
   }
 
   .chart-nav-btn:hover {
