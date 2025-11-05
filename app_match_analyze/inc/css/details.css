@@ -53,7 +53,11 @@ table#points_table td.right {
   flex: 1;              /* alle Buttons gleich breit */
   padding: 5px;
   text-align: center;
-  width:31vw;
+  width:28vw;
+}
+
+.header_sets button#btn_overview {
+  width:10vw;
 }
 
 .header_points {

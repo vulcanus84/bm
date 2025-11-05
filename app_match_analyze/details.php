@@ -22,6 +22,7 @@ try
 
 		$myPage->add_content("
 			<div class='header_sets'>
+				<a href='index.php'><button class='blue' id='btn_overview'><<</button></a>
 				<a href='details.php?ma_id={$_GET['ma_id']}&set=1'><button id='btn_set1'>Satz 1</button></a>
 				<a href='details.php?ma_id={$_GET['ma_id']}&set=2'><button id='btn_set2'>Satz 2</button></a>
 				<a href='details.php?ma_id={$_GET['ma_id']}&set=3'><button id='btn_set3'>Satz 3</button></a>
