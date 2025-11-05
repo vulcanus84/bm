@@ -491,7 +491,7 @@ function new_point(id,winner, ...path)
   }
   else {
     let i = 0;
-    let btn_height = 55 / (arr_options.length + 1);
+    let btn_height = 50 / (arr_options.length + 1);
     if (path.length > 0) {
       txt += `<button 
         class='level_option' 
