@@ -506,10 +506,10 @@ function new_point(id,winner, ...path)
       let suffix = arr_options_next.length > 0 ? '＋' : '✅';
       
       let len = option.length;
-      let calc_font_size = btn_height * 0.5;
+      let calc_font_size = btn_height * 0.3;
       if(len>12) {
         let weight = Math.sqrt(len) / 3;
-        calc_font_size = btn_height * 0.5 / weight;
+        calc_font_size = btn_height * 0.3 / weight;
       }
 
       txt += `
