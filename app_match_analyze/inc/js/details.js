@@ -491,24 +491,40 @@ function new_point(id,winner, ...path)
   }
   else {
     let i = 0;
-    let btn_height = 50 / arr_options.length;
+    let btn_height = 60 / (arr_options.length + 1);
     if (path.length > 0) {
       txt += `<button 
         class='level_option' 
-        style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height/2}vh;margin:1vw;background-color:gray'
+        style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height}vh;margin:${btn_height/10}vh;background-color:gray'
         data-level='back'
       >Zurück</button>`;
     }
-    for(const option of arr_options) {
+
+    for (const option of arr_options) {
       let color = colors[i % colors.length];
-      let arr_options = getLevelOptions(...path, option);
-      if(arr_options.length>0) {
-        suffix = '＋';
-      } else {
-        suffix = '✅';
+      let arr_options_next = getLevelOptions(...path, option);
+      let suffix = arr_options_next.length > 0 ? '＋' : '✅';
+      
+      let len = option.length;
+      let calc_font_size = btn_height * 0.5;
+      if(len>12) {
+        let weight = Math.sqrt(len) / 3;
+        calc_font_size = btn_height * 0.5 / weight;
       }
 
-      txt += `<button class='level_option' style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height}vh;margin:1vw;background-color:${color}' data-level='${option}'>${option} ${suffix} </button>`;
+      txt += `
+        <button class='level_option'
+          style='
+            font-size:${calc_font_size}vh;
+            width:75vw;
+            height:${btn_height}vh;
+            margin:${btn_height/10}vh;
+            background-color:${color};
+          '
+          data-level='${option}'>
+          ${option} ${suffix}
+        </button>
+      `;
       i++;
     }
     $('#myModalText').html(txt); 
