@@ -20,7 +20,7 @@ div.user_pic { float:left; }
 div.col_text { padding:5px;width:60%;border-right:1px solid gray; }
 div.col_delete { padding:5px;width:5%;display:flex;justify-content:center;align-items:center; }
 
-#training_description { width:70vw;height:20vh; }
+#training_description { width:70vw;height:5vh; }
 #opponent_name { width:70vw; }
 
 h1.delete_confirmation { font-size:5vh; }
@@ -28,9 +28,15 @@ button.abort_delete { background-color:green;margin:5px;font-size:5vh; }
 button.delete { background-color:red;margin:5px;font-size:5vh; }
 
 h1.show_players { clear:both;padding-top:10px; }
+
 div.activated { border:3px solid purple;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
 div.deactivated { border:3px solid white;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
 div.activated img, div.deactivated img { width:10vw;max-width: 150px; } 
+
+div.activated_trainer, div.deactivated_trainer { border:3px solid purple;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
+div.deactivated_trainer { border:3px solid white; }
+div.activated_trainer img, div.deactivated_trainer img { width:10vw;max-width: 150px; } 
+
 
 hr.end_line {clear:both; }
 div.save { margin-bottom:100px; }

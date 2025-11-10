@@ -18,7 +18,21 @@ try
 		$myPage->add_content("  </div>");
 		$myPage->add_content("</div>");
 
-		$db->sql_query("SELECT *, DATE_FORMAT(ma_created_on,'%d.%m.%Y') as curr_date FROM match_analyzes ORDER BY ma_created_on DESC");
+		$db->sql_query("
+				SELECT DISTINCT 
+						ma.*, 
+						trainee.*, 
+						DATE_FORMAT(ma_created_on, '%d.%m.%Y') AS curr_date
+				FROM match_analyzes AS ma
+				LEFT JOIN users AS trainee 
+						ON ma.ma_trainee_id = trainee.user_id
+				INNER JOIN location2user AS l2u 
+						ON l2u.location2user_user_id = trainee.user_id
+				INNER JOIN location_permissions AS perm 
+						ON perm.loc_permission_loc_id = l2u.location2user_location_id
+				WHERE perm.loc_permission_user_id = '" . $_SESSION['login_user']->id . "'
+				ORDER BY ma_created_on DESC
+		");
 
 		$myPage->add_content("<div class='add_entry'><img src='../inc/imgs/query/add.png'/></div>"); 
 

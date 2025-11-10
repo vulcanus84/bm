@@ -2,58 +2,13 @@
 $(document).ready(function() {
   $('.add_entry').on('click', () => add_entry());
   $('.close').on('click', () => $('#myModal').hide());
-  $('.col_trainer').on('click', (e) => edit_trainer(e.currentTarget.id.replace('trainer_', '')));
-  $('.col_player').on('click', (e) => edit_players(e.currentTarget.id.replace('players_', '')));
-  $('.col_opponent').on('click', (e) => edit_opponent(e.currentTarget.id.replace('opponent_', '')));
-  $('.col_text').on('click', (e) => edit_text(e.currentTarget.id.replace('text_', '')));
+  $('.col_trainer').on('click', (e) => edit_entry(e.currentTarget.id.replace('trainer_', '')));
+  $('.col_player').on('click', (e) => edit_entry(e.currentTarget.id.replace('players_', '')));
+  $('.col_opponent').on('click', (e) => edit_entry(e.currentTarget.id.replace('opponent_', '')));
+  $('.col_text').on('click', (e) => edit_entry(e.currentTarget.id.replace('text_', '')));
   $('.col_delete').on('click', (e) => confirm_delete(e.currentTarget.id.replace('delete_', '')));
 });
 
-function edit_text(id)
-{
-  let my_url = 'index.php?ajax=show_text&ma_id=' + id
-  $.ajax({ url: my_url }).done(
-    function(data)
-    {
-      $('#myModalText').html(data); 
-      $('#myModal').show();
-      $('.save_text').on('click', (e) => save_text(e.currentTarget.id.replace('save_text_','')));
-    });
-}
-
-function save_text(id)
-{
-  let encoded_text = encodeURIComponent($('#training_description').val());
-  let my_url = 'index.php?ajax=save_text&ma_id=' + id + '&text=' + encoded_text
-  $.ajax({ url: my_url }).done(
-    function()
-    {
-      location.reload();
-    });
-}
-
-function edit_players(id)
-{
-  let my_url = 'index.php?ajax=show_players&ma_id=' + id
-  $('#myModalText').html("Data loading..."); 
-  $('#myModal').show();
-  $.ajax({ url: my_url }).done(
-    function(data)
-    {
-      $('#myModalText').html(data); 
-      $("div[id^='div_location_']").hide();
-      $('#myModal').show();
-      $('.activated, .deactivated').on('click', (e) => {
-          // e.currentTarget.id = "img_316_7"
-          const fullId = e.currentTarget.id;         // "img_316_7"
-          const mainId = fullId.split('_')[1];       // "316"
-          toggle_activation(mainId);
-      });
-      $('.save_players').on('click', (e) => save_players(e.currentTarget.id.replace('save_players_','')));
-      $('.location_select').on('click', (e) => change_location(e.currentTarget.id.replace('btn_location_','')));
-      $('.location_select').first().click();
-    });
-}
 
 function change_location(location_id)
 {
@@ -64,48 +19,25 @@ function change_location(location_id)
   $('#div_location_' + location_id).show();
 }
 
-function save_players(ma_id)
-{
-  // IDs aus allen aktivierten Elementen sammeln
-  let players = $('.activated')
-      .map(function() {
-          return $(this).attr('id').split('_')[1]; // nur die mittlere Zahl
-      })
-      .get(); // jQuery-Objekt in normales Array umwandeln
-
-  // Duplikate entfernen und wieder zu String zusammenfügen
-  let uniqueStr = [...new Set(players)].join(';');
-
-  let my_url = 'index.php?ajax=save_players&players=' + uniqueStr + '&ma_id=' + ma_id
-  $.ajax({ url: my_url }).done(
-    function(data)
-    {
-      if(data!='') { alert(data); } else { location.reload(); }
-    });
-}
-
-function edit_trainer(id)
-{
-  let my_url = 'index.php?ajax=show_trainer&ma_id=' + id
-  $.ajax({ url: my_url }).done(
-    function(data)
-    {
-      $('#myModalText').html(data); 
-      $('#myModal').show();
-      $('.activated').on('click', (e) => change_activation(e.currentTarget.id.replace('img_','')));
-      $('.deactivated').on('click', (e) => change_activation(e.currentTarget.id.replace('img_','')));
-      $('.save_trainer').on('click', (e) => save_trainer(e.currentTarget.id.replace('save_trainer_','')));
-    });
-}
-
-function save_trainer(ma_id)
+function save_entry(ma_id)
 {
   let trainer_id = null;
+  let trainee_id = null;
+  $('.activated_trainer').each(function() {
+    trainer_id = $(this).attr('id').replace('img_trainer_', '') + ';';
+  });
   $('.activated').each(function() {
-    trainer_id = $(this).attr('id').replace('img_', '') + ';';
+    trainee_id = $(this).attr('id').replace(/^img_([^_]+).*$/, '$1') + ';';
   });
   let journal_date = $('#journal_date').val();
-  let my_url = 'index.php?ajax=save_trainer&trainer_id=' + trainer_id + '&ma_id=' + ma_id + '&journal_date=' + journal_date
+  let encoded_description = encodeURIComponent($('#training_description').val());
+  let encoded_opponent = encodeURIComponent($('#opponent_name').val());
+
+  if(trainer_id== null) { alert('Bitte einen Trainer auswählen!'); return; }
+  if(trainee_id== null) { alert('Bitte einen Spieler auswählen!'); return; } 
+  if(encoded_opponent=='' ) { alert('Bitte den Gegnernamen eingeben!'); return; }
+
+  let my_url = 'index.php?ajax=save_entry&trainer_id=' + trainer_id + '&ma_id=' + ma_id + '&journal_date=' + journal_date + '&description=' + encoded_description + '&trainee_id=' + trainee_id + '&opponent_name=' + encoded_opponent
   $.ajax({ url: my_url }).done(
     function(data)
     {
@@ -113,40 +45,28 @@ function save_trainer(ma_id)
     });
 }
 
-function edit_opponent(id)
-{
-  let my_url = 'index.php?ajax=show_opponent&ma_id=' + id
+function edit_entry(ma_id) {
+  let my_url = 'index.php?ajax=show_edit&ma_id=' + ma_id;
   $.ajax({ url: my_url }).done(
     function(data)
     {
       $('#myModalText').html(data); 
       $('#myModal').show();
-      $('.save_text').on('click', (e) => save_opponent(e.currentTarget.id.replace('save_opponent_','')));
+
+      $('.activated_trainer, .deactivated_trainer').on('click', (e) => toggle_activation_trainer(e.currentTarget.id.replace('img_trainer_','')));
+      $('.activated, .deactivated').on('click', (e) => toggle_activation_trainee(e.currentTarget.id.replace('img_','')));
+
+      $('.save_entry').on('click', (e) => save_entry(e.currentTarget.id.replace('save_entry_','')));
+      $('.location_select').on('click', (e) => change_location(e.currentTarget.id.replace('btn_location_','')));
+      $('.location_select').first().click();
+
     });
 }
-
-function save_opponent(id)
-{
-  let encoded_text = encodeURIComponent($('#opponent_name').val());
-  let my_url = 'index.php?ajax=save_opponent&ma_id=' + id + '&text=' + encoded_text
-  $.ajax({ url: my_url }).done(
-    function(data)
-    {
-      if(data!='') { alert(data); } else { location.reload(); }
-    });
-}
-
 
 function add_entry()
 {
-  let my_url = 'index.php?ajax=add_entry';
-  $.ajax({ url: my_url }).done(
-    function(data)
-    {
-      if(data!='') { alert(data); } else { location.reload(); }
-    });
+  edit_entry(0);
 }
-
 function delete_entry(id)
 {
   let my_url = 'index.php?ajax=delete_entry&ma_id=' + id
@@ -170,25 +90,7 @@ function confirm_delete(id)
     });
 }
 
-function toggle_activation(img_id)
-{
-  // Aktuelle Anzahl aktivierter Elemente speichern
-  var $elements = $('[id^="img_"]');
-  var activatedCount = $elements.filter('.activated').length;
-
-  $('[id^="img_' + img_id + '"]').each(function() {
-    if ($(this).hasClass('activated')) {
-      $(this).removeClass('activated'); 
-      $(this).addClass('deactivated');
-    } else {
-      if(activatedCount > 1) { alert("Es können max. 2 Spieler ausgewählt werden."); return; }
-      $(this).removeClass('deactivated'); 
-      $(this).addClass('activated');
-    }
-  });
-}
-
-function change_activation(img_id)
+function toggle_activation_trainee(img_id)
 {
   //Remove activated from all items and add deactivated
   $("div[id^='img_']").removeClass('activated');
@@ -197,4 +99,15 @@ function change_activation(img_id)
   //Remove deactivated from selected item and add activated
   $('#img_' + img_id).removeClass('deactivated');
   $('#img_' + img_id).addClass('activated');
+}
+
+function toggle_activation_trainer(img_id)
+{
+  //Remove activated from all items and add deactivated
+  $("div[id^='img_trainer_']").removeClass('activated_trainer');
+  $("div[id^='img_trainer_']").addClass('deactivated_trainer');
+  
+  //Remove deactivated from selected item and add activated
+  $('#img_trainer_' + img_id).removeClass('deactivated_trainer');
+  $('#img_trainer_' + img_id).addClass('activated_trainer');
 }

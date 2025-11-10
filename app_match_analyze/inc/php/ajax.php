@@ -61,10 +61,6 @@ switch($_GET['ajax'])
     echo json_encode($data); 
     break;
 
-  case 'add_entry':
-    $db->insert(array('ma_created_by'=>$_SESSION['login_user']->id),'match_analyzes');
-    break;
-
   case 'confirm_delete':
     print "<h1 class='delete_confirmation'>Wirklich löschen?</h1>";
     print "<button class='delete' id='delete_".$_GET['ma_id']."'>Ja</button>";
@@ -75,47 +71,70 @@ switch($_GET['ajax'])
     $db->delete('match_analyzes','ma_id',$_GET['ma_id']);
     break;
 
-  case 'save_text':
-    $db->update(array('ma_description'=>$_GET['text']),'match_analyzes','ma_id',$_GET['ma_id']);
-    break;
-
-  case 'save_opponent':
-    $db->update(array('ma_opponent_name'=>$_GET['text']),'match_analyzes','ma_id',$_GET['ma_id']);
-    break;
-
-  case 'save_players':
-    //Add selected players
-    $arr_players = explode(';',$_GET['players']);
-    if(count($arr_players)>0) { $db->update(array('ma_trainee_id'=>$arr_players[0]),'match_analyzes','ma_id',$_GET['ma_id']); } else { $db->update(array('ma_trainee_id'=>null),'match_analyzes','ma_id',$_GET['ma_id']); }
-    if(count($arr_players)>1) { $db->update(array('ma_trainee_partner_id'=>$arr_players[1]),'match_analyzes','ma_id',$_GET['ma_id']); } else { $db->update(array('ma_trainee_partner_id'=>null),'match_analyzes','ma_id',$_GET['ma_id']); }  
-    break;
-
-  case 'save_trainer':
-    //Add selected players
-    $arr_trainer = explode(';',$_GET['trainer_id']);
-    foreach($arr_trainer as $trainer)
-    {
-      if($trainer > 0) { 
-        $db->update(array('ma_created_on'=>$_GET['journal_date'],'ma_created_by'=>$trainer),'match_analyzes','ma_id',$_GET['ma_id']); 
-      }
+  case 'save_entry':
+    if((isset($_GET['ma_id']) && $_GET['ma_id']>0)) {
+      //Update existing entry
+      $db->update(array(
+        'ma_created_on'=>$_GET['journal_date'],
+        'ma_created_by'=>explode(';',$_GET['trainer_id'])[0],
+        'ma_description'=>$_GET['description'],
+        'ma_trainee_id'=>explode(';',$_GET['trainee_id'])[0] ?? null,
+        'ma_opponent_name'=>$_GET['opponent_name']
+      ),'match_analyzes','ma_id',$_GET['ma_id']);
+    } else {
+      //New entry
+      $db->insert(array(
+        'ma_created_on'=>$_GET['journal_date'],
+        'ma_created_by'=>explode(';',$_GET['trainer_id'])[0],
+        'ma_description'=>$_GET['description'],
+        'ma_trainee_id'=>explode(';',$_GET['trainee_id'])[0] ?? null,
+        'ma_opponent_name'=>$_GET['opponent_name']
+      ),'match_analyzes');
     }
     break;
 
-  case 'show_text':
-    $d = $db->sql_query_with_fetch("SELECT * FROM match_analyzes WHERE ma_id='".$_GET['ma_id']."'");
-    print "<textarea id='training_description'>".$d->ma_description."</textarea>";
-    print "<br/><button class='save_text' id='save_text_".$d->ma_id."'>Speichern</button>";
-    break;
+  case 'show_edit':
+    if(isset($_GET['ma_id']) && $_GET['ma_id']>0) {
+      $ma_id = $_GET['ma_id'];
+      $d = $db->sql_query_with_fetch("SELECT *, DATE_FORMAT(ma_created_on,'%Y-%m-%d')  as curr_date FROM match_analyzes WHERE ma_id='$_GET[ma_id]'");
+      $trainer_id = $d->ma_created_by;
+      $trainee_id = $d->ma_trainee_id;
+    } else {
+      $d = null;
+      $ma_id = '';
+      $trainer_id = $_SESSION['login_user']->id;
+      $trainee_id = '';
+    }
+    print "<h2>Datum</h2>";
+    print "<input id='journal_date' type='date' value='" . ($d->curr_date ?? date('Y-m-d')) . "'/>";
+    print "<hr/>";
+    print "<h2>Beschreibung</h2>";
+    print "<textarea id='training_description'>".($d->ma_description ?? '') . "</textarea>";
+    print "<hr/>";
+    print "<h2>Name des Gegners</h2>";
+    print "<input type='text' id='opponent_name' value='". ($d->ma_opponent_name ?? '') ."'/>";
+    print "<hr/>";
 
-  case 'show_opponent':
-    $d = $db->sql_query_with_fetch("SELECT * FROM match_analyzes WHERE ma_id='".$_GET['ma_id']."'");
-    print "Name des Gegner / der Gegner<br/><input type='text' id='opponent_name' value='{$d->ma_opponent_name}'/>";
-    print "<p/><button class='save_text' id='save_opponent_".$d->ma_id."'>Speichern</button>";
-    break;
+    print "<h2>Trainer</h2>";
+    print "<div>";
+    $db->sql_query("SELECT * FROM users 
+                    LEFT JOIN location2user ON location2user.location2user_user_id = users.user_id 
+                    LEFT JOIN locations ON location2user.location2user_location_id = locations.location_id 
+                    WHERE user_hide!='1' AND user_id>1 AND locations.location_name = '_Trainer'
+                    ORDER BY locations.location_name, user_account");
 
-  case 'show_players':
+    while($d = $db->get_next_res())
+    {
+      $player = new user($d->user_id);
+      print "<div class='" . ($d->user_id == $trainer_id ? 'activated_trainer' : 'deactivated_trainer') . "' id='img_trainer_{$d->user_id}'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>";
+    }
+
+    print "</div>";
+    print "<div style='clear: both;'>";
+    print "<hr/>";
+    print "<h2>Spieler</h2>";
+
     $last_group = null;
-    //$db->sql_query("SELECT * FROM journal2user WHERE journal2user_ma_id='".$_GET['ma_id']."'");
     $db->sql_query("
         SELECT l.* 
         FROM locations l
@@ -133,7 +152,7 @@ switch($_GET['ajax'])
                     LEFT JOIN (
                         SELECT * 
                         FROM match_analyzes 
-                        WHERE ma_id = '$_GET[ma_id]'
+                        WHERE ma_id = '$ma_id'
                     ) AS ma_temp 
                         ON (
                             ma_temp.ma_trainee_id = users.user_id 
@@ -159,59 +178,14 @@ switch($_GET['ajax'])
         print "<div class='location' id='div_location_{$d->location_id}'>";
         $last_group = $d->location_name;
       }
-      if($d->ma_trainee_id!='')
-      {
-        $player = new user($d->user_id);
-        print "<div class='activated' id='img_{$d->user_id}_{$d->location_id}' ><img src='".$player->get_pic_path(true)."'/><br/>{$player->login}</div>";
-      }
-      else
-      {
-        $player = new user($d->user_id);
-        print "<div class='deactivated' id='img_{$d->user_id}_{$d->location_id}'><img src='".$player->get_pic_path(true)."'/><br/>{$player->login}</div>";
-      }
+      $player = new user($d->user_id);
+      print "<div class='" . ($d->user_id == $trainee_id ? 'activated' : 'deactivated') . "' id='img_{$d->user_id}_{$d->location_id}' ><img src='".$player->get_pic_path(true)."'/><br/>{$player->login}</div>";
     }
-    print "</div>";
-    print "<hr class='end_line' /><p/><div class='save'><button class='save_players' id='save_players_{$_GET['ma_id']}'>Speichern</button></div>";
-    print "<br/><br/><br/><br/>";  
-    break;
 
-  case 'show_trainer':
-    $d = $db->sql_query_with_fetch("SELECT *, DATE_FORMAT(ma_created_on,'%Y-%m-%d')  as curr_date FROM match_analyzes WHERE ma_id='$_GET[ma_id]'");
-    print "<h1>Datum</h1>";
-    print "<input id='journal_date' type='date' value='".$d->curr_date."'/>";
-    print "<hr/>";
-    print "<h1>Trainer</h1>";
-    $db->sql_query("SELECT * FROM users 
-                    LEFT JOIN (SELECT * FROM match_analyzes WHERE ma_id='$_GET[ma_id]') as ma_temp ON ma_temp.ma_created_by = users.user_id
-                    LEFT JOIN location2user ON location2user.location2user_user_id = users.user_id 
-                    LEFT JOIN locations ON location2user.location2user_location_id = locations.location_id 
-                    WHERE user_hide!='1' AND user_id>1 AND locations.location_name = '_Trainer'
-                    ORDER BY locations.location_name, user_account
-    ");
-
-    while($d = $db->get_next_res())
-    {
-      if($d->ma_created_by!='')
-      {
-        $player = new user($d->ma_created_by);
-        print "<div class='activated' id='img_{$d->user_id}'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>";
-      }
-      else
-      {
-        $player = new user($d->user_id);
-        print "<div class='deactivated' id='img_{$d->user_id}'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>";
-      }
-    }
-    print "<hr class='end_line'/><p/><div class='save'><button class='save_trainer' id='save_trainer_".$_GET['ma_id']."'>Speichern</button></div>";
+    print "</div><hr class='end_line'/><p/><div class='save'><button class='save_entry' id='save_entry_".$ma_id."'>Speichern</button></div>";
     break;
 
   default:
     throw new Exception("Ungültiger AJAX-Aufruf!<br/>".$_GET['ajax']);
     break;
 }
-
-//************************************************************************************
-
-
-
-
