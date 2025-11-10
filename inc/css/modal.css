@@ -21,7 +21,7 @@
 	border: 1px solid #888;
 	width: 80%;
 	border-radius: 10px;
-	height: 90%;
+	max-height: 90%;
 	overflow-y: auto;      /* Overlay scrollbar */
   -webkit-overflow-scrolling: touch; /* sanftes Scrollen auf iOS */
 }

@@ -33,9 +33,9 @@ function save_entry(ma_id)
   let encoded_description = encodeURIComponent($('#training_description').val());
   let encoded_opponent = encodeURIComponent($('#opponent_name').val());
 
-  if(trainer_id== null) { alert('Bitte einen Trainer auswählen!'); return; }
-  if(trainee_id== null) { alert('Bitte einen Spieler auswählen!'); return; } 
-  if(encoded_opponent=='' ) { alert('Bitte den Gegnernamen eingeben!'); return; }
+  if(trainer_id== null) { alert('Bitte einen Trainer auswählen'); return; }
+  if(trainee_id== null) { alert('Bitte einen Spieler auswählen'); return; } 
+  if(encoded_opponent=='' ) { alert('Bitte den Gegnernamen eingeben'); return; }
 
   let my_url = 'index.php?ajax=save_entry&trainer_id=' + trainer_id + '&ma_id=' + ma_id + '&journal_date=' + journal_date + '&description=' + encoded_description + '&trainee_id=' + trainee_id + '&opponent_name=' + encoded_opponent
   $.ajax({ url: my_url }).done(
