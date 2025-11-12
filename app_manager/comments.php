@@ -6,6 +6,9 @@
   try
   {
     $myPage = new page();
+    $myPage->set_title("Manager > Kommentare");
+    if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
     $myQuery = new query();
     $myQuery->set_default_order_by("user_account");
     $myQuery->set_sql_table("comments");
@@ -25,8 +28,6 @@
     {
       //Display page
       include('menu.php');
-      $myPage->set_title("Badminton Academy");
-      $myPage->set_subtitle("Spiele");
       $myPage->add_content($myQuery->get_list());
       print $myPage->get_html_code();
     }

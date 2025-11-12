@@ -7,6 +7,9 @@
   try
   {
     $myPage = new page();
+    $myPage->set_title("Manager > Match-Analysen");
+    if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
     $myQuery = new query();
     $myQuery->set_default_order_by("ma_point_id");
     $myQuery->set_default_sort_dir("ASC");
@@ -43,8 +46,6 @@
     {
       //Display page
       include('menu.php');
-      $myPage->set_title("Match-Analyse");
-      $myPage->set_subtitle("Fehlergründe verwalten");
       $myPage->add_content($myQuery->get_list());
       print $myPage->get_html_code();
     }

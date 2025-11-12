@@ -23,6 +23,7 @@
 
     $myPage->set_title("Administration");
     $myPage->set_subtitle("Passwort setzen");
+    if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
     include('menu.php');
     $myPage->menu = $myMenu->create_menu("tabsJ");
     $myHTML = new html();

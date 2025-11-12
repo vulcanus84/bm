@@ -7,6 +7,9 @@
   try
   {
     $myPage = new page();
+    $myPage->set_title("Manager > Turniere");
+    if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
     $myQuery = new query();
     $myQuery->set_default_order_by("group_created");
     $myQuery->set_default_sort_dir("DESC");
@@ -29,8 +32,6 @@
     {
       //Display page
       include('menu.php');
-      $myPage->set_title("Badminton Academy");
-      $myPage->set_subtitle("Gruppen");
       $myPage->add_content($myQuery->get_list());
       print $myPage->get_html_code();
     }

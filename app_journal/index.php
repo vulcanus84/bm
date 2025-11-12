@@ -6,6 +6,9 @@ global $db;
 try
 {	
 	$myPage = new page();
+	$myPage->set_title("Journal");
+	if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
 	$myPage->add_js_link('inc/js/index.js');
 	$myPage->add_css_link('inc/css/index.css');
 

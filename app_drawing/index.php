@@ -5,14 +5,16 @@
   try
   {
     $myPage = new page();
-		$page->change_parameter('x','1');
+    $myPage->set_title("Badminton Academy");
+    $myPage->set_subtitle("Übungen zeichnen");
+  	if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
+    $page->change_parameter('x','1');
 		$_SERVER['link'] = $page->get_link();
 
     if(!IS_AJAX)
     {
       //Display page
-      $myPage->set_title("Badminton Academy");
-      $myPage->set_subtitle("Übungen zeichnen");
       $myPage->add_css_link('inc/css/index.css');
 
       $myPage->add_content("<!-- The Modal -->"); 

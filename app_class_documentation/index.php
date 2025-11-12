@@ -108,6 +108,11 @@
 
   if(!IS_AJAX)
   {
+	  $myPage = new page ($db);
+	  $myPage->set_title("CCS Documentation");
+	  $myPage->set_subtitle("Online Help");
+		if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
 		$_SESSION['arr_classes'] = array();
 		$it = new RecursiveDirectoryIterator(level."inc");
 		foreach(new RecursiveIteratorIterator($it) as $file)
@@ -132,9 +137,6 @@
 			}
 		}
 	  //Display page
-	  $myPage = new page ($db);
-	  $myPage->set_title("CCS Documentation");
-	  $myPage->set_subtitle("Online Help");
 		$myPage->add_css("div.frame { float:left;background-color:#FFF;padding:5px;}");
 		$myPage->add_css("div.area { float:left;overflow:auto;padding:5px;border-radius:10px;padding:10px;}");
 		$myPage->add_css("p.headline { font-size:16pt;margin-top:5px;margin-bottom:10px;font-weight:bold; }");

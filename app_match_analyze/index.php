@@ -8,6 +8,9 @@ try
 	if(!IS_AJAX)
 	{
 		$myPage = new page();
+	  $myPage->set_title("Match Analysen");
+		if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
 		$myPage->add_js_link('inc/js/index.js');
 		$myPage->add_css_link('inc/css/index.css');
 		$last_date = null;

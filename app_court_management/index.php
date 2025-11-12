@@ -5,13 +5,15 @@
   try
   {
     $myPage = new page();
+		$myPage->set_title("Felder verwalten");
+		if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+		
 		$myPage->add_js_link('inc/js/index.js');
 		$myPage->add_css_link('inc/css/index.css');
 
     if(!IS_AJAX)
     {
       //Display page
-      $myPage->set_title("Felder verwalten");
       $myPage->add_js_link(level."inc/js/jquery.ui.touch.js");
       
   		$db->sql_query("SELECT *, DATE_FORMAT(court_started_on,'%Y-%m-%dT%H:%i:%S') as js_date FROM courts WHERE court_status = 'play'");

@@ -5,6 +5,11 @@
 
   try
   {
+    $myPage = new page();
+    $myPage->set_title("Administration");
+    $myPage->set_subtitle("Trainingsorte berechtigen");
+    if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
     $myQuery = new query();
     $myQuery->set_default_order_by("user_account");
     $myQuery->set_sql_table("location_permissions");
@@ -25,9 +30,6 @@
     if(!IS_AJAX)
     {
       //Display page
-      $myPage = new page();
-      $myPage->set_title("Administration");
-      $myPage->set_subtitle("Trainingsorte berechtigen");
       include('menu.php');
       $myPage->add_content($myQuery->get_list());
       print $myPage->get_html_code();

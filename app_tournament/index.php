@@ -8,13 +8,15 @@ if(!isset($_SESSION['login_user'])) { header("Location: ../index.php"); }
 try
 {
 	$myPage = new \page();
+	$myPage->set_title('Turniere');
+	if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
 	$myLogger = new \log();
 	$myPage->add_js_link('inc/js/index.js');
 	$myPage->add_css_link('inc/css/index.css');
 	$myPage->add_css_link('inc/css/layout.css');
 
 	$myTournament = new tournament();
-	$myPage->set_title('Turniere');
 	if(isset($_GET['tournament_id'])) {
 		$myTournament->load($_GET['tournament_id']);
 		$myPage->set_title($myTournament->title);

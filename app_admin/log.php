@@ -23,6 +23,7 @@
       $myPage = new page();
       $myPage->set_title("Administration");
       $myPage->set_subtitle("Log");
+  		if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
       include('menu.php');
       $myPage->add_content($myQuery->get_list());
       print $myPage->get_html_code();

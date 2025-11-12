@@ -11,6 +11,7 @@
     $myPage = new \page();
     $myPage->permission_required=false;
     $myPage->set_title('Turnierübersicht');
+  	if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
     $myTournament = new tournament($_GET['tournament_id']);
 
     if(!IS_AJAX)

@@ -8,6 +8,9 @@ require_once(level."inc/standard_includes.php");		//Load all necessary files (DB
 try
 {
 	$myPage = new page();
+	$myPage->set_title("Meine Einstellungen");
+	if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
 	$myPage->permission_required=false;
 
 	if(isset($_SESSION['login_user']))

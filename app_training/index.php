@@ -18,6 +18,9 @@ try
 	}
 	
 	$myPage = new page();
+  $myPage->set_title("Training");
+	if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
 	$myPage->add_js_link('inc/js/index.js');
 	$myPage->add_css_link('inc/css/index.css');
 
@@ -26,6 +29,9 @@ try
 
 	if(!IS_AJAX)
 	{
+		if($myPage->is_logged_in()) {
+		}
+
 		//Display page
 		$myPage->add_content("<!-- The Modal -->");
 		$myPage->add_content("<div id='myModal' class='modal'>");

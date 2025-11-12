@@ -46,6 +46,7 @@
   $myPage = new page();
   $myPage->set_title("Administration");
   $myPage->set_subtitle("Berechtigungen");
+  if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
 
   try
   {

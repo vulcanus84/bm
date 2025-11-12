@@ -6,6 +6,8 @@
   {
     //Display page
     $myPage = new page();
+		if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
     $_SERVER['link'] = $page->get_link();
 
     $myPage->add_js("

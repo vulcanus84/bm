@@ -9,6 +9,9 @@ if(!isset($_SESSION['login_user'])) { header("Location: ../index.php"); }
 try
 {
 	$myPage = new \page();
+	$myPage->set_title("Spielerverwaltung");
+	if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
+
 	$myLogger = new \log();
 	$myPage->add_js_link('inc/js/players.js');
 	$myPage->add_css_link('inc/css/index.css');
@@ -22,7 +25,6 @@ try
 		//Display page
 		//$myPage->set_title("Badminton Academy");
 		$myPage->permission_required=false;
-		$myPage->set_title("Spielerverwaltung");
 		$myPage->add_content("<div id='left_col' style='flex: 0 0 30vw;'>");
 		$myPage->add_content("	<div id='collapsed_label'>Spieler</div>");
 		$myPage->add_content("	<div id='left_header'>");
