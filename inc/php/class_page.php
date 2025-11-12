@@ -72,6 +72,7 @@ class page
     $this->add_js_link(level."inc/js/calendar/calendar-setup.js");
     $this->add_js_link(level."inc/js/jquery-3.5.1.min.js");
     $this->add_js_link(level."inc/js/jquery-1.11.3-ui.min.js");
+    $this->add_js_link(level."inc/js/main.js");
 
 		try
 		{
@@ -102,6 +103,10 @@ class page
 	    $this->error_text = $e->getMessage();
 			$this->t = new translation("german");
 	  }
+  }
+
+  public function is_logged_in() {
+    return isset($_SESSION['login_user']);
   }
 
 	public function get_setting($setting_name)
