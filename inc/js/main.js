@@ -4,7 +4,9 @@ $(document).ready(function() {
   if(rootPath=='http://localhost:8888') { rootPath += '/bm/inc/'; } else { rootPath+=  '/inc/'; }
 
   // Prüfen, ob gerade die Login-Maske angezeigt wird
-  const bodyHasLoginForm = $('form#login').length > 0;
+  var bodyHasLoginForm = false;
+  if($('div#login_mask').length > 0) { bodyHasLoginForm = true; } 
+  if($('div#error_div').length > 0) { bodyHasLoginForm = true; } 
 
   // Wenn Login-Maske sichtbar ist → Heartbeat aussetzen
   if (bodyHasLoginForm) {

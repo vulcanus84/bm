@@ -92,3 +92,12 @@ div.menu {
 }
 
 div#login_mask h1 { font-size:16pt; }
+
+div#error_div {
+	background-color:#FFFFAA;
+	color:black;
+	border-radius:15px;
+	padding:10px;
+	margin-bottom:10px;
+	border:1px solid red;
+}

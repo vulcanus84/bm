@@ -222,7 +222,7 @@ class page
       //If a error occured show the error and no content
       if(isset($this->error_text))
       {
-        $txt.= "<div style='background-color:#FFFFAA;color:black;border-radius:15px;padding:10px;margin-bottom:10px;border:1px solid red;'>".$this->error_text."</div>";
+        $txt.= "<div id='error_div'>".$this->error_text."<p/><a href='index.php'>Zurück</a></div>";
       }
       else
       {
