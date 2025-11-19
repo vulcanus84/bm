@@ -10,7 +10,7 @@ img.delete {
 
 #chartMainReasons, #chartStrokes, #chartPointIncreases, #chartMainReasonsOpponent, #chartOuts, #chartOutsOpponent, #chartStrokesOpponent {
   width: 70vw !important;
-  height: 50vh !important;
+  height: 40vh !important;
 }
 
 table#points_table {
@@ -74,6 +74,7 @@ table#points_table td.right {
   font-size: 5vw;
   font-weight: bold;
   gap: 15px;
+  white-space: nowrap;
 }
 
 .header_players {
@@ -162,10 +163,45 @@ div.location {
     margin-top: 1vh;
     margin-bottom: 1vh;
     white-space: nowrap;
-    font-size: clamp(1pt,5vw,36pt);
+    font-size: 36pt;
   }
 
-  .slider {
-    width: 100%;
-    vertical-align: middle;
-  } 
+.slider {
+    width: 60vw;
+    height: 40px;                /* große Touch-Fläche */
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+}
+
+/* Track (die Linie) */
+.slider::-webkit-slider-runnable-track {
+    height: 14px;                /* dicker Track */
+    background: #ddd;
+    border-radius: 7px;
+}
+
+.slider::-moz-range-track {
+    height: 14px;
+    background: #ddd;
+    border-radius: 7px;
+}
+
+/* Thumb (Schiebeknopf) */
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 32px;                 /* großer Thumb */
+    height: 32px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -9px;            /* Thumb sauber zentrieren */
+}
+
+.slider::-moz-range-thumb {
+    width: 32px;
+    height: 32px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+}
