@@ -17,8 +17,8 @@ class user
 	private $frontend_language;
 
 	//Read-only konfiguriert
-	protected $id;
-	protected $login;
+	public $id;
+	public $login;
 	private $db;
 
 	public function __get($name)
