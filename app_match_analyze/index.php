@@ -34,7 +34,7 @@ try
 				INNER JOIN location_permissions AS perm 
 						ON perm.loc_permission_loc_id = l2u.location2user_location_id
 				WHERE perm.loc_permission_user_id = '" . $_SESSION['login_user']->id . "'
-				ORDER BY ma_created_on DESC
+				ORDER BY DATE(ma_created_on) DESC, ma_id DESC
 		");
 
 		$myPage->add_content("<div class='add_entry'><img src='../inc/imgs/query/add.png'/></div>"); 
