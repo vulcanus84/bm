@@ -24,7 +24,6 @@ const winAllowedCombinations = [
     { detail: "---", extra: "" },
     { detail: "Cross", extra: "" },
     { detail: "Longline", extra: "" },
-    { detail: "Auf Backhand", extra: "" }
 ];
 
 
@@ -62,25 +61,32 @@ function startAutoScroll() {
 
     autoScrollInterval = setInterval(() => {
         currentPercent += 1;
+
         if (currentPercent > 100) {
             // Stoppe Interval
             clearInterval(autoScrollInterval);
             autoScrollInterval = null;
 
-            // Optional: Reset oder Pause
+            // 5 Sekunden Pause bei 100%
             setTimeout(() => {
-                currentPercent = 0; // oder gewünschter Wert
-                startAutoScroll();   // Auto-Scroll wieder starten
-            }, 3000); // 1000ms = 1 Sekunde Delay
+                currentPercent = 0;
+                match.scrollToPercent(currentPercent);
+                $('#point_slider').val(currentPercent).trigger('change'); // Slider aktualisieren + Event auslösen
 
-            return; // sonst scrollToPercent auf 101
+                // 2 Sekunden Pause bei 0%
+                setTimeout(() => {
+                    startAutoScroll(); // Auto-Scroll erneut starten
+                }, 2000);
+
+            }, 5000);
+
+            return;
         }
-
 
         match.scrollToPercent(currentPercent);
         $('#point_slider').val(currentPercent).trigger('change'); // Slider aktualisieren + Event auslösen
 
-    }, 100);
+    }, 200);
 }
 
 // Auto-Scroll stoppen
