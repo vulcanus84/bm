@@ -1,7 +1,6 @@
 <?php
 define("level","../");																//define the structur to to root directory (e.g. "../", for files in root set "")
 require_once(level."inc/standard_includes.php");		//Load all necessary files (DB-Connection, User-Login, etc.)
-global $db;
 
 try
 {	
@@ -11,7 +10,9 @@ try
 	  $myPage->set_title("Match Analyse");
 		if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
 
+		$myPage->add_js_link('inc/js/class_match.js');
 		$myPage->add_js_link('inc/js/details.js');
+
 		$myPage->add_js_link('inc/js/chart.js');
 		$myPage->add_css_link('inc/css/details.css');
 		$myPage->add_content("<div id='myModal' class='modal'>");
@@ -63,6 +64,8 @@ try
     <canvas id='chartMainReasonsOpponent'></canvas>
     <canvas id='chartStrokes'></canvas>
     <canvas id='chartOuts'></canvas>
+    <canvas id='chartStrokesOpponent'></canvas>
+    <canvas id='chartOutsOpponent'></canvas>
     <canvas id='chartPointIncreases'></canvas>
   </div>
 
@@ -70,13 +73,15 @@ try
 </div>");
 		$myPage->add_content("
 			<div class='header_points'>
-				<div id='points_player'>0</div>
-				<div class='double_point'>:</div>
-				<div id='points_opponent'>0</div>
+				<div id='points'>0:0</div>
 			</div>
 		");
 
 		$myPage->add_content("
+			<div class='div_slider'>
+				<span id='btnAutoScroll' style='cursor:pointer;'>▶️</span>
+				<input type='range' min='0' max='100' value='100' class='slider' id='point_slider'>
+			</div>
 			<div class='header_players'>
 				<div class='player' id='point_for_trainee'>");
 				if($d->ma_trainee_id>0) {

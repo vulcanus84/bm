@@ -156,3 +156,16 @@ div.location {
   .chart-nav-btn:hover {
     background-color: #3a6fd8;
   }
+
+  .div_slider {
+    width: 70vw;
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+    white-space: nowrap;
+    font-size: clamp(1pt,5vw,36pt);
+  }
+
+  .slider {
+    width: 100%;
+    vertical-align: middle;
+  } 

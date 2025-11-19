@@ -5,21 +5,30 @@ let opponentpoints = 0;
 let set;
 let ma_id;
 let mode='load';
+const match = new BadmintonMatch("Ich", "Gegner");
 
-const reasons_data = [0,0,0];
-const reasons_data_opponent = [0,0,0];
-const strokes_data = [0,0,0,0,0,0,0];
+const errorStrokes = ["Anspiel","Clear", "Drop", "Drive", "Smash", "Lift", "Netzdrop", "Kill"];
+const errorAllowedCombinations = [
+    { detail: "Out", extra: "Hinten" },
+    { detail: "Out", extra: "Seite" },
+    { detail: "Netz", extra: "" },
+    { detail: "Nicht getroffen", extra: "" },
+    { detail: "Zu flach", extra: "" },
+    { detail: "Zu kurz", extra: "" },
+    { detail: "Zu hoch", extra: "" },
+    { detail: "---", extra: "" }
+];
+
+const winStrokes = ["Angriffsclear", "Drop", "Drive", "Smash", "Defense", "Netzdrop", "Kill", "Täuschung"];
+const winAllowedCombinations = [
+    { detail: "---", extra: "" },
+    { detail: "Cross", extra: "" },
+    { detail: "Longline", extra: "" },
+    { detail: "Auf Backhand", extra: "" }
+];
+
+
 const labels = [0];
-const stats = {
-  Clear: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
-  Drop: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
-  Smash: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
-  Drive: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
-  Kill: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
-  Netzdrop: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
-  Lift: { OutHinten: 0, OutSeite: 0, InsNetz: 0 },
-  Anspiel: { OutHinten: 0, OutSeite: 0, InsNetz: 0 }
-};
 
 const colors = [
   "#E63946", // warmes Rot
@@ -39,47 +48,53 @@ const arr_charts = [
   'chartMainReasonsOpponent',
   'chartStrokes',
   'chartOuts',
+  'chartStrokesOpponent',
+  'chartOutsOpponent',
   'chartPointIncreases'
 ];
 
-function countErrors(path) {
-  const [main_reason, stroke, errorType, direction] = path;
+let autoScrollInterval = null;
+let currentPercent = 0;
 
-  if (main_reason !== 'Fehler') return; // nur Fehler zählen
+// Auto-Scroll starten
+function startAutoScroll() {
+    if (autoScrollInterval) return; // läuft bereits
 
-  // Prüfen, ob Schlag im stats-Objekt existiert
-  if (!stats[stroke]) {
-    return;
-  }
+    autoScrollInterval = setInterval(() => {
+        currentPercent += 1;
+        if (currentPercent > 100) {
+            // Stoppe Interval
+            clearInterval(autoScrollInterval);
+            autoScrollInterval = null;
 
-  // Fehlerarten unterscheiden
-  if (errorType === 'Out') {
-    if (direction === 'Hinten') stats[stroke].OutHinten++;
-    else if (direction === 'Seite') stats[stroke].OutSeite++;
-  } else if (errorType === 'Netz') {
-    stats[stroke].InsNetz++;
-  }
+            // Optional: Reset oder Pause
+            setTimeout(() => {
+                currentPercent = 0; // oder gewünschter Wert
+                startAutoScroll();   // Auto-Scroll wieder starten
+            }, 3000); // 1000ms = 1 Sekunde Delay
+
+            return; // sonst scrollToPercent auf 101
+        }
+
+
+        match.scrollToPercent(currentPercent);
+        $('#point_slider').val(currentPercent).trigger('change'); // Slider aktualisieren + Event auslösen
+
+    }, 100);
 }
 
-function prepareChartData(stats) {
-  const strokes = Object.keys(stats); // z. B. ["Clear", "Drop", "Smash", ...]
-  const categories = ['OutHinten', 'OutSeite', 'InsNetz'];
-
-  const datasets = categories.map((cat, i) => ({
-    label: cat,
-    data: strokes.map(stroke => stats[stroke][cat] || 0),
-    backgroundColor: colors[i % colors.length],
-    borderColor: colors[i % colors.length].replace('0.6', '1'),
-    borderWidth: 1,
-    fill: false,  // 🔹 wichtig für Line-Charts (keine Fläche unter der Linie)
-    tension: 0.3  // 🔹 sanfte Kurve, falls du Line-Chart verwendest
-  }));
-
-  return { labels: strokes, datasets };
+// Auto-Scroll stoppen
+function stopAutoScroll() {
+    if (autoScrollInterval) {
+        clearInterval(autoScrollInterval);
+        autoScrollInterval = null;
+    }
 }
-
 
 function delete_entry(id) {
+  match.removePointById(id);
+  $('#row_' + id).remove();
+  update_stats();
   let my_url = 'index.php?ajax=delete_point&point_id=' + id
       + '&ma_id=' + ma_id
       + '&set=' + set;
@@ -88,8 +103,13 @@ function delete_entry(id) {
     function(data)
     {
       if(data!='') { alert(data); }
-      location.reload();
+      //location.reload();
   });
+}
+
+function change_slider(value) {
+  match.scrollToPercent(parseInt(value));
+  update_stats();
 }
 
 //Event handlers
@@ -99,6 +119,44 @@ $(document).ready(function() {
   $('#point_for_opponent').on('click', (e) => new_point(null,'opponent'));
   $('#btnNext').on('click', () => change_chart('next'));
   $('#btnPrev').on('click', () => change_chart('previous'));
+  $('.header_points').on('click', () => toggleSlider());
+  $('.div_slider').hide();
+
+  function toggleSlider() {
+      $('.div_slider').toggle();
+      $('.header_players').toggle();
+      if('none' === $('.div_slider').css('display')) {
+          stopAutoScroll();
+          match.scrollToPercent(100);
+          currentPercent = 0;
+          update_stats();
+          $('.slider').val(100);
+          $('#btnAutoScroll').text("▶️");
+      } else {
+          startAutoScroll();
+          $('#btnAutoScroll').text("⏸️");
+      }
+  }
+  
+  // Button Event
+  $('#btnAutoScroll').on('click', function() {
+      const $btn = $(this);
+      if (autoScrollInterval) {
+          stopAutoScroll();
+          $btn.text("▶️");
+      } else {
+          startAutoScroll();
+          $btn.text("⏸️");
+      }
+  });
+
+  // Slider Event (bestehend in deinem Stil)
+  $('#point_slider').on('change', (e) => {
+      const value = parseInt(e.currentTarget.value, 10);
+      currentPercent = value;          // aktuellen Wert merken
+      match.scrollToPercent(value);    // Match-Cursor setzen
+      update_stats();                 // Stats aktualisieren
+  });
 
   let savedChart = sessionStorage.getItem("currentChart");
 
@@ -159,7 +217,6 @@ $(document).ready(function() {
       });
       mode = 'save';
       $('img.delete').on('click', (e) => delete_entry(e.currentTarget.id));
-
   });
 
   chartMainReasons = new Chart(document.getElementById('chartMainReasons'), {
@@ -167,7 +224,7 @@ $(document).ready(function() {
     data: {
       labels: ['Fehler des Gegners','Gewinner', 'Glück'],
       datasets: [{
-        data: reasons_data,
+        data: match.getPointStatistics('trainee'),
         borderWidth: 1,
         backgroundColor: colors
       }]
@@ -198,7 +255,7 @@ $(document).ready(function() {
     data: {
       labels: ['Meine Fehler','Gewinner', 'Glück'],
       datasets: [{
-        data: reasons_data_opponent,
+        data: match.getPointStatistics('opponent'),
         borderWidth: 1,
         backgroundColor: colors
       }]
@@ -225,72 +282,217 @@ $(document).ready(function() {
   });
 
   chartStrokes = new Chart(document.getElementById('chartStrokes'), {
-    type: 'pie',
+    type: 'bar',
     data: {
-      labels: ['Angriffsclear', 'Drop', 'Smash', 'Defense', 'Netz', 'Täuschung', 'Kill'],
-      datasets: [{
-        data: strokes_data,
-        borderWidth: 1,
-        backgroundColor: colors
-      }]
+        labels: winStrokes,
+        datasets: winAllowedCombinations.map((c, i) => {
+            // Label richtig setzen: extra nur, wenn nicht leer
+            const label = c.extra ? `${c.detail} ${c.extra}` : c.detail;
+            return {
+                label: label,
+                data: winStrokes.map(() => 0),          // initial 0
+                backgroundColor: colors[i % colors.length],
+                extra: c.extra                       // optional für Tooltip
+            };
+        })
     },
     options: {
-      plugins: {
-        title: {
-          display: true,          // 👈 Titel aktivieren
-          text: 'Meine Gewinnschläge nach Schlagarten', 
-          font: {
-            size: 24,             // Schriftgröße
-            weight: 'bold'
-          },
-          color: '#000',          // Schriftfarbe
-          padding: {
-            top: 10,
-            bottom: 0
-          },
-          align: 'center'         // oder 'start' | 'end'
-        }
-      },
-      maintainAspectRatio: false
-    }
-  });
-
-  chartOuts = new Chart(document.getElementById('chartOuts'), {
-    type: 'bar',
-    data: prepareChartData(stats),
-    options: {
-      plugins: {
-        title: {
-          display: true,          // 👈 Titel aktivieren
-          text: 'Meine Fehler nach Schlag und Ort', 
-          font: {
-            size: 24,             // Schriftgröße
-            weight: 'bold'
-          },
-          color: '#000',          // Schriftfarbe
-          padding: {
-            top: 10,
-            bottom: 0
-          },
-          align: 'center'         // oder 'start' | 'end'
+        scales: { 
+            x: { stacked: true },
+            y: { 
+                stacked: true,
+                beginAtZero: true,
+                ticks: { stepSize: 1 },
+                suggestedMax: 5
+            }
         },
-        legend: {
-          display: true
+        plugins: {
+            title: {
+                display: true,
+                text: 'Meine Gewinnschläge', 
+                font: { size: 24, weight: 'bold' },
+                color: '#000',
+                padding: { top: 10, bottom: 0 },
+                align: 'center'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const ds = context.dataset;
+                        const label = ds.label;
+                        return `${label}: ${context.raw}`;
+                    }
+                }
+            }
+        },
+        animation: {
+            duration: 500,
+            easing: 'linear',
+            loop: false
         }
-      },
-      scales: {
-        y: {
-          min: 0,   // Minimumwert fixieren
-          max: 7,  // Maximumwert fixieren
-          ticks: {
-            stepSize: 1 // optional: Schritte auf der Y-Achse
-          }
-        }
-      },
-
-      maintainAspectRatio: false
     }
-  });
+});
+
+
+// Initialisierung
+chartOuts = new Chart(document.getElementById('chartOuts'), {
+    type: 'bar',
+    data: {
+        labels: errorStrokes,
+        datasets: errorAllowedCombinations.map((c, i) => {
+            // Label richtig setzen: extra nur, wenn nicht leer
+            const label = c.extra ? `${c.detail} ${c.extra}` : c.detail;
+            return {
+                label: label,
+                data: errorStrokes.map(() => 0),          // initial 0
+                backgroundColor: colors[i % colors.length],
+                extra: c.extra                       // optional für Tooltip
+            };
+        })
+    },
+    options: {
+        scales: { 
+            x: { stacked: true },
+            y: { 
+                stacked: true,
+                beginAtZero: true,
+                ticks: { stepSize: 1 },
+                suggestedMax: 5
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Meine Fehler', 
+                font: { size: 24, weight: 'bold' },
+                color: '#000',
+                padding: { top: 10, bottom: 0 },
+                align: 'center'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const ds = context.dataset;
+                        const label = ds.label;
+                        return `${label}: ${context.raw}`;
+                    }
+                }
+            }
+        },
+        animation: {
+            duration: 500,
+            easing: 'linear',
+            loop: false
+        }
+    }
+});
+
+  chartStrokesOpponent = new Chart(document.getElementById('chartStrokesOpponent'), {
+    type: 'bar',
+    data: {
+        labels: winStrokes,
+        datasets: winAllowedCombinations.map((c, i) => {
+            // Label richtig setzen: extra nur, wenn nicht leer
+            const label = c.extra ? `${c.detail} ${c.extra}` : c.detail;
+            return {
+                label: label,
+                data: winStrokes.map(() => 0),          // initial 0
+                backgroundColor: colors[i % colors.length],
+                extra: c.extra                       // optional für Tooltip
+            };
+        })
+    },
+    options: {
+        scales: { 
+            x: { stacked: true },
+            y: { 
+                stacked: true,
+                beginAtZero: true,
+                ticks: { stepSize: 1 },
+                suggestedMax: 5
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Gewinnschläge des Gegners', 
+                font: { size: 24, weight: 'bold' },
+                color: '#000',
+                padding: { top: 10, bottom: 0 },
+                align: 'center'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const ds = context.dataset;
+                        const label = ds.label;
+                        return `${label}: ${context.raw}`;
+                    }
+                }
+            }
+        },
+        animation: {
+            duration: 500,
+            easing: 'linear',
+            loop: false
+        }
+    }
+});
+
+
+// Initialisierung
+chartOutsOpponent = new Chart(document.getElementById('chartOutsOpponent'), {
+    type: 'bar',
+    data: {
+        labels: errorStrokes,
+        datasets: errorAllowedCombinations.map((c, i) => {
+            // Label richtig setzen: extra nur, wenn nicht leer
+            const label = c.extra ? `${c.detail} ${c.extra}` : c.detail;
+            return {
+                label: label,
+                data: errorStrokes.map(() => 0),          // initial 0
+                backgroundColor: colors[i % colors.length],
+                extra: c.extra                       // optional für Tooltip
+            };
+        })
+    },
+    options: {
+        scales: { 
+            x: { stacked: true },
+            y: { 
+                stacked: true,
+                beginAtZero: true,
+                ticks: { stepSize: 1 },
+                suggestedMax: 5
+            }
+        },
+        plugins: {
+            title: {
+                display: true,
+                text: 'Fehler des Gegners', 
+                font: { size: 24, weight: 'bold' },
+                color: '#000',
+                padding: { top: 10, bottom: 0 },
+                align: 'center'
+            },
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        const ds = context.dataset;
+                        const label = ds.label;
+                        return `${label}: ${context.raw}`;
+                    }
+                }
+            }
+        },
+        animation: {
+            duration: 500,
+            easing: 'linear',
+            loop: false
+        }
+    }
+});
+
 
   chartPointIncreases = new Chart(document.getElementById('chartPointIncreases'), {
     type: 'line',
@@ -412,9 +614,12 @@ function new_point(id,winner, ...path)
   }
   txt += "</h1>";
   let arr_options = getLevelOptions(...path);
+  
   if(arr_options.length===0) {
     // Ende des Pfades erreicht, Punkt speichern
     $('#myModal').hide();
+    match.addPoint({ id: id, winner: winner, type: path[0], shot: path[1], detail: path[2], extra: path[3] });
+
     let main_reason = path[0];
     let reason_path = path.slice(1)
       .filter(p => p && p.trim() !== '') // nur nicht-leere Werte behalten
@@ -422,48 +627,19 @@ function new_point(id,winner, ...path)
     if ($('#points_table tbody').length === 0) { $('#points_table').append('<tbody></tbody>'); }
 
     if(winner=='trainee') {
-      if(main_reason=='Fehler') { reasons_data[0]++; }
-      mypoints++;
-      if(main_reason=='Gewinnschlag') { 
-        reasons_data[1]++; 
-        if(path[1]=='Angriffsclear') { strokes_data[0]++; }
-        if(path[1]=='Drop') { strokes_data[1]++; }
-        if(path[1]=='Smash') { strokes_data[2]++; }
-        if(path[1]=='Defense') { strokes_data[3]++; }
-        if(path[1]=='Netzdrop') { strokes_data[4]++; }
-        if(path[1]=='Täuschung') { strokes_data[5]++; }
-        if(path[1]=='Kill') { strokes_data[6]++; }
-      }
-      
-      if(main_reason=='Glück') { reasons_data[2]++; }
-
-      $('#points_table tbody').prepend(`<tr><td class='left'>${htmlCode}</td><td class='middle'>${main_reason}<br/><img  class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></td><td class='right'>${reason_path}</td></tr>`);
-      $('#points_player').text(parseInt($('#points_player').text()) + 1);
+      $('#points_table tbody').prepend(`<tr id='row_${id}'><td class='left'>${htmlCode}</td><td class='middle'>${main_reason}<br/><img  class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></td><td class='right'>${reason_path}</td></tr>`);
     } else {
-      opponentpoints++;
-      if(main_reason=='Fehler') { 
-        reasons_data_opponent[0]++; 
-        countErrors(path);
-      }
-      if(main_reason=='Gewinnschlag') { reasons_data_opponent[1]++; }
-      if(main_reason=='Glück') { reasons_data_opponent[2]++; }
-      $('#points_table tbody').prepend(`<tr><td class='left'>${reason_path}</td><td class='middle'>${main_reason}<br/><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></td><td class='right'>${htmlCode}</td></tr>`);
-      $('#points_opponent').text(parseInt($('#points_opponent').text()) + 1);
+      $('#points_table tbody').prepend(`<tr id='row_${id}'><td class='left'>${reason_path}</td><td class='middle'>${main_reason}<br/><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></td><td class='right'>${htmlCode}</td></tr>`);
     }
-
+    
     const nextLabel = chartPointIncreases.data.labels.length;
     chartPointIncreases.data.labels.push(nextLabel);
     chartPointIncreases.data.datasets[0].data.push(mypoints);
     chartPointIncreases.data.datasets[1].data.push(opponentpoints);
     $('img.delete').off('click');
     $('img.delete').on('click', (e) => delete_entry(e.currentTarget.id));
-      
-    chartMainReasons.update();
-    chartStrokes.update();
-    chartPointIncreases.update();
-    chartMainReasonsOpponent.update();
-    chartOuts.data = prepareChartData(stats);
-    chartOuts.update();
+
+    update_stats();
     if(mode=='save') {
       let my_url = 'index.php?ajax=save_point&winner=' + winner 
       + '&level1=' + encodeURIComponent(main_reason) 
@@ -481,6 +657,8 @@ function new_point(id,winner, ...path)
 
               // img mit class "delete" finden, das aktuell die alte point_id als id hat
               $('img.delete#' + id).attr('id', newId);
+              $('tr#row_' + id).attr('id', 'row_' +newId);
+              match.replacePointId(id, newId);
 
           } else if (data != '') {
               alert(data); // Andere Meldungen anzeigen
@@ -545,4 +723,53 @@ function new_point(id,winner, ...path)
 
   }
 
+}
+
+function update_stats() {
+  chartMainReasons.data.datasets[0].data = match.getPointStatistics('trainee');
+  chartMainReasons.update();
+  
+  chartMainReasonsOpponent.data.datasets[0].data = match.getPointStatistics('opponent');
+  chartMainReasonsOpponent.update();
+
+  const newDataWin = match.getWinnerChartData("trainee", winStrokes, winAllowedCombinations);
+  chartStrokes.data.datasets.forEach((ds, i) => {
+      for (let j = 0; j < ds.data.length; j++) {
+          ds.data[j] = newDataWin.datasets[i].data[j];
+      }
+  });
+  chartStrokes.update();
+
+  const newDataError = match.getErrorChartData("trainee", errorStrokes, errorAllowedCombinations);
+  chartOuts.data.datasets.forEach((ds, i) => {
+      for (let j = 0; j < ds.data.length; j++) {
+          ds.data[j] = newDataError.datasets[i].data[j];
+      }
+  });
+  chartOuts.update();
+  
+  const newDataWinOpponent = match.getWinnerChartData("opponent", winStrokes, winAllowedCombinations);
+  chartStrokesOpponent.data.datasets.forEach((ds, i) => {
+      for (let j = 0; j < ds.data.length; j++) {
+          ds.data[j] = newDataWinOpponent.datasets[i].data[j];
+      }
+  });
+  chartStrokesOpponent.update();
+
+  const newDataErrorOpponent = match.getErrorChartData("opponent", errorStrokes, errorAllowedCombinations);
+  chartOutsOpponent.data.datasets.forEach((ds, i) => {
+      for (let j = 0; j < ds.data.length; j++) {
+          ds.data[j] = newDataErrorOpponent.datasets[i].data[j];
+      }
+  });
+  chartOutsOpponent.update();
+
+
+  const prog = match.getPointProgress();
+  chartPointIncreases.data.datasets[0].data = prog.trainee;
+  chartPointIncreases.data.datasets[1].data = prog.opponent;
+  chartPointIncreases.data.labels = prog.trainee.map((_, i) => i + 1); 
+  chartPointIncreases.update();
+
+  $('#points').text(match.getScore().text);
 }
