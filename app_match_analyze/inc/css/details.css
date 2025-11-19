@@ -8,9 +8,9 @@ img.delete {
   margin-top:2px;
 }
 
-#chartMainReasons, #chartStrokes, #chartPointIncreases, #chartMainReasonsOpponent, #chartOuts {
+#chartMainReasons, #chartStrokes, #chartPointIncreases, #chartMainReasonsOpponent, #chartOuts, #chartOutsOpponent, #chartStrokesOpponent {
   width: 70vw !important;
-  height: 30vh !important;
+  height: 50vh !important;
 }
 
 table#points_table {

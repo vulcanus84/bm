@@ -329,8 +329,10 @@ $(document).ready(function() {
             duration: 500,
             easing: 'linear',
             loop: false
-        }
+        },
+        maintainAspectRatio: false
     }
+    
 });
 
 
@@ -383,7 +385,8 @@ chartOuts = new Chart(document.getElementById('chartOuts'), {
             duration: 500,
             easing: 'linear',
             loop: false
-        }
+        },
+        maintainAspectRatio: false
     }
 });
 
@@ -435,7 +438,8 @@ chartOuts = new Chart(document.getElementById('chartOuts'), {
             duration: 500,
             easing: 'linear',
             loop: false
-        }
+        },
+        maintainAspectRatio: false
     }
 });
 
@@ -489,7 +493,8 @@ chartOutsOpponent = new Chart(document.getElementById('chartOutsOpponent'), {
             duration: 500,
             easing: 'linear',
             loop: false
-        }
+        },
+        maintainAspectRatio: false
     }
 });
 
