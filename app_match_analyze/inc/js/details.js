@@ -71,7 +71,7 @@ function startAutoScroll() {
             setTimeout(() => {
                 currentPercent = 0;
                 match.scrollToPercent(currentPercent);
-                $('#point_slider').val(currentPercent).trigger('change'); // Slider aktualisieren + Event auslösen
+                $('#point_slider').val(currentPercent).trigger('input'); // Slider aktualisieren + Event auslösen
 
                 // 2 Sekunden Pause bei 0%
                 setTimeout(() => {
@@ -84,7 +84,7 @@ function startAutoScroll() {
         }
 
         match.scrollToPercent(currentPercent);
-        $('#point_slider').val(currentPercent).trigger('change'); // Slider aktualisieren + Event auslösen
+        $('#point_slider').val(currentPercent).trigger('input'); // Slider aktualisieren + Event auslösen
 
     }, 200);
 }
@@ -157,7 +157,7 @@ $(document).ready(function() {
   });
 
   // Slider Event (bestehend in deinem Stil)
-  $('#point_slider').on('change', (e) => {
+  $('#point_slider').on('input', (e) => {
       const value = parseInt(e.currentTarget.value, 10);
       currentPercent = value;          // aktuellen Wert merken
       match.scrollToPercent(value);    // Match-Cursor setzen
