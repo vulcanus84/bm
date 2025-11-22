@@ -71,7 +71,8 @@ function startAutoScroll() {
             setTimeout(() => {
                 currentPercent = 0;
                 match.scrollToPercent(currentPercent);
-                $('#point_slider').val(currentPercent).trigger('input'); // Slider aktualisieren + Event auslösen
+                $('#point_slider').val(currentPercent);
+                change_slider(currentPercent);
 
                 // 2 Sekunden Pause bei 0%
                 setTimeout(() => {
@@ -84,7 +85,8 @@ function startAutoScroll() {
         }
 
         match.scrollToPercent(currentPercent);
-        $('#point_slider').val(currentPercent).trigger('input'); // Slider aktualisieren + Event auslösen
+        $('#point_slider').val(currentPercent);
+        change_slider(currentPercent);
 
     }, 200);
 }
@@ -118,6 +120,13 @@ function change_slider(value) {
   update_stats();
 }
 
+function change_slider(value) {
+  value = parseInt(value, 10);
+  currentPercent = value;          // aktuellen Wert merken
+  match.scrollToPercent(value);    // Match-Cursor setzen
+  update_stats();                 // Stats aktualisieren
+}
+
 //Event handlers
 $(document).ready(function() {
   $('.close').on('click', () => $('#myModal').hide());
@@ -127,6 +136,8 @@ $(document).ready(function() {
   $('#btnPrev').on('click', () => change_chart('previous'));
   $('.header_points').on('click', () => toggleSlider());
   $('.div_slider').hide();
+  $('#point_slider').on('input', (e) => { change_slider(e.currentTarget.value); });
+  $('#point_slider').on('touchmove', (e) => { change_slider(e.currentTarget.value); });
 
   function toggleSlider() {
       $('.div_slider').toggle();
@@ -156,13 +167,6 @@ $(document).ready(function() {
       }
   });
 
-  // Slider Event (bestehend in deinem Stil)
-  $('#point_slider').on('input', (e) => {
-      const value = parseInt(e.currentTarget.value, 10);
-      currentPercent = value;          // aktuellen Wert merken
-      match.scrollToPercent(value);    // Match-Cursor setzen
-      update_stats();                 // Stats aktualisieren
-  });
 
   let savedChart = sessionStorage.getItem("currentChart");
 
