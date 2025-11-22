@@ -137,7 +137,7 @@ $(document).ready(function() {
   $('.header_points').on('click', () => toggleSlider());
   $('.div_slider').hide();
   $('#point_slider').on('input', (e) => { change_slider(e.currentTarget.value); });
-  $('#point_slider').on('touchmove', (e) => { change_slider(e.currentTarget.value); });
+  $('#point_slider').on('pointermove', (e) => { change_slider(e.currentTarget.value); });
 
   function toggleSlider() {
       $('.div_slider').toggle();
