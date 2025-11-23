@@ -121,10 +121,7 @@ function edit_entry(ma_id) {
       $('#myModal').show();
 
       $('.activated_trainer, .deactivated_trainer').on('click', (e) => toggle_activation_trainer(e.currentTarget.id.replace('img_trainer_','')));
-
       $('.save_entry').on('click', (e) => save_entry(e.currentTarget.id.replace('save_entry_','')));
-      $('.location_select').on('click', (e) => change_location(e.currentTarget.id.replace('btn_location_','')));
-      $('.location_select').first().click();
       
       $('#pl_loc').on('change', (e) => show_details(ma_id,'pl_loc',e.target.value)); 
       $('#plpa_loc').on('change', (e) => show_details(ma_id,'plpa_loc',e.target.value)); 
@@ -138,6 +135,7 @@ function show_details(ma_id, section, location_id) {
   $.ajax({ url: 'index.php?ajax=show_location_details&ma_id=' + ma_id + '&section=' + section + '&location_id=' + location_id }).done(
     function(data)
     {
+      alert("Load");
       const target = "#" + section.replace("_loc", "_div");
       $(target).html(data);
       $('.activated_' + section +', .deactivated_' + section).off('click');
