@@ -135,7 +135,6 @@ function show_details(ma_id, section, location_id) {
   $.ajax({ url: 'index.php?ajax=show_location_details&ma_id=' + ma_id + '&section=' + section + '&location_id=' + location_id }).done(
     function(data)
     {
-      alert("Load");
       const target = "#" + section.replace("_loc", "_div");
       $(target).html(data);
       $('.activated_' + section +', .deactivated_' + section).off('click');
