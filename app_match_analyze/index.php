@@ -1,7 +1,6 @@
 <?php
 define("level","../");																//define the structur to to root directory (e.g. "../", for files in root set "")
 require_once(level."inc/standard_includes.php");		//Load all necessary files (DB-Connection, User-Login, etc.)
-global $db;
 
 try
 {	
@@ -22,19 +21,29 @@ try
 		$myPage->add_content("</div>");
 
 		$db->sql_query("
-				SELECT DISTINCT 
+				SELECT DISTINCT
 						ma.*, 
 						trainee.*, 
 						DATE_FORMAT(ma_created_on, '%d.%m.%Y') AS curr_date
 				FROM match_analyzes AS ma
+
 				LEFT JOIN users AS trainee 
 						ON ma.ma_trainee_id = trainee.user_id
-				INNER JOIN location2user AS l2u 
+
+				LEFT JOIN location2user AS l2u
 						ON l2u.location2user_user_id = trainee.user_id
-				INNER JOIN location_permissions AS perm 
+
+				LEFT JOIN location_permissions AS perm
 						ON perm.loc_permission_loc_id = l2u.location2user_location_id
-				WHERE perm.loc_permission_user_id = '" . $_SESSION['login_user']->id . "'
-				ORDER BY DATE(ma_created_on) DESC, ma_id DESC
+
+				WHERE 
+						(
+								ma.ma_trainee_id IS NULL
+								OR perm.loc_permission_user_id = '" . $_SESSION['login_user']->id . "'
+						)
+				ORDER BY 
+						DATE(ma_created_on) DESC, 
+						ma_id DESC
 		");
 
 		$myPage->add_content("<div class='add_entry'><img src='../inc/imgs/query/add.png'/></div>"); 
@@ -55,17 +64,32 @@ try
 			if($d->ma_trainee_id>0) {
 				$player = new user($d->ma_trainee_id);
 				$myPage->add_content("<div class='deactivated'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
-				if($d->ma_trainee_partner_id>0) {
-					$player = new user($d->ma_trainee_partner_id);
-					$myPage->add_content("<div class='deactivated'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
-				}
+			} else {
+				if($d->ma_trainee_name != '') { $myPage->add_content("<div class='opponent'>{$d->ma_trainee_name}</div>"); }
+			} 
+			if($d->ma_trainee_partner_id>0) {
+				$player = new user($d->ma_trainee_partner_id);
+				$myPage->add_content("<div class='deactivated'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
+			} else {
+				if($d->ma_trainee_partner_name != '') { $myPage->add_content("<div class='opponent'>{$d->ma_trainee_partner_name}</div>"); }
 			} 
 			$myPage->add_content("</div>");
 
 			$myPage->add_content("<div class ='col_opponent' id='opponent_{$d->ma_id}'>");
 			$myPage->add_content("<h3>Gegner</h3>");
-			$myPage->add_content("{$d->ma_opponent_name}");
-
+			if($d->ma_opponent_id>0) {
+				$player = new user($d->ma_opponent_id);
+				$myPage->add_content("<div class='deactivated'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
+			} else {
+				if($d->ma_opponent_name != '') { $myPage->add_content("<div class='opponent'>{$d->ma_opponent_name}</div>"); }
+			}
+			if($d->ma_opponent_partner_id>0) {
+				$player = new user($d->ma_opponent_partner_id);
+				$myPage->add_content("<div class='deactivated'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
+			} else {
+				if($d->ma_opponent_partner_name != '') { $myPage->add_content("<div class='opponent'>{$d->ma_opponent_partner_name}</div>"); }
+			}
+		 
 			$myPage->add_content("</div>");
 			$myPage->add_content("<div class='col_text' id='text_{$d->ma_id}'><h3>Bemerkungen</h3>".nl2br($d->ma_description ?? '')."</div>");
 			$myPage->add_content("<div class='col_delete' id='delete_{$d->ma_id}'><img src='../inc/imgs/query/delete_big.png'/></div>");

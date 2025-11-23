@@ -1,3 +1,4 @@
+h2 { margin-top:0px; padding-top:0px; padding-bottom:0px; margin-bottom:0px}
 h3 { padding-top:0px; margin-top:0px; }
 
 div.add_entry { float:right; }
@@ -29,9 +30,31 @@ button.delete { background-color:red;margin:5px;font-size:5vh; }
 
 h1.show_players { clear:both;padding-top:10px; }
 
-div.activated { border:3px solid purple;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
-div.deactivated { border:3px solid white;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
-div.activated img, div.deactivated img { width:10vw;max-width: 150px; } 
+div.activated,
+div.activated_pl_loc,
+div.activated_plpa_loc,
+div.activated_op_loc,
+div.activated_oppa_loc
+{ border:3px solid purple;float:left;font-size:clamp(8pt,3vw,16pt);text-align:center;border-radius:10px; }
+
+div.deactivated,
+div.deactivated_pl_loc,
+div.deactivated_plpa_loc,
+div.deactivated_op_loc,
+div.deactivated_oppa_loc
+{ border:3px solid white;float:left;font-size:clamp(8pt,3vw,16pt);text-align:center;border-radius:10px; }
+
+div.activated img,
+div.deactivated img,
+div.activated_pl_loc img,
+div.activated_plpa_loc img,
+div.activated_op_loc img,
+div.activated_oppa_loc img,
+div.deactivated_pl_loc img,
+div.deactivated_plpa_loc img,
+div.deactivated_op_loc img,
+div.deactivated_oppa_loc img
+{ width:10vw;max-width: 150px; } 
 
 div.activated_trainer, div.deactivated_trainer { border:3px solid purple;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
 div.deactivated_trainer { border:3px solid white; }
@@ -46,4 +69,24 @@ div.location {
   flex-wrap: wrap; 
   flex-direction: row; /* oder row */   
   margin-top:10px;
+}
+
+div.opponent {
+    width: 12vw;
+    height: 12vw;
+    max-width:150px;
+    max-height:150px;
+    background-color: #877af9; /* Kreisfarbe */
+    border-radius: 50%; /* Macht die Form rund */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* Textfarbe */
+    font-size: clamp(8pt, 2vw, 24pt);
+    font-weight: bold;
+    text-align: center;
+}
+
+select {
+  margin-bottom:5px;
 }
