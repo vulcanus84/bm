@@ -86,30 +86,30 @@ try
 				<div class='player' id='point_for_trainee'>");
 				if($d->ma_trainee_id>0) {
 					$player = new user($d->ma_trainee_id);
-					$myPage->add_content("<div class='deactivated'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
+					$myPage->add_content("<div class='deactivated' id='player'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
 				} else {
-					if($d->ma_trainee_name != '') { $myPage->add_content("<div class='opponent'>{$d->ma_trainee_name}</div>"); }
+					if($d->ma_trainee_name != '') { $myPage->add_content("<div class='opponent' id='player'>{$d->ma_trainee_name}</div>"); }
 				} 
 				if($d->ma_trainee_partner_id>0) {
 					$player = new user($d->ma_trainee_partner_id);
-					$myPage->add_content("<div class='deactivated'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
+					$myPage->add_content("<div class='deactivated' id='playerPartner'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
 				} else {
-					if($d->ma_trainee_partner_name != '') { $myPage->add_content("<div class='opponent'>{$d->ma_trainee_partner_name}</div>"); }
+					if($d->ma_trainee_partner_name != '') { $myPage->add_content("<div class='opponent' id='playerPartner'>{$d->ma_trainee_partner_name}</div>"); }
 				} 
 				$myPage->add_content("</div>
 				<div class='vs'>VS</div>
 				<div id='point_for_opponent'>");
 				if($d->ma_opponent_id>0) {
 					$player = new user($d->ma_opponent_id);
-					$myPage->add_content("<div class='deactivated'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
+					$myPage->add_content("<div class='deactivated' id='opponent'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
 				} else {
-					if($d->ma_opponent_name != '') { $myPage->add_content("<div class='opponent'>{$d->ma_opponent_name}</div>"); }
+					if($d->ma_opponent_name != '') { $myPage->add_content("<div class='opponent' id='opponent'>{$d->ma_opponent_name}</div>"); }
 				}
 				if($d->ma_opponent_partner_id>0) {
 					$player = new user($d->ma_opponent_partner_id);
-					$myPage->add_content("<div class='deactivated'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
+					$myPage->add_content("<div class='deactivated' id='opponentPartner'><img src='{$player->get_pic_path(true)}'/><br/>{$player->login}</div>");
 				} else {
-					if($d->ma_opponent_partner_name != '') { $myPage->add_content("<div class='opponent'>{$d->ma_opponent_partner_name}</div>"); }
+					if($d->ma_opponent_partner_name != '') { $myPage->add_content("<div class='opponent' id='opponentPartner'>{$d->ma_opponent_partner_name}</div>"); }
 				}
 				$myPage->add_content("</div>
 			</div>

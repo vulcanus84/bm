@@ -36,6 +36,7 @@ switch($_GET['ajax'])
         'ma_point_ma_id'=>$_GET['ma_id'],
         'ma_point_set'=>$_GET['set'],
         'ma_point_winner'=>$_GET['winner'],
+        'ma_point_caused_by'=>$_GET['player'],
         'ma_point_reason_id'=>$reason_id,
       ),'match_analyzes_points');
       print "OK>".$db->last_inserted_id;

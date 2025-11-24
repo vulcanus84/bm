@@ -5,7 +5,7 @@ let opponentpoints = 0;
 let set;
 let ma_id;
 let mode='load';
-const match = new BadmintonMatch("Ich", "Gegner");
+const match = new BadmintonMatch();
 
 const errorStrokes = ["Anspiel","Clear", "Drop", "Drive", "Smash", "Lift", "Netzdrop", "Kill"];
 const errorAllowedCombinations = [
@@ -153,20 +153,22 @@ $(document).ready(function() {
           startAutoScroll();
           $('#btnAutoScroll').text("⏸️");
       }
-  }
+    }
   
-  // Button Event
-  $('#btnAutoScroll').on('click', function() {
-      const $btn = $(this);
-      if (autoScrollInterval) {
-          stopAutoScroll();
-          $btn.text("▶️");
-      } else {
-          startAutoScroll();
-          $btn.text("⏸️");
-      }
+    // Button Event
+    $('#btnAutoScroll').on('click', function() {
+        const $btn = $(this);
+        if (autoScrollInterval) {
+            stopAutoScroll();
+            $btn.text("▶️");
+        } else {
+            startAutoScroll();
+            $btn.text("⏸️");
+        }
   });
 
+  //Load players
+  match.setPlayerNames($('#player').prop('outerHTML'),$('#playerPartner').prop('outerHTML'),$('#opponent').prop('outerHTML'),$('#opponentPartner').prop('outerHTML'));
 
   let savedChart = sessionStorage.getItem("currentChart");
 
@@ -214,6 +216,7 @@ $(document).ready(function() {
         const args = [
           row.ma_point_id,
           row.ma_point_winner,
+          row.ma_point_caused_by,
           row.ma_reason_level1,
           row.ma_reason_level2
         ];
@@ -232,7 +235,7 @@ $(document).ready(function() {
   chartMainReasons = new Chart(document.getElementById('chartMainReasons'), {
     type: 'pie',
     data: {
-      labels: ['Fehler des Gegners','Gewinner', 'Glück'],
+      labels: match.getPointStatisticsLabels('trainee'),
       datasets: [{
         data: match.getPointStatistics('trainee'),
         borderWidth: 1,
@@ -610,134 +613,255 @@ function getLevelOptions(...path) {
 }
 
 
-function new_point(id,winner, ...path)
-{
+function new_point(id, winner, player = null, ...path) {
   if(id===null) {
-    // Dummy-ID für neue Punkte
     id = 'dummy_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
   }
+
+  //*******************************************************/
+  //Create dynamic header text
+  //*******************************************************/
   let txt = "<h1>";
-  let reason_path = "";
-  if(path[0]) { reason_path += path[0]; }
-  if(path[1]) { reason_path += ' beim ' + path[1]; }
+  let tempDiv = document.createElement('div');
+  let htmlCode = null;
+
   if(winner=='trainee') {
-    txt += "Unser Punkt durch " + reason_path + "...";
-    var htmlCode = $('#point_for_trainee').prop('outerHTML');
+    txt += "Unser Punkt durch ";
+    if(path[0]) {
+      txt += path[0]; 
+      if(player) {
+        if (path[0] === 'Fehler') {
+            var pointPlayer = (player === 'player' ? match.opponentName : match.opponentPartnerName);
+        } else {
+            var pointPlayer = (player === 'player' ? match.traineeName : match.traineePartnerName);
+        }
+        let temp = document.createElement('div');
+        temp.innerHTML = pointPlayer;
+        pointPlayer = temp.textContent;
+        txt+= " von " + pointPlayer;
+        if(path[1]) txt+= " beim " + path[1]; else txt+= " beim..."
+      } else txt+= " von..."
+    } else txt += "..."
+    tempDiv.innerHTML = $('#point_for_trainee').prop('outerHTML');
   } else {
-    txt += "Punkt für den Gegner durch " + reason_path + "...";
-    var htmlCode = $('#point_for_opponent').prop('outerHTML');
+    txt += "Punkt für den Gegner durch ";
+    if(path[0]) {
+      txt += path[0]; 
+      if(player) {
+        if (path[0] === 'Fehler') {
+            var pointPlayer = (player === 'player' ? match.traineeName : match.traineePartnerName);
+        } else {
+            var pointPlayer = (player === 'player' ? match.opponentName : match.opponentPartnerName);
+        }
+        let temp = document.createElement('div');
+        temp.innerHTML = pointPlayer;
+        pointPlayer = temp.textContent;
+        txt+= " von " + pointPlayer;
+        if(path[1]) txt+= " beim " + path[1]; else txt+= " beim..."
+      } else txt+= " von..."
+    } else txt += "..."
+    tempDiv.innerHTML = $('#point_for_opponent').prop('outerHTML');
   }
+  tempDiv.firstChild.removeAttribute('id');
+  htmlCode = tempDiv.firstChild.outerHTML;
   txt += "</h1>";
+  //*******************************************************/
+
   let arr_options = getLevelOptions(...path);
-  
+
+  //*******************************************************/
+  // End of path, save point
+  //*******************************************************/
   if(arr_options.length===0) {
-    // Ende des Pfades erreicht, Punkt speichern
     $('#myModal').hide();
-    match.addPoint({ id: id, winner: winner, type: path[0], shot: path[1], detail: path[2], extra: path[3] });
+    match.addPoint({
+      id: id,
+      winner: winner,
+      caused_by: player,
+      type: path[0],
+      shot: path[1],
+      detail: path[2],
+      extra: path[3],
+      player: player
+    });
 
     let main_reason = path[0];
-    let reason_path = path.slice(1)
-      .filter(p => p && p.trim() !== '') // nur nicht-leere Werte behalten
+    let reason_path_text = path.slice(1)
+      .filter(p => p && p.trim() !== '')
       .join(' / ');
-    if ($('#points_table tbody').length === 0) { $('#points_table').append('<tbody></tbody>'); }
+
+    if ($('#points_table tbody').length === 0) $('#points_table').append('<tbody></tbody>');
 
     if(winner=='trainee') {
-      $('#points_table tbody').prepend(`<tr id='row_${id}'><td class='left'>${htmlCode}</td><td class='middle'>${main_reason}<br/><img  class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></td><td class='right'>${reason_path}</td></tr>`);
+      if (main_reason === 'Fehler') {
+          var pointPlayer = (player === 'player' ? match.opponentName : match.opponentPartnerName);
+          var errorStyle = 'border:5px solid red;';
+      } else {
+          var pointPlayer = (player === 'player' ? match.traineeName : match.traineePartnerName);
+          var errorStyle = 'border:5px solid green;';
+      }
+      $('#points_table tbody').prepend(`
+        <tr id='row_${id}'>
+          <td class='left'>${htmlCode}</td>
+          <td class='middle'>
+            <div style="display: flex; flex-direction: column; gap: 5px; padding: 5px;border-radius:5vw; ${errorStyle}">
+              <div style="display: flex; justify-content: center; align-items: center;">${pointPlayer || ''}</div>
+              <div><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></div>
+            </div>
+          </td>
+          <td class='right'>${reason_path_text}</td>
+        </tr>
+      `);
     } else {
-      $('#points_table tbody').prepend(`<tr id='row_${id}'><td class='left'>${reason_path}</td><td class='middle'>${main_reason}<br/><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></td><td class='right'>${htmlCode}</td></tr>`);
+      if (main_reason === 'Fehler') {
+          var pointPlayer = (player === 'player' ? match.traineeName : match.traineePartnerName);
+          var errorStyle = 'border:5px solid red;';
+      } else {
+          var pointPlayer = (player === 'player' ? match.opponentName : match.opponentPartnerName);
+          var errorStyle = 'border:5px solid green;';
+      }
+      $('#points_table tbody').prepend(`
+        <tr id='row_${id}'>
+          <td class='left'>${reason_path_text}</td>
+          <td class='middle'>
+            <div style="display: flex; flex-direction: column; gap: 5px; padding: 5px;border-radius:5vw; ${errorStyle}">
+              <div style="display: flex; justify-content: center; align-items: center;">${pointPlayer || ''}</div>
+              <div><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></div>
+            </div>
+          </td>
+          <td class='right'>${htmlCode}</td>
+        </tr>
+      `);
     }
-    
-    const nextLabel = chartPointIncreases.data.labels.length;
-    chartPointIncreases.data.labels.push(nextLabel);
-    chartPointIncreases.data.datasets[0].data.push(mypoints);
-    chartPointIncreases.data.datasets[1].data.push(opponentpoints);
+
     $('img.delete').off('click');
     $('img.delete').on('click', (e) => delete_entry(e.currentTarget.id));
 
     update_stats();
+
+    // ----------------------------
+    // Save by AJAX
+    // ----------------------------
     if(mode=='save') {
-      let my_url = 'index.php?ajax=save_point&winner=' + winner 
-      + '&level1=' + encodeURIComponent(main_reason) 
-      + '&level2=' + encodeURIComponent(path[1] || '')
-      + '&level3=' + encodeURIComponent(path[2] || '')
-      + '&level4=' + encodeURIComponent(path[3] || '')
-      + '&ma_id=' + ma_id
-      + '&set=' + set
-      + '&point_id=' + id;
+      let my_url = 'index.php?ajax=save_point&winner=' + winner
+        + '&level1=' + encodeURIComponent(main_reason)
+        + '&level2=' + encodeURIComponent(path[1] || '')
+        + '&level3=' + encodeURIComponent(path[2] || '')
+        + '&level4=' + encodeURIComponent(path[3] || '')
+        + '&player=' + encodeURIComponent(player || '')
+        + '&ma_id=' + ma_id
+        + '&set=' + set
+        + '&point_id=' + id;
 
       $.ajax({ url: my_url }).done(function(data) {
-          if (data.startsWith('OK>')) {
-              // Zahl hinter "OK>"
-              let newId = data.split('>')[1];
-
-              // img mit class "delete" finden, das aktuell die alte point_id als id hat
-              $('img.delete#' + id).attr('id', newId);
-              $('tr#row_' + id).attr('id', 'row_' +newId);
-              match.replacePointId(id, newId);
-
-          } else if (data != '') {
-              alert(data); // Andere Meldungen anzeigen
-          }
-      });    
-    }
-  }
-  else {
-    let i = 0;
-    let btn_height = 50 / (arr_options.length + 1);
-    if (path.length > 0) {
-      txt += `<button 
-        class='level_option' 
-        style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height}vh;margin:${btn_height/10}vh;background-color:gray'
-        data-level='back'
-      >Zurück</button>`;
+        if(data.startsWith('OK>')) {
+          let newId = data.split('>')[1];
+          $('img.delete#' + id).attr('id', newId);
+          $('tr#row_' + id).attr('id', 'row_' + newId);
+          match.replacePointId(id, newId);
+        } else if(data != '') {
+          alert(data);
+        }
+      });
     }
 
-    for (const option of arr_options) {
-      let color = colors[i % colors.length];
-      let arr_options_next = getLevelOptions(...path, option);
-      let suffix = arr_options_next.length > 0 ? '＋' : '✅';
-      
-      let len = option.length;
-      let calc_font_size = btn_height * 0.3;
-      if(len>12) {
-        let weight = Math.sqrt(len) / 3;
-        calc_font_size = btn_height * 0.3 / weight;
-      }
-
-      txt += `
-        <button class='level_option'
-          style='
-            font-size:${calc_font_size}vh;
-            width:75vw;
-            height:${btn_height}vh;
-            margin:${btn_height/10}vh;
-            background-color:${color};
-          '
-          data-level='${option}'>
-          ${option} ${suffix}
-        </button>
-      `;
-      i++;
-    }
-    $('#myModalText').html(txt); 
-    $('#myModal').show();
-    $('.level_option').on('click', (e) => {
-      const level = e.currentTarget.getAttribute('data-level');
-      let newPath;
-
-      if (level === 'back') {
-        // eine Stufe zurück
-        newPath = path.slice(0, -1);
-      } else {
-        // tiefer ins Menü
-        newPath = [...path, level];
-      }
-
-      new_point(null, winner, ...newPath);
-    });
-
+    return;
   }
 
+  // ----------------------------
+  // Zwischen Level 1 und 2 → Spieler/Partner Auswahl
+  // ----------------------------
+  if(winner=='trainee') {
+    if(path[0]=='Fehler') {
+      var p1 = match.opponentName;
+      var p2 = match.opponentPartnerName;
+    } else {
+      var p1 = match.traineeName;
+      var p2 = match.traineePartnerName;
+    }
+  } else {
+    if(path[0]=='Fehler') { 
+      var p1 = match.traineeName;
+      var p2 = match.traineePartnerName;
+    } else {
+      var p1 = match.opponentName;
+      var p2 = match.opponentPartnerName;
+    }
+  }
+
+  if(path.length===1 && player===null) {
+    if($('#playerPartner').length>0)
+    {
+      let btn_height = 5;
+
+      // Zurück-Button oben
+      txt += `<button class='level_option' data-level='back' style='font-size:${btn_height*0.6}vh;width:75vw;height:${btn_height}vh;margin:${btn_height/10}vh;background-color:gray'>Zurück</button>`;
+
+      txt += `<div class='level_option' data-level='player'>${p1}</div>`;
+      txt += `<div class='level_option' data-level='partner'>${p2}</div>`;
+      txt += `<div style='clear:both;margin-bottom:1vh;'></div>`;
+
+      $('#myModalText').html(txt);
+      $('#myModal').show();
+
+      $('.level_option').on('click', (e) => {
+        const level = e.currentTarget.getAttribute('data-level');
+        if(level==='back'){
+          new_point(null,winner,null,...path.slice(0,-1));
+        } else {
+          new_point(null,winner,level,...path); // Player setzen, Pfad bleibt
+        }
+      });
+    } else {
+      new_point(null,winner,'player',...path);
+      return
+    }
+    return;
+  }
+
+  // ----------------------------
+  // Normale Level-Auswahl
+  // ----------------------------
+  let i = 0;
+  let btn_height = 50 / (arr_options.length + 1);
+
+  if(path.length>0) {
+    txt += `<button class='level_option' style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height}vh;margin:${btn_height/10}vh;background-color:gray' data-level='back'>Zurück</button>`;
+  }
+
+  for (const option of arr_options) {
+    let color = colors[i % colors.length];
+    let arr_options_next = getLevelOptions(...path, option);
+    let suffix = arr_options_next.length > 0 ? '＋' : '✅';
+
+    let len = option.length;
+    let calc_font_size = btn_height * 0.3;
+    if(len>12) calc_font_size = calc_font_size / (Math.sqrt(len)/3);
+
+    txt += `<button class='level_option' style='font-size:${calc_font_size}vh;width:75vw;height:${btn_height}vh;margin:${btn_height/10}vh;background-color:${color}' data-level='${option}'>${option} ${suffix}</button>`;
+    i++;
+  }
+
+  $('#myModalText').html(txt);
+  $('#myModal').show();
+
+  $('.level_option').on('click', (e) => {
+    const level = e.currentTarget.getAttribute('data-level');
+    let newPath;
+
+    if(level==='back'){
+      // Speziell: wenn Player gesetzt und zurück auf Level 1 → Player löschen
+      if(path.length===1 && player!==null && $('#playerPartner').length>0) {
+        new_point(null,winner,null,...path);
+        return;
+      }
+      newPath = path.slice(0,-1);
+    } else {
+      newPath = [...path, level];
+    }
+
+    new_point(null,winner,player,...newPath);
+  });
 }
 
 function update_stats() {

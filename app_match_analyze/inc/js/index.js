@@ -92,6 +92,9 @@ function save_entry(ma_id)
   if(trainer_id== null) { alert('Bitte einen Trainer auswählen'); return; }
   if(trainee_id== '' && trainee_name == '') { alert('Bitte einen Spieler auswählen oder eingeben'); return; } 
   if(opponent_id== '' && opponent_name == '') { alert('Bitte einen Gegner auswählen oder eingeben'); return; }
+  if(trainee_partner_id>0 || trainee_partner_name != '') { 
+    if(opponent_partner_id== '' && opponent_partner_name == '') { alert('Bitte einen Gegnerpartner auswählen oder eingeben'); return; }
+  }
 
   let my_url = 'index.php?ajax=save_entry&trainer_id=' + trainer_id + 
                     '&ma_id=' + ma_id + 

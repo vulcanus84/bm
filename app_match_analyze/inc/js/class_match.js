@@ -1,15 +1,39 @@
 class BadmintonMatch {
-    constructor(traineeName = "Trainee", opponentName = "Gegner") {
+    constructor(traineeName = "Trainee",traineePartnerName = "Trainee Partner", opponentName = "Gegner", opponentPartnerName = "Partner Gegner") {
+        this.traineePartnerName = traineePartnerName;
+        this.opponentPartnerName = opponentPartnerName;
         this.traineeName = traineeName;
         this.opponentName = opponentName;
 
+        
         this.events = [];
         this.score = { trainee: 0, opponent: 0 };
 
         this.cursor = null; 
     }
 
-    addPoint({ id, winner, type, shot = null, detail = null, extra = null }) {
+    setPlayerNames(pl,plpa,op,oppa) {
+        this.traineeName = pl;
+        this.traineePartnerName = plpa;
+        this.opponentName = op;
+        this.opponentPartnerName = oppa;
+
+        const tmp = document.createElement('div');
+        
+        tmp.innerHTML = this.traineeName;
+        this.traineeNameTxt = tmp.textContent;
+
+        tmp.innerHTML = this.traineePartnerName;
+        this.traineePartnerNameTxt = tmp.textContent;
+
+        tmp.innerHTML = this.opponentName;
+        this.opponentNameTxt = tmp.textContent;
+
+        tmp.innerHTML = this.opponentPartnerName;
+        this.opponentPartnerNameTxt = tmp.textContent;
+    }
+
+    addPoint({ id, winner,caused_by, type, shot = null, detail = null, extra = null }) {
         if (!["trainee", "opponent"].includes(winner)) {
             throw new Error("winner muss 'trainee' oder 'opponent' sein.");
         }
@@ -25,6 +49,7 @@ class BadmintonMatch {
             index: this.events.length + 1,
             id,
             winner,
+            caused_by,
             type,
             shot,
             detail,
@@ -54,29 +79,61 @@ class BadmintonMatch {
     getPointStatistics(player = "trainee") {
         const ev = this._activeEvents();
 
-        // Zähler initialisieren
-        let fehler = 0, gewinn = 0, glueck = 0;
+        if (!this.traineePartnerName) {
+            // Zähler initialisieren
+            let fehler = 0, gewinn = 0, glueck = 0;
 
-        ev.forEach(e => {
-            if (player === "trainee") {
-                if (e.winner === player) {
-                    if (e.type === "Fehler") fehler++;
-                    else if (e.type === "Gewinnschlag") gewinn++;
-                    else if (e.type === "Glück") glueck++;
+            ev.forEach(e => {
+                if (player === "trainee") {
+                    if (e.winner === player) {
+                        if (e.type === "Fehler") fehler++;
+                        else if (e.type === "Gewinnschlag") gewinn++;
+                        else if (e.type === "Glück") glueck++;
+                    }
                 }
-            } else {
-                // Gegner-Statistik
-                if (e.winner === player) {
-                    if (e.type === "Fehler") fehler++;
-                    else if (e.type === "Gewinnschlag") gewinn++;
-                    else if (e.type === "Glück") glueck++;
-                }
-            }
-        });
+            });
 
-        // Array zurückgeben für Chart.js
-        return [fehler, gewinn, glueck];
+            // Array zurückgeben für Chart.js
+            return [fehler, gewinn, glueck];
+        } else {
+            // Zähler initialisieren
+            let error_op = 0, error_oppa=0, winner_pl = 0, winner_plpa=0, luck_pl = 0,luck_plpa=0;
+
+            ev.forEach(e => {
+                if (e.winner === player) {
+                    if (e.type === "Fehler") {
+                        if(e.caused_by === "partner") { error_oppa++; } else { error_op++; }
+                    } 
+                    else if (e.type === "Gewinnschlag") {
+                        if(e.caused_by === "partner") { winner_plpa++; } else { winner_pl++; }
+                    }
+                    else if (e.type === "Glück") {
+                        if(e.caused_by === "partner") { luck_plpa++; } else { luck_pl++; }
+                    }
+                }
+            });
+
+            // Array zurückgeben für Chart.js
+            return [error_op,error_oppa, winner_pl,winner_plpa, luck_pl, luck_plpa];
+
+        }
     }
+
+    getPointStatisticsLabels(player = "trainee") {
+        if (!this.traineePartnerName) {
+            return ['Fehler von ' + this.opponentNameTxt, 'Gewinner', 'Glück'];
+        } else {
+            return [
+                'Fehler (' + this.opponentNameTxt + ')',
+                'Fehler (' + this.opponentPartnerNameTxt + ')',
+                this.traineeNameTxt,
+                this.traineePartnerNameTxt,
+                'Glück (' + this.traineeNameTxt + ')',
+                'Glück (' + this.traineePartnerNameTxt + ')'
+            ];
+        }
+    }
+
 
     getWinnersByShot(player = "trainee") {
         const ev = this._activeEvents();

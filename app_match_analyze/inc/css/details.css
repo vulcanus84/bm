@@ -8,6 +8,43 @@ img.delete {
   margin-top:2px;
 }
 
+div.opponent {
+    width: 17vw;
+    height: 17vw;
+    max-width:150px;
+    max-height:150px;
+    background-color: #877af9; /* Kreisfarbe */
+    border-radius: 50%; /* Macht die Form rund */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white; /* Textfarbe */
+    font-size: clamp(8pt, 3vw, 24pt);
+    font-weight: bold;
+    text-align: center;
+    float:left;
+}
+
+div.deactivated {
+  float:right;
+  font-size:clamp(8pt,3vw,24pt);
+  text-align:center; 
+}
+
+.modal div.deactivated {
+    font-size:clamp(8pt,5vw,24pt);
+}
+.modal div.deactivated img {
+  width:40vw;
+}
+
+.modal div.opponent {
+  width:40vw;
+  height:40vw;
+  font-size:clamp(8pt,5vw,24pt);
+}
+
+
 #chartMainReasons, #chartStrokes, #chartPointIncreases, #chartMainReasonsOpponent, #chartOuts, #chartOutsOpponent, #chartStrokesOpponent {
   width: 70vw !important;
   height: 40vh !important;
@@ -23,7 +60,11 @@ table#points_table td.left {
   font-size:4vw;
   padding-right:2vw;
   border-bottom:1px dotted gray;
+  width:40%;
 }
+table#points_table td.left div.deactivated {float:right;font-size:clamp(8pt,3vw,24pt);text-align:center; }
+table#points_table td.left div.deactivated img { width:12vw;max-width: 150px; } 
+table#points_table td.left div.opponent { width: 14vw; height: 14vw; }
 
 table#points_table td.middle {
   text-align: center;
@@ -32,14 +73,23 @@ table#points_table td.middle {
   border-right:3px solid gray;
   border-left:3px solid gray;
   border-bottom:1px dotted gray;
+  width:20%;
 }
+table#points_table td.middle div.deactivated { float:right;font-size:clamp(8pt,3vw,24pt);text-align:center; }
+table#points_table td.middle div.deactivated img { width:10vw;max-width: 150px; } 
+table#points_table td.middle div.opponent { width: 12vw; height: 12vw; }
+
 
 table#points_table td.right {
   text-align: left;
   font-size:4vw;
   padding-left:2vw;
   border-bottom:1px dotted gray;
+  width:40%;
 }
+table#points_table td.right div.deactivated { float:left;font-size:clamp(8pt,3vw,24pt);text-align:center; }
+table#points_table td.right div.deactivated img { width:12vw;max-width: 150px; } 
+table#points_table td.right div.opponent { width: 14vw; height: 14vw; }
 
 .header_sets {
   display: flex;
@@ -89,23 +139,9 @@ table#points_table td.right {
   font-size: 5vw;
   font-weight: bold;
 }
-
-div.opponent {
-    width: 20vw;
-    height: 20vw;
-    max-width:150px;
-    max-height:150px;
-    background-color: #877af9; /* Kreisfarbe */
-    border-radius: 50%; /* Macht die Form rund */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white; /* Textfarbe */
-    font-size: clamp(8pt, 3vw, 24pt);
-    font-weight: bold;
-    text-align: center;
-    float:left;
-}
+.header_players div.deactivated { border:3px solid white;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
+.header_players div.deactivated img { width:15vw;max-width: 150px; } 
+.header_players div.opponent { width: 17vw; height: 17vw; }
 
 div.point_description { display:flex; align-items: center; margin:5px; }
 #training_description { width:70vw;height:50vh; }
@@ -116,9 +152,7 @@ button.abort_delete { background-color:green;margin:5px;font-size:5vh; }
 button.delete { background-color:red;margin:5px;font-size:5vh; }
 
 h1.show_players { clear:both;padding-top:10px; }
-div.activated { border:3px solid purple;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
-div.deactivated { border:3px solid white;float:left;font-size:clamp(8pt,3vw,24pt);text-align:center;border-radius:10px; }
-div.activated img, div.deactivated img { width:20vw;max-width: 150px; } 
+
 
 hr.end_line {clear:both; }
 div.save { margin-bottom:100px; }
