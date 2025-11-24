@@ -84,12 +84,10 @@ class BadmintonMatch {
             let fehler = 0, gewinn = 0, glueck = 0;
 
             ev.forEach(e => {
-                if (player === "trainee") {
-                    if (e.winner === player) {
-                        if (e.type === "Fehler") fehler++;
-                        else if (e.type === "Gewinnschlag") gewinn++;
-                        else if (e.type === "Glück") glueck++;
-                    }
+                if (e.winner === player) {
+                    if (e.type === "Fehler") fehler++;
+                    else if (e.type === "Gewinnschlag") gewinn++;
+                    else if (e.type === "Glück") glueck++;
                 }
             });
 
@@ -119,20 +117,20 @@ class BadmintonMatch {
         }
     }
 
-    getPointStatisticsLabels(player = "trainee") {
-        if (!this.traineePartnerName) {
-            return ['Fehler von ' + this.opponentNameTxt, 'Gewinner', 'Glück'];
-        } else {
-            return [
-                'Fehler (' + this.opponentNameTxt + ')',
-                'Fehler (' + this.opponentPartnerNameTxt + ')',
-                this.traineeNameTxt,
-                this.traineePartnerNameTxt,
-                'Glück (' + this.traineeNameTxt + ')',
-                'Glück (' + this.traineePartnerNameTxt + ')'
-            ];
-        }
+getPointStatisticsLabels(player = "trainee") {
+    if (!this.traineePartnerName) {
+        return ['Fehler von ' + this.opponentNameTxt, 'Gewinner', 'Glück'];
+    } else {
+        return [
+            'Fehler (' + this.opponentNameTxt + ')',
+            'Fehler (' + this.opponentPartnerNameTxt + ')',
+            this.traineeNameTxt,
+            this.traineePartnerNameTxt,
+            'Glück (' + this.traineeNameTxt + ')',
+            'Glück (' + this.traineePartnerNameTxt + ')'
+        ];
     }
+}
 
 
     getWinnersByShot(player = "trainee") {
