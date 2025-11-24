@@ -266,7 +266,7 @@ $(document).ready(function() {
   chartMainReasonsOpponent = new Chart(document.getElementById('chartMainReasonsOpponent'), {
     type: 'pie',
     data: {
-      labels: ['Meine Fehler','Gewinner', 'Glück'],
+      labels: match.getPointStatisticsLabels('opponent'),
       datasets: [{
         data: match.getPointStatistics('opponent'),
         borderWidth: 1,

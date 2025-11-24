@@ -117,20 +117,35 @@ class BadmintonMatch {
         }
     }
 
-getPointStatisticsLabels(player = "trainee") {
-    if (!this.traineePartnerName) {
-        return ['Fehler von ' + this.opponentNameTxt, 'Gewinner', 'Glück'];
-    } else {
-        return [
-            'Fehler (' + this.opponentNameTxt + ')',
-            'Fehler (' + this.opponentPartnerNameTxt + ')',
-            this.traineeNameTxt,
-            this.traineePartnerNameTxt,
-            'Glück (' + this.traineeNameTxt + ')',
-            'Glück (' + this.traineePartnerNameTxt + ')'
-        ];
+    getPointStatisticsLabels(player = "trainee") {
+        if (!this.traineePartnerName) {
+            if(player === 'trainee') {
+                return ['Fehler von ' + this.opponentNameTxt, 'Gewinner', 'Glück'];
+            } else {
+                return ['Fehler von ' + this.traineeNameTxt, 'Gewinner', 'Glück'];
+            }
+        } else {
+            if(player === 'trainee') {
+                return [
+                    'Fehler (' + this.opponentNameTxt + ')',
+                    'Fehler (' + this.opponentPartnerNameTxt + ')',
+                    this.traineeNameTxt,
+                    this.traineePartnerNameTxt,
+                    'Glück (' + this.traineeNameTxt + ')',
+                    'Glück (' + this.traineePartnerNameTxt + ')'
+                ];
+            } else {
+                return [
+                    'Fehler (' + this.traineeNameTxt + ')',
+                    'Fehler (' + this.traineePartnerNameTxt + ')',
+                    this.opponentNameTxt,
+                    this.opponentPartnerNameTxt,
+                    'Glück (' + this.opponentNameTxt + ')',
+                    'Glück (' + this.opponentPartnerNameTxt + ')'
+                ];
+            }
+        }
     }
-}
 
 
     getWinnersByShot(player = "trainee") {
