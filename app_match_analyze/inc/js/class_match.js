@@ -31,6 +31,8 @@ class BadmintonMatch {
 
         tmp.innerHTML = this.opponentPartnerName;
         this.opponentPartnerNameTxt = tmp.textContent;
+
+        this.mode = (!plpa) ? 'single' : 'double';
     }
 
     addPoint({ id, winner,caused_by, type, shot = null, detail = null, extra = null }) {

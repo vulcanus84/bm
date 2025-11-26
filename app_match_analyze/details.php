@@ -10,10 +10,12 @@ try
 	  $myPage->set_title("Match Analyse");
 		if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
 
+		$myPage->add_js_link('inc/js/chart.js');
 		$myPage->add_js_link('inc/js/class_match.js');
 		$myPage->add_js_link('inc/js/details.js');
+		$myPage->add_js_link('inc/js/chartDefinitions.js');
+		$myPage->add_js_link('inc/js/scrollMatch.js');
 
-		$myPage->add_js_link('inc/js/chart.js');
 		$myPage->add_css_link('inc/css/details.css');
 		$myPage->add_content("<div id='myModal' class='modal'>");
 		$myPage->add_content("  <div class='modal-content'>");
@@ -57,20 +59,10 @@ try
 
 
 		$myPage->add_content("<div class='chart-container'>
-  <button class='chart-nav-btn' id='btnPrev' title='Vorheriges Diagramm'>&lt;</button>
-
-  <div class='chart-wrapper'>
-    <canvas id='chartMainReasons'></canvas>
-    <canvas id='chartMainReasonsOpponent'></canvas>
-    <canvas id='chartStrokes'></canvas>
-    <canvas id='chartOuts'></canvas>
-    <canvas id='chartStrokesOpponent'></canvas>
-    <canvas id='chartOutsOpponent'></canvas>
-    <canvas id='chartPointIncreases'></canvas>
-  </div>
-
-  <button class='chart-nav-btn' id='btnNext' title='Nächstes Diagramm'>&gt;</button>
-</div>");
+														<button class='chart-nav-btn' id='btnPrev' title='Vorheriges Diagramm'>&lt;</button>
+														<div class='chart-wrapper' id='chartWrapper'></div>
+														<button class='chart-nav-btn' id='btnNext' title='Nächstes Diagramm'>&gt;</button>
+													</div>");
 		$myPage->add_content("
 			<div class='header_points'>
 				<div id='points'>0:0</div>
