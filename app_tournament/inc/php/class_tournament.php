@@ -135,6 +135,14 @@ class tournament
 
 	function reactivate() {
 		$this->status = "Started";
+		if($this->system === 'Gruppenspiele') {
+			foreach($this->arr_rounds as $round) {
+				foreach($round->arr_games as $game) {
+					$game->status = 'New';
+					$game->save();
+				}
+			}
+		}
 		$this->save();
 	}
 
