@@ -525,7 +525,7 @@ class html
 			}
 		}				
 
-
+		$html.= "<div style='height:100px;'></div>";
 		return $html;
 	}
 
