@@ -89,7 +89,7 @@ div.team button {
 
 
 img.img_court { width:100%; }
-img.img_sort { cursor: pointer; margin-left:5px; width:60px; vertical-align:middle; }
+img.img_sort { cursor: pointer; margin-left:5px; width:50px; vertical-align:middle; }
 
 /* Container für die Liste der Turniere */
 .tournament-list {

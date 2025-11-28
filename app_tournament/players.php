@@ -25,7 +25,7 @@ try
 		//Display page
 		//$myPage->set_title("Badminton Academy");
 		$myPage->permission_required=false;
-		$myPage->add_content("<div id='left_col' style='flex: 0 0 30vw;'>");
+		$myPage->add_content("<div id='left_col'>");
 		$myPage->add_content("	<div id='collapsed_label'>Spieler</div>");
 		$myPage->add_content("	<div id='left_header'>");
 		$myPage->add_content("		<span><a href='index.php'><button class='orange'>Turniere</button></a></span>");
