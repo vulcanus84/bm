@@ -14,6 +14,7 @@ for (const [key, value] of params) {
 
 $(document).ready(function() {
   tournamentId = $('#content').data('tournament-id');
+  if(!tournamentId) $('#left_col').addClass('open'); 
   setEvents();
 });
 

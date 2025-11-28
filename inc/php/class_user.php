@@ -10,7 +10,7 @@ class user
 	public string $fullname;
 	public $gender;
 	public $birthday;
-	public $training_location;
+	public $training_location_id;
 	public $image_path;
 	public $hidden;
 
@@ -69,7 +69,18 @@ class user
 
 	public function load_user_by_id($id)
 	{
-		$this->db->sql_query("SELECT *, DATE_FORMAT(user_birthday,'%d.%m.%Y') as user_birthday FROM users	WHERE user_id=:uid",array('uid'=>$id));
+		
+
+		$this->db->sql_query("SELECT 
+															users.*,
+															DATE_FORMAT(users.user_birthday, '%d.%m.%Y') AS user_birthday,
+															GROUP_CONCAT(location2user.location2user_location_id) AS location_ids
+													FROM users
+													LEFT JOIN location2user 
+															ON location2user.location2user_user_id = users.user_id
+													WHERE users.user_id = :uid
+													GROUP BY users.user_id;",array('uid'=>$id));
+
 		if($this->db->count()>0)
 		{
 			$res = $this->db->get_next_res();
@@ -83,6 +94,8 @@ class user
 			if(trim($this->firstname)=='') { $this->firstname = $this->login; }
 			$this->gender = $res->user_gender;
 			$this->birthday = $res->user_birthday;
+
+			$this->training_location_id = $res->location_ids;
 
 			$this->set_frontend_language($res->user_language);
 			$this->image_path = "app_user_admin/pics/".$this->login.".jpg";
@@ -156,7 +169,7 @@ class user
 		$pic_path = $this->get_pic_path($thumbnail);
 
 		if($this->hidden) { $css.= "opacity:0.3"; }
-		$html = "<div class='user_pic' id='user_{$this->id}' data-user-id='{$this->id}'>";
+		$html = "<div class='user_pic' id='user_{$this->id}' data-user-id='{$this->id}' data-location-id='{$this->training_location_id}'>";
 		$html.= "<img alt='{$this->login}' title='{$this->login}' style='{$css}' src='{$pic_path}'/>";
 		if(is_array($arr_text_lines) AND count($arr_text_lines)>0)
 		{

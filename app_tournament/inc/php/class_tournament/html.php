@@ -354,18 +354,17 @@ class html
 										ORDER BY location_name");
 		if($this->db->count()>1)
 		{
-			if($group_by=='location') {
-				$html.="<select name='location' style='width:90%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">";
-				$html.="<option value=''>-- Alle Standorte --</option>";
-				while ($d=$this->db->get_next_res())
-				{
-					$html.="<option";
-					if(isset($_GET['location_filter']) && $_GET['location_filter']==$d->location_id) {$html.=" selected='1'"; }
-					$html.=" value='".$d->location_id."'>".$d->location_name."</option>";
-				}
-				$html.="</select>";
-				$html.="<hr style='margin:0px;'>";
+			$html.="<select name='location' style='width:90%;margin:2.5%;' onchange=\"$('#change_location_filter').submit();\">";
+			$html.="<option value=''>-- Alle Standorte --</option>";
+			while ($d=$this->db->get_next_res())
+			{
+				$html.="<option";
+				if(isset($_GET['location_filter']) && $_GET['location_filter']==$d->location_id) {$html.=" selected='1'"; }
+				$html.=" value='".$d->location_id."'>".$d->location_name."</option>";
 			}
+			$html.="</select>";
+			$html.="<hr style='margin:0px;'>";
+
 			if(isset($_GET['show_hidden']) AND $_GET['show_hidden']=='1')
 			{
 				$w_str = "WHERE user_id!='1'";
@@ -410,42 +409,43 @@ class html
 				$this->db->sql_query("SELECT DISTINCT user_id,user_account FROM location2user 
 										LEFT JOIN users ON location2user_user_id = users.user_id 
 										$w_str ORDER BY user_account ASC");
-				$html.= "<h1>Spieler (".$this->db->count().")</h1>";
+				$html.= "<section id='section_players' style='display:flex;flex-wrap:wrap;border-bottom:1px solid gray;'>";
+				$html.= "<h1 style='flex-basis: 100%;'>Spieler (".$this->db->count().")</h1>";
 				while($data = $this->db->get_next_res())
 				{
 					$my_user = new \user($data->user_id);
 					$html.= $my_user->get_picture(true,array($my_user->login));
 					$my_user = null;
 				}
+				$html.= "</section>";
 			}
 	
 			if($group_by=='gender')
 			{
 				$this->db->sql_query("SELECT DISTINCT user_id, user_account FROM location2user 
-						LEFT JOIN users ON location2user_user_id = users.user_id 
-						$w_str AND user_gender='Frau' ORDER BY user_account ASC");
-
-				$this->db->sql_query("SELECT DISTINCT user_id, user_account FROM location2user 
 										LEFT JOIN users ON location2user_user_id = users.user_id 
 										$w_str AND user_gender='Frau' ORDER BY user_account ASC");
-				$html.= "<h1>Mädchen (".$this->db->count().")</h1>";
+				$html.= "<section id='section_girls' style='display:flex;flex-wrap:wrap;border-bottom:1px solid gray;'>";
+				$html.= "<h1 style='flex-basis: 100%;'>Mädchen (".$this->db->count().")</h1>";
 				while($data = $this->db->get_next_res())
 				{
 					$my_user = new \user($data->user_id);
 					$html.= $my_user->get_picture(true,array($my_user->login));
 					$my_user = null;
 				}
-				$html.="<div style='clear:both;border-bottom:1px solid gray;'>&nbsp;</div>";
+				$html.= "</section>";
 				$this->db->sql_query("SELECT DISTINCT user_id, user_account FROM location2user 
 										LEFT JOIN users ON location2user_user_id = users.user_id 
 										$w_str AND user_gender='Herr' ORDER BY user_account ASC");
-				$html.= "<h1>Jungs (".$this->db->count().")</h1>";
+				$html.= "<section id='section_boys' style='display:flex;flex-wrap:wrap;border-bottom:1px solid gray;'>";
+				$html.= "<h1 style='flex-basis: 100%;'>Jungs (".$this->db->count().")</h1>";
 				while($data = $this->db->get_next_res())
 				{
 					$my_user = new \user($data->user_id);
 					$html.= $my_user->get_picture(true,array($my_user->login));
 					$my_user = null;
 				}
+				$html.= "</section>";
 			}
 	
 			if($group_by=='location')
@@ -506,11 +506,13 @@ class html
 					}
 					if($data2->diff_years=='')
 					{
-						$html.= "<h1>Unbekannt (".$this->db->count().")</h1>";
+						$html.= "<section id='section_age_unknown' style='display:flex;flex-wrap:wrap;border-bottom:1px solid gray;'>";
+						$html.= "<h1 style='flex-basis: 100%;'>Unbekannt (".$this->db->count().")</h1><p/>";
 					}
 					else
 					{
-						$html.= "<h1>".$data2->diff_years." Jahre (".$this->db->count().")</h1>";
+						$html.= "<section id='section_age_'".$data2->diff_years." style='display:flex;flex-wrap:wrap;border-bottom:1px solid gray;'>";
+						$html.= "<h1 style='flex-basis: 100%;'>".$data2->diff_years." Jahre (".$this->db->count().")</h1><p/>";
 					}
 					while($data = $this->db->get_next_res())
 					{
@@ -518,7 +520,7 @@ class html
 						$html.= $my_user->get_picture(true,array($my_user->login));
 						$my_user = null;
 					}
-					$html.="<div style='clear:both;border-bottom:1px solid gray;'>&nbsp;</div>";
+					$html.= "</section>";
 				}
 			}
 		}				

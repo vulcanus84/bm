@@ -13,6 +13,8 @@ for (const [key, value] of params) {
 
 $(document).ready(function() {
   playerId = $('#content').data('user-id');
+  if(!playerId) $('#left_col').addClass('open'); 
+
   if(playerId>0) {
     $('#right_col').load(server_link+'&ajax=show_infos');
   }
@@ -25,21 +27,66 @@ function setEvents() {
   $('#content').off();
 
   //Location filter
-  $('#content').on('change', 'select[name="location"]', function() {
-    const allSections = $('#left_content section');
-    const selected = $(this).val();
-    allSections.hide();
+  $('#content').on('change', 'select[name="location"]', function () {
+      const selected = $(this).val();
+      const allSections = $('#left_content section');
 
-    if (!selected) {
+      // Reset visibility
       allSections.show();
-    } else {
-      allSections.each(function() {
-        if ($(this).find('h1').text().includes($(this).find('h1').text().split('(')[0].trim())) {
-          $(this).toggle($(this).find('h1').text().includes($('select[name="location"] option:selected').text().trim()));
-        }
+      allSections.find('.user_pic').show();
+
+      // Show everything if no selection
+      if (!selected) return;
+
+      // Special case: show only section_<id>
+      const targetSectionId = 'section_' + selected;
+      const targetSection = $('#' + targetSectionId);
+
+      if (targetSection.length) {
+          allSections.not(targetSection).hide();
+
+          // Filter user_pics in target section
+          targetSection.find('.user_pic').each(function () {
+              const ids = String($(this).data('location-id'))
+                          .split(',')
+                          .map(i => i.trim());
+              $(this).toggle(ids.includes(String(selected)));
+          });
+
+          // Update count in h1
+          const visiblePics = targetSection.find('.user_pic:visible').length;
+          const h1 = targetSection.find('h1');
+          const baseTitle = h1.text().replace(/\(\s*\d+\s*\)\s*$/, '').trim();
+          h1.text(`${baseTitle} (${visiblePics})`);
+
+          return;
+      }
+
+      // Default filtering when no matching section_<id>
+      allSections.each(function () {
+          const section = $(this);
+
+          // Filter user_pics
+          section.find('.user_pic').each(function () {
+              const ids = String($(this).data('location-id'))
+                          .split(',')
+                          .map(i => i.trim());
+              $(this).toggle(ids.includes(String(selected)));
+          });
+
+          // Toggle section based on visible user_pics
+          const visiblePics = section.find('.user_pic:visible').length;
+          section.toggle(visiblePics > 0);
+
+          // Update count in h1
+          const h1 = section.find('h1');
+          const baseTitle = h1.text().replace(/\(\s*\d+\s*\)\s*$/, '').trim();
+          h1.text(`${baseTitle} (${visiblePics})`);
       });
-    }
   });
+
+
+
 
 
   $('#left_col').off('click').on('click', function(e) {
@@ -176,9 +223,11 @@ function delete_pic(user_id)
 }
 
 function change_group_by(id) {
-  let sort_by = id.currentTarget.id;
-  //$('#left_content').html("<img src='../inc/imgs/query/loading.gif' />");
-  $('#left_content').load(server_link+'&ajax=get_all_users&order_by='+sort_by, function() {
+  var oldVal = $('select[name="location"]').val();
+
+  $('#left_content').load(server_link+'&ajax=get_all_users&order_by='+id.currentTarget.id, function() {
     setEvents();
+    $('select[name="location"]').val(oldVal);
+    $('select[name="location"]').trigger('change');
   });
 }
