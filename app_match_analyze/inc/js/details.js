@@ -154,7 +154,7 @@ function new_point(id, winner, player = null, ...path) {
 
     if ($('#points_table tbody').length === 0) $('#points_table').append('<tbody></tbody>');
 
-    errorStyle = "padding: 5px;border-radius:5vw;"
+    errorStyle = "display: flex; flex-direction: column; gap: 5px; padding: 5px;border-radius:30px;"
     switch (main_reason) {
       case 'Fehler':
         errorStyle += 'border:5px solid #E63946;';
@@ -180,7 +180,7 @@ function new_point(id, winner, player = null, ...path) {
           <td class='left'>${htmlCode}</td>
           <td class='middle'>
             <div class='point_visualisation' style="${errorStyle}">
-              <div>${pointPlayer || ''}</div>
+              <div class='point_player'>${pointPlayer || ''}</div>
               <div><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></div>
             </div>
           </td>
@@ -198,7 +198,7 @@ function new_point(id, winner, player = null, ...path) {
           <td class='left'>${reason_path_text}</td>
           <td class='middle'>
             <div style="${errorStyle}">
-              <div>${pointPlayer || ''}</div>
+              <div class='point_player'>${pointPlayer || ''}</div>
               <div><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></div>
             </div>
           </td>
