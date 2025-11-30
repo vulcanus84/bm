@@ -149,25 +149,38 @@ function new_point(id, winner, player = null, ...path) {
     let errorStyle = "";
     let main_reason = path[0];
     let reason_path_text = path.slice(1)
-      .filter(p => p.trim() !== '')
+      .filter(p => p && p.trim() !== '')
       .join(' / ');
 
     if ($('#points_table tbody').length === 0) $('#points_table').append('<tbody></tbody>');
 
+    errorStyle = "padding: 5px;border-radius:5vw;"
+    switch (main_reason) {
+      case 'Fehler':
+        errorStyle += 'border:5px solid #E63946;';
+        break;
+      case 'Gewinnschlag':
+        errorStyle += 'border:5px solid #52B788;';
+        break;
+      case 'Glück':
+        errorStyle += 'border:5px solid #F1A208;';
+        break;
+      default:
+        errorStyle += 'border:5px solid #DDD;';
+    }
+
     if(winner==='trainee') {
       if (main_reason === 'Fehler') {
           pointPlayer = (player === 'player' ? match.opponentName : match.opponentPartnerName);
-          errorStyle = 'border:5px solid red;';
       } else {
           pointPlayer = (player === 'player' ? match.traineeName : match.traineePartnerName);
-          errorStyle = 'border:5px solid green;';
       }
       $('#points_table tbody').prepend(`
         <tr id='row_${id}'>
           <td class='left'>${htmlCode}</td>
           <td class='middle'>
-            <div style="display: flex; flex-direction: column; gap: 5px; padding: 5px;border-radius:5vw; ${errorStyle}">
-              <div style="display: flex; justify-content: center; align-items: center;">${pointPlayer || ''}</div>
+            <div class='point_visualisation' style="${errorStyle}">
+              <div>${pointPlayer || ''}</div>
               <div><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></div>
             </div>
           </td>
@@ -177,17 +190,15 @@ function new_point(id, winner, player = null, ...path) {
     } else {
       if (main_reason === 'Fehler') {
           pointPlayer = (player === 'player' ? match.traineeName : match.traineePartnerName);
-          errorStyle = 'border:5px solid red;';
       } else {
           pointPlayer = (player === 'player' ? match.opponentName : match.opponentPartnerName);
-          errorStyle = 'border:5px solid green;';
       }
       $('#points_table tbody').prepend(`
         <tr id='row_${id}'>
           <td class='left'>${reason_path_text}</td>
           <td class='middle'>
-            <div style="display: flex; flex-direction: column; gap: 5px; padding: 5px;border-radius:5vw; ${errorStyle}">
-              <div style="display: flex; justify-content: center; align-items: center;">${pointPlayer || ''}</div>
+            <div style="${errorStyle}">
+              <div>${pointPlayer || ''}</div>
               <div><img class='delete' id='${id}' src='inc/imgs/delete.png' alt='Delete last entry' /></div>
             </div>
           </td>
@@ -221,6 +232,7 @@ function new_point(id, winner, player = null, ...path) {
           $('tr#row_' + id).attr('id', 'row_' + newId);
           match.replacePointId(id, newId);
         } else if(data != '') {
+          $('tr#row_' + id).remove();
           alert(data);
         }
       });

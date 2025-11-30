@@ -122,9 +122,9 @@ class BadmintonMatch {
     getPointStatisticsLabels(player = "trainee") {
         if (!this.traineePartnerName) {
             if(player === 'trainee') {
-                return ['Fehler von ' + this.opponentNameTxt, 'Gewinner', 'Glück'];
+                return ['Fehler von ' + this.opponentNameTxt, 'Gewinnschlag', 'Glück'];
             } else {
-                return ['Fehler von ' + this.traineeNameTxt, 'Gewinner', 'Glück'];
+                return ['Fehler von ' + this.traineeNameTxt, 'Gewinnschlag', 'Glück'];
             }
         } else {
             if(player === 'trainee') {

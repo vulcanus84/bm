@@ -20,8 +20,8 @@ const winAllowedCombinations = [
 const labels = [0];
 const colors = [
   "#E63946", // warmes Rot
-  "#F1A208", // kräftiges Goldgelb
   "#52B788", // weiches Grün
+  "#F1A208", // kräftiges Goldgelb
   "#277DA1", // kühles Blau
   "#9C89B8", // sanftes Violett
   "#F3722C", // warmes Orange

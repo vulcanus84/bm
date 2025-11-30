@@ -64,7 +64,7 @@ table#points_table td.left {
 }
 table#points_table td.left div.deactivated {float:right;font-size:clamp(8pt,3vw,24pt);text-align:center; }
 table#points_table td.left div.deactivated img { width:12vw;max-width: 150px; } 
-table#points_table td.left div.opponent { width: 14vw; height: 14vw; }
+table#points_table td.left div.opponent { float:right;width: 14vw; height: 14vw; }
 
 table#points_table td.middle {
   text-align: center;
@@ -89,7 +89,7 @@ table#points_table td.right {
 }
 table#points_table td.right div.deactivated { float:left;font-size:clamp(8pt,3vw,24pt);text-align:center; }
 table#points_table td.right div.deactivated img { width:12vw;max-width: 150px; } 
-table#points_table td.right div.opponent { width: 14vw; height: 14vw; }
+table#points_table td.right div.opponent { float:left;width: 14vw; height: 14vw; }
 
 .header_sets {
   display: flex;

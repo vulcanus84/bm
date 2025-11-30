@@ -6,32 +6,32 @@ switch($_GET['ajax'])
     break;
 
   case 'save_point':
-    $sql = "SELECT ma_reason_id FROM match_analyzes_reasons WHERE ma_reason_level1=:level1";
-    $arr_params = array();
-    $arr_params['level1'] = $_GET['level1'];
-    if(isset($_GET['level2']) && $_GET['level2']!='') {
-      $sql .= " AND ma_reason_level2=:level2";
-      $arr_params['level2'] = $_GET['level2'];
-    } else {
-      $sql .= " AND (ma_reason_level2 IS NULL OR ma_reason_level2='')";
-    }
-    if(isset($_GET['level3']) && $_GET['level3']!='') {
-      $sql .= " AND ma_reason_level3=:level3";
-      $arr_params['level3'] = $_GET['level3'];
-    } else {
-      $sql .= " AND (ma_reason_level3 IS NULL OR ma_reason_level3='')";
-    }
-    if(isset($_GET['level4']) && $_GET['level4']!='') {
-      $sql .= " AND ma_reason_level4=:level4";
-      $arr_params['level4'] = $_GET['level4'];
-    } else {
-      $sql .= " AND (ma_reason_level4 IS NULL OR ma_reason_level4='')";
-    }
+    try {
+      $sql = "SELECT ma_reason_id FROM match_analyzes_reasons WHERE ma_reason_level1=:level1";
+      $arr_params = array();
+      $arr_params['level1'] = $_GET['level1'];
+      if(isset($_GET['level2']) && $_GET['level2']!='') {
+        $sql .= " AND ma_reason_level2=:level2";
+        $arr_params['level2'] = $_GET['level2'];
+      } else {
+        $sql .= " AND (ma_reason_level2 IS NULL OR ma_reason_level2='')";
+      }
+      if(isset($_GET['level3']) && $_GET['level3']!='') {
+        $sql .= " AND ma_reason_level3=:level3";
+        $arr_params['level3'] = $_GET['level3'];
+      } else {
+        $sql .= " AND (ma_reason_level3 IS NULL OR ma_reason_level3='')";
+      }
+      if(isset($_GET['level4']) && $_GET['level4']!='') {
+        $sql .= " AND ma_reason_level4=:level4";
+        $arr_params['level4'] = $_GET['level4'];
+      } else {
+        $sql .= " AND (ma_reason_level4 IS NULL OR ma_reason_level4='')";
+      }
 
-    $data = $db->sql_query_with_fetch($sql,$arr_params);
-    $reason_id = $data->ma_reason_id;
+      $data = $db->sql_query_with_fetch($sql,$arr_params);
+      $reason_id = $data->ma_reason_id;
 
-    if($reason_id>0) {
       $db->insert(array(
         'ma_point_ma_id'=>$_GET['ma_id'],
         'ma_point_set'=>$_GET['set'],
@@ -40,8 +40,8 @@ switch($_GET['ajax'])
         'ma_point_reason_id'=>$reason_id,
       ),'match_analyzes_points');
       print "OK>".$db->last_inserted_id;
-    } else {
-      throw new Exception("Grund nicht gefunden!");
+    } catch (\Throwable $th) {
+      print $th->getMessage();
     }
     break;
 
