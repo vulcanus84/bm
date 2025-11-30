@@ -282,22 +282,45 @@ function new_point(id, winner, player = null, ...path) {
     // Usual Level selection
     // ----------------------------
     let i = 0;
-    let btn_height = 50 / (arr_options.length + 1);
+    let btnStyle = ";";
+    let btn_height = 5;
+    let margin_right = 0;
+    if(arr_options.length > 6) {
+      btnStyle += "width:39vw;";
+      btn_height = 100 / (arr_options.length + 1);
+      margin_right = 1;
+    } else {
+      btnStyle += "width:80vw;";
+      btn_height = 50 / (arr_options.length + 1);
+    }
 
     if(path.length>0) {
-      txt += `<button class='level_option' style='font-size:${btn_height*2}pt;width:75vw;height:${btn_height}vh;margin:${btn_height/10}vh;background-color:gray' data-level='back'>Zurück</button>`;
+      txt += `<div style='white-space: nowrap;'><button class='level_option' style='font-size:16pt;width:39vw;height:${btn_height/1.5}vh;min-height:7vh;margin-bottom:${btn_height/10}vh;margin-right:1vw;background-color:#AAA' data-level='back'>⬅️ Zurück</button>`;
+      txt += `<button class='level_option' style='font-size:16pt;width:39vw;height:${btn_height/1.5}vh;min-height:7vh;margin-bottom:${btn_height/10}vh;margin-right:1vw;background-color:#AAA' data-level='-'>Fertig ✅</button></div>`;
     }
 
     for (const option of arr_options) {
       let color = colors[i % colors.length];
       let arr_options_next = getLevelOptions(...path, option);
-      let suffix = arr_options_next.length > 0 ? '＋' : '✅';
+      let suffix = arr_options_next.length > 0 ? '' : '✅';
 
       let len = option.length;
-      let calc_font_size = btn_height * 0.3;
-      if(len>12) calc_font_size = calc_font_size / (Math.sqrt(len)/3);
+      let calc_font_size;
 
-      txt += `<button class='level_option' style='font-size:${calc_font_size}vh;width:75vw;height:${btn_height}vh;margin:${btn_height/10}vh;background-color:${color}' data-level='${option}'>${option} ${suffix}</button>`;
+      if(arr_options.length > 6) { 
+        calc_font_size = 18;
+        if(len>10) { calc_font_size = calc_font_size - 4; }
+        if(len>15) { calc_font_size = calc_font_size - 4; }
+        if(len>20) { calc_font_size = calc_font_size - 4; }
+       } else {
+        calc_font_size = 24;
+        if(len>10) { calc_font_size = calc_font_size - 4; }
+        if(len>15) { calc_font_size = calc_font_size - 4; }
+        if(len>20) { calc_font_size = calc_font_size - 4; }
+       }
+
+
+      txt += `<button class='level_option' style='white-space: nowrap;font-size:${calc_font_size}pt;height:${btn_height}vh;margin-bottom:${btn_height/10}vh;margin-right:${margin_right}vw;background-color:${color}${btnStyle}' data-level='${option}'>${option} ${suffix}</button>`;
       i++;
     }
   }
