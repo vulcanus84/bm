@@ -21,6 +21,7 @@
     $myCol = new column("ma_reason_level2","Level 2"); $myQuery->add_column($myCol);
     $myCol = new column("ma_reason_level3","Level 3"); $myQuery->add_column($myCol);
     $myCol = new column("ma_reason_level4","Level 4"); $myQuery->add_column($myCol);
+    $myCol = new column("ma_reason_hide","Ausgeblendet"); $myCol->set_edit_typ('checkbox'); $myQuery->add_column($myCol);
 
     if(!IS_AJAX)
     {

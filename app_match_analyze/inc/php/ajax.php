@@ -46,7 +46,9 @@ switch($_GET['ajax'])
     break;
 
   case 'get_reasons_as_json':
-    $db->sql_query("SELECT * FROM match_analyzes_reasons ORDER BY ma_reason_level1, ma_reason_level2, ma_reason_level3, ma_reason_level4");
+    $db->sql_query("SELECT * FROM match_analyzes_reasons 
+                    WHERE ma_reason_hide = 0
+                    ORDER BY ma_reason_level1, ma_reason_level2, ma_reason_level3, ma_reason_level4");
     $data = $db->fetch_all();
     header('Content-Type: application/json');
     echo json_encode($data); 
