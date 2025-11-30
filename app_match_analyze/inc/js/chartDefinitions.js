@@ -1,4 +1,4 @@
-const errorStrokes = ["Anspiel","Clear", "Drop", "Drive", "Smash", "Lift", "Netzdrop", "Kill","Juhu"];
+const errorStrokes = ["Anspiel","Clear", "Drop", "Drive", "Smash", "Lift", "Netzdrop", "Kill","Fehleinschätzung"];
 const errorAllowedCombinations = [
     { detail: "Out", extra: "Hinten" },
     { detail: "Out", extra: "Seite" },
