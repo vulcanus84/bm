@@ -32,7 +32,7 @@ try
 				<a href='details.php?ma_id={$_GET['ma_id']}&set=1'><button id='btn_set1'>Satz 1</button></a>
 				<a href='details.php?ma_id={$_GET['ma_id']}&set=2'><button id='btn_set2'>Satz 2</button></a>
 				<a href='details.php?ma_id={$_GET['ma_id']}&set=3'><button id='btn_set3'>Satz 3</button></a>
-				<a href='details.php?ma_id={$_GET['ma_id']}&set=0'><button id='btn_set0'>Alle Sätze</button></a>
+				<a href='details.php?ma_id={$_GET['ma_id']}&set=0'><button id='btn_set0'>Alle</button></a>
 			</div>
 		");
 

@@ -232,7 +232,7 @@ function getChartPointIncreases() {
       scales: {
         y: {
           min: 0,   // Minimumwert fixieren
-          max: 30,  // Maximumwert fixieren
+          suggestedMax: 30,  // Maximumwert fixieren
           ticks: {
             stepSize: 5 // optional: Schritte auf der Y-Achse
           }
