@@ -62,7 +62,7 @@ function getAllCharts() {
     wrapper.appendChild(canvas);
   });
 
-  let savedChart = (sessionStorage.getItem("currentChart") || "").replace('#', '');
+  let savedChart = (sessionStorage.getItem("currentChart") || "chartMainReasons").replace('#', '');
 
   // Gespeichertes Chart anzeigen oder Standard (erstes)
   if (savedChart && arr_charts.includes(savedChart)) {
