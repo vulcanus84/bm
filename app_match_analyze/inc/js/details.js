@@ -168,12 +168,15 @@ function new_point(id, winner, player = null, ...path) {
       default:
         errorStyle += 'border:5px solid #DDD;';
     }
+    let chartToShow = '#chartMainReasons';
 
     if(winner==='trainee') {
       if (main_reason === 'Fehler') {
           pointPlayer = (player === 'player' ? match.opponentName : match.opponentPartnerName);
+          chartToShow = '#chartErrorsOpponent';          
       } else {
           pointPlayer = (player === 'player' ? match.traineeName : match.traineePartnerName);
+          chartToShow = '#chartWinners';          
       }
       $('#points_table tbody').prepend(`
         <tr id='row_${id}'>
@@ -190,8 +193,10 @@ function new_point(id, winner, player = null, ...path) {
     } else {
       if (main_reason === 'Fehler') {
           pointPlayer = (player === 'player' ? match.traineeName : match.traineePartnerName);
+          chartToShow = '#chartErrors';          
       } else {
           pointPlayer = (player === 'player' ? match.opponentName : match.opponentPartnerName);
+          chartToShow = '#chartWinnersOpponent';          
       }
       $('#points_table tbody').prepend(`
         <tr id='row_${id}'>
@@ -215,6 +220,13 @@ function new_point(id, winner, player = null, ...path) {
     // Save by AJAX
     // ----------------------------
     if(mode==='save') {
+      arr_charts.forEach(id => $('#' + id).hide());
+      $(chartToShow).show();
+      setTimeout(function() {
+        arr_charts.forEach(id => $('#' + id).hide());
+        $('#' + sessionStorage.getItem("currentChart")).fadeIn(300);
+      }, 5000);
+      
       let my_url = 'index.php?ajax=save_point&winner=' + winner
         + '&level1=' + encodeURIComponent(main_reason)
         + '&level2=' + encodeURIComponent(path[1] || '')

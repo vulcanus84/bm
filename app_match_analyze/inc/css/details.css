@@ -46,7 +46,7 @@ div.deactivated {
 }
 
 
-#chartMainReasons, #chartStrokes, #chartPointIncreases, #chartMainReasonsOpponent, #chartOuts, #chartOutsOpponent, #chartStrokesOpponent {
+#chartMainReasons, #chartMainReasonsOpponent, #chartWinners, #chartWinnersOpponent, #chartErrors, #chartErrorsOpponent, #chartPointIncreases {
   width: 70vw !important;
   height: 40vh !important;
 }

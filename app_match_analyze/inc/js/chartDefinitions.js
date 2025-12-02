@@ -34,10 +34,10 @@ const colors = [
 const arr_charts = [
   'chartMainReasons',
   'chartMainReasonsOpponent',
-  'chartStrokes',
-  'chartStrokesOpponent',
-  'chartOuts',
-  'chartOutsOpponent',
+  'chartWinners',
+  'chartWinnersOpponent',
+  'chartErrors',
+  'chartErrorsOpponent',
   'chartPointIncreases'
 ];
 
@@ -62,7 +62,7 @@ function getAllCharts() {
     wrapper.appendChild(canvas);
   });
 
-  let savedChart = sessionStorage.getItem("currentChart");
+  let savedChart = sessionStorage.getItem("currentChart").replace('#','');
 
   // Gespeichertes Chart anzeigen oder Standard (erstes)
   if (savedChart && arr_charts.includes(savedChart)) {
@@ -73,10 +73,10 @@ function getAllCharts() {
 
   getChartMainReasons('trainee');
   getChartMainReasons('opponent');
-  getChartStrokes('trainee');
-  getChartStrokes('opponent');
-  getChartOuts('trainee');
-  getChartOuts('opponent');
+  getchartWinners('trainee');
+  getchartWinners('opponent');
+  getchartErrors('trainee');
+  getchartErrors('opponent');
   getChartPointIncreases();
 }
 
@@ -111,7 +111,7 @@ function getChartMainReasons(side) {
   window[chartName] = new Chart(document.getElementById(chartName), config);
 }
 
-function getChartStrokes(side) {
+function getchartWinners(side) {
   // Titel dynamisch
   const titles = {
     trainee: match.mode === 'single' ? "Gewinnschläge von " + match.traineeNameTxt : "Gewinnschläge " + match.traineeNameTxt + "/" + match.traineePartnerNameTxt,
@@ -119,7 +119,7 @@ function getChartStrokes(side) {
   };
 
   // Element-ID und Chart-Variable sind gleich
-  const chartName = side === 'trainee' ? 'chartStrokes' : 'chartStrokesOpponent';
+  const chartName = side === 'trainee' ? 'chartWinners' : 'chartWinnersOpponent';
 
   // Config erstellen
   let config = {
@@ -152,7 +152,7 @@ function getChartStrokes(side) {
 }
 
 
-function getChartOuts(side) {
+function getchartErrors(side) {
 
   // Titel dynamisch
   const titles = {
@@ -161,7 +161,7 @@ function getChartOuts(side) {
   };
 
   // Element-ID und Chart-Variable sind gleich
-  const chartName = side === 'trainee' ? 'chartOuts' : 'chartOutsOpponent';
+  const chartName = side === 'trainee' ? 'chartErrors' : 'chartErrorsOpponent';
 
   let config = {
     type: 'bar',
@@ -279,36 +279,36 @@ function update_stats() {
   chartMainReasonsOpponent.update();
 
   const newDataWin = match.getWinnerChartData("trainee", winStrokes, winAllowedCombinations);
-  chartStrokes.data.datasets.forEach((ds, i) => {
+  chartWinners.data.datasets.forEach((ds, i) => {
       for (let j = 0; j < ds.data.length; j++) {
           ds.data[j] = newDataWin.datasets[i].data[j];
       }
   });
-  chartStrokes.update();
+  chartWinners.update();
 
   const newDataError = match.getErrorChartData("trainee", errorStrokes, errorAllowedCombinations);
-  chartOuts.data.datasets.forEach((ds, i) => {
+  chartErrors.data.datasets.forEach((ds, i) => {
       for (let j = 0; j < ds.data.length; j++) {
           ds.data[j] = newDataError.datasets[i].data[j];
       }
   });
-  chartOuts.update();
+  chartErrors.update();
   
   const newDataWinOpponent = match.getWinnerChartData("opponent", winStrokes, winAllowedCombinations);
-  chartStrokesOpponent.data.datasets.forEach((ds, i) => {
+  chartWinnersOpponent.data.datasets.forEach((ds, i) => {
       for (let j = 0; j < ds.data.length; j++) {
           ds.data[j] = newDataWinOpponent.datasets[i].data[j];
       }
   });
-  chartStrokesOpponent.update();
+  chartWinnersOpponent.update();
 
   const newDataErrorOpponent = match.getErrorChartData("opponent", errorStrokes, errorAllowedCombinations);
-  chartOutsOpponent.data.datasets.forEach((ds, i) => {
+  chartErrorsOpponent.data.datasets.forEach((ds, i) => {
       for (let j = 0; j < ds.data.length; j++) {
           ds.data[j] = newDataErrorOpponent.datasets[i].data[j];
       }
   });
-  chartOutsOpponent.update();
+  chartErrorsOpponent.update();
 
 
   const prog = match.getPointProgress();
