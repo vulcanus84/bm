@@ -6,16 +6,18 @@ const match = new BadmintonMatch();
 
 //Event handlers
 $(document).ready(function() {
-  $('.close').on('click', () => $('#myModal').hide());
-  $('#point_for_trainee').on('click', (e) => new_point(null,'trainee'));
-  $('#point_for_opponent').on('click', (e) => new_point(null,'opponent'));
-
-  //Load players
-  match.setPlayerNames($('#player').prop('outerHTML'),$('#playerPartner').prop('outerHTML'),$('#opponent').prop('outerHTML'),$('#opponentPartner').prop('outerHTML'));
-
   const params = new URLSearchParams(window.location.search);
   set = params.get('set');
   ma_id = params.get('ma_id');
+
+  if(set > 0) {
+    $('.close').on('click', () => $('#myModal').hide());
+    $('#point_for_trainee').on('click', (e) => new_point(null,'trainee'));
+    $('#point_for_opponent').on('click', (e) => new_point(null,'opponent'));
+  }
+
+  //Load players
+  match.setPlayerNames($('#player').prop('outerHTML'),$('#playerPartner').prop('outerHTML'),$('#opponent').prop('outerHTML'),$('#opponentPartner').prop('outerHTML'));
 
   $('#btn_set' + set).addClass('orange');
 
