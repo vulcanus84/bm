@@ -63,6 +63,7 @@ function getAllCharts() {
   });
 
   let savedChart = (sessionStorage.getItem("currentChart") || "chartMainReasons").replace('#', '');
+  sessionStorage.setItem("currentChart",savedChart);
 
   // Gespeichertes Chart anzeigen oder Standard (erstes)
   if (savedChart && arr_charts.includes(savedChart)) {
