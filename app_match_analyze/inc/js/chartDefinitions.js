@@ -199,9 +199,9 @@ function getchartErrors(side) {
 }
 
 function getChartPointIncreases() {
-  let title = "Punkteverlauf im Satz";
-  let label1 = match.mode === 'single' ? "Meine Punkte": "Unsere Punkte";
-  let label2 = match.mode === 'single' ? "Gegnerische Punkte": "Gegnerische Punkte";
+  let title = "Punkteverlauf";
+  let label1 = match.mode === 'single' ? "Punkte von " + match.traineeNameTxt : "Punkte von " + match.traineeNameTxt + "/" + match.traineePartnerNameTxt;
+  let label2 = match.mode === 'single' ? "Punkte von " + match.opponentNameTxt : "Punkte von " + match.opponentNameTxt + "/" + match.opponentPartnerNameTxt;
 
   let config = {
     type: 'line',

@@ -104,7 +104,7 @@ table#points_table td.right div.opponent { float:left;width: 14vw; height: 14vw;
   flex: 1;              /* alle Buttons gleich breit */
   padding: 5px;
   text-align: center;
-  width:28vw;
+  width:20vw;
 }
 
 .header_sets button#btn_overview {

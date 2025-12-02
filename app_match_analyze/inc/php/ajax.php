@@ -55,10 +55,19 @@ switch($_GET['ajax'])
     break;
 
   case 'get_points_as_json':
-    $db->sql_query("SELECT * FROM match_analyzes_points 
-                    LEFT JOIN match_analyzes_reasons ON match_analyzes_points.ma_point_reason_id = match_analyzes_reasons.ma_reason_id
-                    WHERE ma_point_ma_id=:ma_id AND ma_point_set=:set 
-                    ORDER BY ma_point_created_on ASC",array('ma_id'=>$_GET['ma_id'],'set'=>$_GET['set']));
+    $set = $_GET['set'];
+    if($set=='0') {
+      $db->sql_query("SELECT * FROM match_analyzes_points 
+                      LEFT JOIN match_analyzes_reasons ON match_analyzes_points.ma_point_reason_id = match_analyzes_reasons.ma_reason_id
+                      WHERE ma_point_ma_id=:ma_id
+                      ORDER BY ma_point_created_on ASC",array('ma_id'=>$_GET['ma_id']));
+    } else {
+      $db->sql_query("SELECT * FROM match_analyzes_points 
+                      LEFT JOIN match_analyzes_reasons ON match_analyzes_points.ma_point_reason_id = match_analyzes_reasons.ma_reason_id
+                      WHERE ma_point_ma_id=:ma_id AND ma_point_set=:set 
+                      ORDER BY ma_point_created_on ASC",array('ma_id'=>$_GET['ma_id'],'set'=>$_GET['set']));
+      
+    }
     $data = $db->fetch_all();
     header('Content-Type: application/json');
     echo json_encode($data); 
