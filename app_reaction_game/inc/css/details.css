@@ -28,6 +28,7 @@
     border-radius: 8px;
     max-width: 420px;
     margin-bottom: 10px;
+    float:left;
 }
 
 .sensor-card.active {
@@ -64,4 +65,12 @@
     cursor: not-allowed;
     background: #ccc;
     color: #666;
+}
+
+#chart_container {
+    height: 40vh;
+}
+
+#chart_header    {
+    clear:both;
 }

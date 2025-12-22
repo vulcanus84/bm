@@ -91,8 +91,9 @@ function initChart() {
             datasets: []
         },
         options: {
-            responsive: true,
             animation: false,
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: false
@@ -155,10 +156,16 @@ function poll() {
             if(isAssigned) { 
                 if(sensor.rec_user_id == userId) {
                     if(sensor.rec_status !== 'running') {
-                        $('#start').prop('disabled', false); 
-                        $('#start').addClass('green').removeClass('gray');
-                        $('#start').text('Starten');
-                        $('#start').val('Starten');
+                        if(isFresh) {
+                            $('#start').prop('disabled', false); 
+                            $('#start').addClass('green').removeClass('gray');
+                            $('#start').text('Starten');
+                            $('#start').val('Starten');
+                        } else {
+                            $('#start').prop('disabled', true); 
+                            $('#start').addClass('gray').removeClass('green orange');
+                            $('#start').text('Kein Start (Sensor inaktiv)');
+                        }
                     } else {
                         $('#start').prop('disabled', false); 
                         $('#start').addClass('orange').removeClass('gray');
@@ -169,7 +176,7 @@ function poll() {
                 } else {
                     $('#start').prop('disabled', true); 
                     $('#start').addClass('gray').removeClass('green orange');
-                    $('#start').text('Start (nicht möglich, anderer Benutzer)');
+                    $('#start').text('Kein Start (anderer Benutzer)');
                     currStatus = "running";
                 }
             }
@@ -244,15 +251,72 @@ function poll() {
             const runs = [];
             const template = data.template; // [1,3,4,5]
             let currentRun = [];
-
+            let runDuration = 0;
+            let maxRunDuration = 0;
+            let minDuration = Number.MAX_VALUE;
+            let firstRun = true;
             data.events.forEach(ev => {
                 if (ev.pos_id === template[0] && currentRun.length > 0) {
-                    runs.push(currentRun);
+                    if (!firstRun) {
+                        if (currentRun.length === template.length ) {
+                            runs.push(currentRun);
+                            if (runDuration > maxRunDuration) { maxRunDuration = runDuration;}
+                            if (runDuration<minDuration) { minDuration = runDuration; }
+                        }
+                    } firstRun = false;
                     currentRun = [];
+                    runDuration = 0;
                 }
-                currentRun.push(ev);
+                runDuration += ev.duration;
+                if(ev.duration > 0) { currentRun.push(ev); }
             });
-            if (currentRun.length > 0) runs.push(currentRun);
+            if (currentRun.length === template.length) runs.push(currentRun);
+
+            $('#misc_container').html(`
+            <div style="
+                display: flex; 
+                gap: 20px; 
+                flex-wrap: wrap; 
+                font-family: Arial, sans-serif;
+            ">
+
+                <div style="
+                    background: #f0f4f8; 
+                    border-radius: 12px; 
+                    padding: 20px; 
+                    flex: 1 1 200px; 
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    text-align: center;
+                ">
+                <div style="font-size: 14px; color: #555;">Schnellster</div>
+                <div style="font-size: 24px; font-weight: bold; color: #43a047;">${minDuration.toFixed(1)}s</div>
+                </div>
+
+                <div style="
+                    background: #f0f4f8; 
+                    border-radius: 12px; 
+                    padding: 20px; 
+                    flex: 1 1 200px; 
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    text-align: center;
+                ">
+                <div style="font-size: 14px; color: #555;">Langsamster</div>
+                <div style="font-size: 24px; font-weight: bold; color: #e53935;">${maxRunDuration.toFixed(1)}s</div>
+                </div>
+
+                <div style="
+                    background: #f0f4f8; 
+                    border-radius: 12px; 
+                    padding: 20px; 
+                    flex: 1 1 200px; 
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+                    text-align: center;
+                ">
+                <div style="font-size: 14px; color: #555;">Durchläufe</div>
+                <div style="font-size: 24px; font-weight: bold; color: #1e88e5;">${runs.length}</div>
+                </div>
+            </div>
+            `);
 
             // X-Achse = Durchläufe
             const labels = runs.map((_, i) => (i + 1));
@@ -286,7 +350,7 @@ function poll() {
                     stack: 'runs',
                     backgroundColor: posColors[posId],
                     data: runs.map((run, runIdx) => {
-                        const runData = (runIdx === 0) ? run.slice(1) : run;
+                        const runData = run;
                         const ev = runData.find(e => e.pos_id === posId);
                         return ev ? Number(ev.duration.toFixed(3)) : 0;
                     })

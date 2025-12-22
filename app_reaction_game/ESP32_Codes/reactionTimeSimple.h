@@ -1,6 +1,7 @@
   #include <WiFi.h>
   #include <HTTPClient.h>
   #include <ArduinoJson.h>  // Bibliothek für JSON
+  #include "esp_timer.h"
 
   // ===================== DEFINITIONEN =====================
 
@@ -50,8 +51,8 @@
   const uint8_t DATA_TYPE_BASIC = 0x02;
 
   // ---- Server URLs ----
-  const char* CONFIG_URL  = "https://clanic.ch/bm/app_reaction_game/get_infos.php";
-  const char* TRIGGER_URL = "https://clanic.ch/bm/app_reaction_game/trigger.php";
+  const char* CONFIG_URL  = "https://clanic.ch/app_reaction_game/get_infos.php";
+  const char* TRIGGER_URL = "https://clanic.ch/app_reaction_game/trigger.php";
 
   // ---- Frame Buffer ----
   uint8_t buffer[BUFFER_SIZE];
@@ -66,7 +67,7 @@
   int lastDistance = -1;
 
   // ---- Timing ----
-  unsigned long long lastEventTime = 0;
+  int64_t lastEventTime = 0;
   unsigned long lastConfigCheck = 0;
   const unsigned long CONFIG_INTERVAL = 5000; // 5 Sekunden
 
@@ -77,9 +78,9 @@
 
   // ---- Range Logik ----
   RangeType getRange(int dist) {
-    if (dist > 0 && dist < 120) return V;
-    if (dist >= 220 && dist <= 260) return M;
-    if (dist > 450) return H;
+    if (dist > 0 && dist < 150) return V;
+    if (dist >= 300 && dist <= 350) return M;
+    if (dist > 550) return H;
     return X; // undefiniert
   }
 
@@ -313,23 +314,28 @@
         currentRange != lastRange &&
         espStatus == "running") {
 
-      unsigned long long now = micros();
-      double duration = (lastEventTime == 0) ? 0 : (now - lastEventTime) / 1e6;
+      int64_t now = esp_timer_get_time(); // µs
+      int64_t delta_us = (lastEventTime == 0) ? 0 : (now - lastEventTime);
 
       Serial.println("=== EVENT ===");
-      Serial.print("Distanz: "); Serial.println(smoothed);
-      Serial.print("Dauer seit letztem: "); Serial.println(duration, 6);
+      Serial.print("Distanz: ");
+      Serial.println(smoothed);
 
-      sendEventToServer(duration, currentRange);
+      Serial.print("Dauer seit letztem: ");
+      Serial.print(delta_us);
+      Serial.println(" us");
+
+      // falls Server Sekunden erwartet:
+      sendEventToServer(delta_us / 1e6, currentRange);
+
       lastRange = currentRange;
+      lastEventTime = now;
 
       seqIndex++;
       if (seqIndex >= SEQ_LENGTH) {
         seqIndex = 0;
         Serial.println("=== SEQUENZ BEENDET ===");
       }
-
-      lastEventTime = now;
     }
   }
 

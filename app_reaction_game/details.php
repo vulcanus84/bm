@@ -61,7 +61,7 @@ try {
                 <span>Diagramm</span>
             </div>
             <div id='chart_container'>
-                <canvas id='reaction_chart' width='400' height='200'></canvas>
+                <canvas id='reaction_chart'></canvas>
             </div>
 
             <!-- Sonstiges -->
