@@ -1,0 +1,67 @@
+/* Allgemeine Header Styles */
+.toggle-header {
+    font-family: Arial, sans-serif;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+}
+
+/* Icon Abstand */
+.toggle-header span.toggle-icon {
+    margin-right: 6px;
+}
+
+/* Sensor / Container Styles */
+#sensor_list, #chart_container, #misc_container {
+    padding: 0; /* optional, kann je nach Bedarf angepasst werden */
+}
+
+/* Sensor-Card Styles (wie vorher) */
+.sensor-card {
+    font-family: Arial, sans-serif;
+    padding: 12px;
+    border-radius: 8px;
+    max-width: 420px;
+    margin-bottom: 10px;
+}
+
+.sensor-card.active {
+    background: #eafaf1;        /* softes Grün */
+    border-left: 6px solid #2ecc71;
+}
+
+.sensor-card.running {
+    background: #fff4e6;        /* softes Orange */
+    border-left: 6px solid #e67e22;
+}
+
+.sensor-card.inactive {
+    background: #fdecea;        /* softes Rot */
+    border-left: 6px solid #e74c3c;
+}
+
+.sensor-card button {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: none;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.sensor-card button.active {
+    cursor: pointer;
+    background: #2ecc71;
+    color: white;
+}
+
+.sensor-card button.disabled {
+    cursor: not-allowed;
+    background: #ccc;
+    color: #666;
+}

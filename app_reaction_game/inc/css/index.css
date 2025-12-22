@@ -1,0 +1,127 @@
+#new_exercise {
+    margin-bottom: 10px;
+}
+
+.reaction_table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.reaction_table th,
+.reaction_table td {
+    border: 1px solid #ccc;
+    padding: 6px;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    position: relative;
+    width: 80vw;
+}
+
+.close {
+    position: absolute;
+    right: 10px;
+    top: 5px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Active Cubes */
+.cube_table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.cube_table td,
+.cube_table th {
+    padding: 6px;
+    border: 1px solid #888;
+    text-align: center;
+}
+
+.green  { background-color: #c8f7c5; }
+.orange { background-color: #f9e79f; }
+.red    { background-color: #f5b7b1; }
+
+.position_table button { margin: 0 2px; }
+.position_table td { font-size: 12px; }
+
+/* Box-Layout für Positionsanzeige */
+.position_box {
+    border: 1px solid #888;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sensors {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.sensor {
+    background-color: #e0e0ff;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.actions button {
+    margin-left: 4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#edit_reaction_form input, #edit_reaction_form textarea {
+    width:90%;
+}
+
+.del-cube { margin-left:5px; }
+
+#reaction_list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.exercise_box {
+    width: 100vw;
+    max-width: 500px;
+    height: 150px;
+    border: 1px solid #888;
+    border-radius: 6px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #f5f5f5;
+}
+
+.exercise_title { font-weight: bold; font-size: 1em; }
+.exercise_desc { 
+  font-size: 0.9em; 
+  overflow: hidden; 
+  flex-grow: 1;
+  margin-top: 5px;    /* Abstand zu den Buttons */
+  margin-bottom: 5px;    /* Abstand zu den Buttons */
+}
+.exercise_actions button { margin-right: 5px; }
