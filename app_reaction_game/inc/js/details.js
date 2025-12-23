@@ -253,7 +253,7 @@ function poll() {
             let currentRun = [];
             let runDuration = 0;
             let maxRunDuration = 0;
-            let minDuration = Number.MAX_VALUE;
+            let minDuration = 999;
             let firstRun = true;
             data.events.forEach(ev => {
                 if (ev.pos_id === template[0] && currentRun.length > 0) {
