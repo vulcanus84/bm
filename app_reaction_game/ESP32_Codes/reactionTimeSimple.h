@@ -51,8 +51,11 @@
   const uint8_t DATA_TYPE_BASIC = 0x02;
 
   // ---- Server URLs ----
-  const char* CONFIG_URL  = "https://clanic.ch/app_reaction_game/get_infos.php";
-  const char* TRIGGER_URL = "https://clanic.ch/app_reaction_game/trigger.php";
+  //const char* CONFIG_URL  = "https://clanic.ch/app_reaction_game/get_infos.php";
+  //const char* TRIGGER_URL = "https://clanic.ch/app_reaction_game/trigger.php";
+
+  const char* CONFIG_URL  = "http://192.168.1.133:8888/bm/app_reaction_game/get_infos.php";
+  const char* TRIGGER_URL = "http://192.168.1.133:8888/bm/app_reaction_game/trigger.php";
 
   // ---- Frame Buffer ----
   uint8_t buffer[BUFFER_SIZE];

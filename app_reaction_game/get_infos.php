@@ -64,24 +64,30 @@ if(isset($_GET['mode']) &&  $_GET['mode'] === 'admin') {
         // Prepare response to update cube
         // *****************************************
         if(isset($cube_data) && $cube_data->rec_status != 'running') {
-            $response['excId'] = $cube_data->rec_re_id;
-            $data = $db->sql_query_with_fetch("SELECT * FROM reaction_exercises_cubes WHERE rec_re_id=:id", ['id'=>$response['excId']]);
-            $data2 = $db->sql_query_with_fetch(
-                "SELECT GROUP_CONCAT(rep_pos_id ORDER BY rep_id ASC) AS sequence,
-                        GROUP_CONCAT(rep_id ORDER BY rep_id ASC) AS sequenceIds
-                FROM reaction_exercises_positions
-                WHERE rep_re_id = :id",
-                ['id' => $response['excId']]
-            );
+            if($cube_data->rec_re_id != null) {
+                $response['excId'] = $cube_data->rec_re_id;
+                $data = $db->sql_query_with_fetch("SELECT * FROM reaction_exercises_cubes WHERE rec_re_id=:id", ['id'=>$response['excId']]);
+                $data2 = $db->sql_query_with_fetch(
+                    "SELECT GROUP_CONCAT(rep_pos_id ORDER BY rep_id ASC) AS sequence,
+                            GROUP_CONCAT(rep_id ORDER BY rep_id ASC) AS sequenceIds
+                    FROM reaction_exercises_positions
+                    WHERE rep_re_id = :id",
+                    ['id' => $response['excId']]
+                );
 
-            // Normal mode: Update or create active cube entry
-            $response = [
-                "status" => $data->rec_status,
-                "sequence" => $data2->sequence,
-                "sequenceIds" => $data2->sequenceIds,
-                "userId" => $data->rec_user_id,
-                "exerciseId" => $data->rec_re_id
-            ];
+                // Normal mode: Update or create active cube entry
+                $response = [
+                    "status" => $data->rec_status,
+                    "sequence" => $data2->sequence,
+                    "sequenceIds" => $data2->sequenceIds,
+                    "userId" => $data->rec_user_id,
+                    "exerciseId" => $data->rec_re_id
+                ];
+            } else {
+                $response = [
+                    "excId" => "Not defined"
+                ];
+            }
         } else {
             $response = [
                 "status" => "running"

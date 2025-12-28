@@ -140,6 +140,8 @@ function poll() {
         let currStatus = "idle";
 
         let html = '';
+        let activeSensorFound = false;
+
         data.sensors.forEach(sensor => {
             // Zeit aus dem JSON in Date umwandeln
             const lastUpdate = new Date(sensor.rec_last_update.replace(' ', 'T'));
@@ -161,10 +163,13 @@ function poll() {
                             $('#start').addClass('green').removeClass('gray');
                             $('#start').text('Starten');
                             $('#start').val('Starten');
+                            activeSensorFound = true;
                         } else {
-                            $('#start').prop('disabled', true); 
-                            $('#start').addClass('gray').removeClass('green orange');
-                            $('#start').text('Kein Start (Sensor inaktiv)');
+                            if(!activeSensorFound) {                                
+                                $('#start').prop('disabled', true); 
+                                $('#start').addClass('gray').removeClass('green orange');
+                                $('#start').text('Kein Start (Sensor inaktiv)'); 
+                            }
                         }
                     } else {
                         $('#start').prop('disabled', false); 
@@ -254,23 +259,20 @@ function poll() {
             let runDuration = 0;
             let maxRunDuration = 0;
             let minDuration = 999;
-            let firstRun = true;
             data.events.forEach(ev => {
                 if (ev.pos_id === template[0] && currentRun.length > 0) {
-                    if (!firstRun) {
-                        if (currentRun.length === template.length ) {
-                            runs.push(currentRun);
-                            if (runDuration > maxRunDuration) { maxRunDuration = runDuration;}
-                            if (runDuration<minDuration) { minDuration = runDuration; }
-                        }
-                    } firstRun = false;
+                    if (currentRun.length === template.length ) {
+                        runs.push(currentRun);
+                        if (runDuration > maxRunDuration) { maxRunDuration = runDuration;}
+                        if (runDuration<minDuration) { minDuration = runDuration; }
+                    }
                     currentRun = [];
                     runDuration = 0;
                 }
                 runDuration += ev.duration;
                 if(ev.duration > 0) { currentRun.push(ev); }
             });
-            if (currentRun.length === template.length) runs.push(currentRun);
+            runs.push(currentRun);
 
             $('#misc_container').html(`
             <div style="
