@@ -1,6 +1,8 @@
 #include <WiFi.h>
 #include <esp_now.h>
 #include "esp_timer.h"
+#include "../common/esp_now_structs.h"
+#include "led_control.h"
 
 #define RXD2 16
 #define TXD2 17
@@ -16,6 +18,13 @@ uint8_t filterIndex = 0;
 bool filterFilled = false;
 int lastSmoothed = -1;
 int lastDistance = -1;
+String espStatus = "idle";
+unsigned long lastHeartbeatReceived = 0;
+unsigned long lastHeartbeatSend = 0;
+
+// Initialisierung der LEDs
+LedControl ok = { okLed, LED_OFF, 0, LOW, false };
+LedControl hit = { hitLed, LED_OFF, 0, LOW, false };
 
 int smoothDistance(int newValue) {
   if (newValue <= 0 || newValue > 3000) return lastSmoothed;
@@ -38,47 +47,95 @@ uint8_t buffer[BUFFER_SIZE];
 bool inFrame = false;
 uint16_t bufIndex = 0;
 
-// Distanzpaket
-typedef struct __attribute__((packed)) {
-  uint8_t sensorId;
-  int distance;
-} dist_packet_t;
 
-// LED-Befehl vom Master
-typedef struct __attribute__((packed)) {
-  bool hitLedOn;
-} led_cmd_t;
+// ==================== ESP-NOW CALLBACK ====================
+void onDataRecv(const esp_now_recv_info_t *recv_info,
+                const uint8_t *incomingData,
+                int len)
+{
+  if (len < sizeof(PacketHeader)) return;
 
-void onLedCmdRecv(const esp_now_recv_info_t *info, const uint8_t *data, int len) {
-  if (len != sizeof(led_cmd_t)) return;
-  led_cmd_t cmd;
-  memcpy(&cmd, data, sizeof(cmd));
-  digitalWrite(hitLed, cmd.hitLedOn ? HIGH : LOW);
+  const PacketHeader *hdr =
+    (const PacketHeader *)incomingData;
+
+  switch (hdr->type) {
+
+    case PKT_HEARTBEAT:
+      if (len == sizeof(HeartbeatPacket)) {
+        const HeartbeatPacket *pkt =
+          (const HeartbeatPacket *)incomingData;
+        lastHeartbeatReceived = millis();
+        setLedState(ok, LED_ON);
+      }
+      break;
+
+    case PKT_GAMEMSG_TO_SENSOR:
+      if (len == sizeof(GameMsg)) {
+        const GameMsg *pkt =
+          (const GameMsg *)incomingData;
+
+          // Status auswerten
+          if (pkt->state == RUNNING) {
+            setLedState(ok,LED_BLINK_FAST);
+            espStatus = "running";
+          } else {
+            setLedState(ok,LED_ON);
+            setLedState(hit,LED_OFF);
+            espStatus = "idle";
+          }
+
+          // Einmal-Event
+          if (pkt->hit) {
+            setLedState(hit,LED_ONEBLINK);
+          }
+      }
+      break;
+  }
 }
+
+// checkHeartbeat
+void checkHeartbeat() {
+  if (millis() - lastHeartbeatReceived > 3000) {
+    setLedState(ok, LED_BLINK);
+    Serial.println("Heartbeat verloren");
+    delay(2000);
+  }
+
+  if (millis() - lastHeartbeatSend > 2000) {
+    lastHeartbeatSend = millis();
+    HeartbeatPacket pkt;
+    pkt.header.type = PKT_HEARTBEAT;
+    pkt.header.sensorId = 1;
+    pkt.ok = 1;
+    esp_now_send(masterMac, (uint8_t*)&pkt, sizeof(pkt));
+  }
+}
+
 
 // ESP-NOW Setup
 void setupESPNow() {
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
 
-  if (esp_now_init() != ESP_OK) Serial.println("❌ ESP-NOW Init fehlgeschlagen");
+  if (esp_now_init() != ESP_OK) Serial.println("ESP-NOW Init fehlgeschlagen");
 
   esp_now_peer_info_t peer{};
   memcpy(peer.peer_addr, masterMac, 6);
   peer.channel = 0;
   peer.encrypt = false;
-  if (esp_now_add_peer(&peer) != ESP_OK) Serial.println("❌ Peer hinzufügen fehlgeschlagen");
+  if (esp_now_add_peer(&peer) != ESP_OK) Serial.println("Peer hinzufügen fehlgeschlagen");
 
-  esp_now_register_recv_cb(onLedCmdRecv);
+  esp_now_register_recv_cb(onDataRecv);
+  setLedState(ok, LED_ON);
 }
 
 // Sendet Distanz an Master
 void sendDistance(int dist) {
-  dist_packet_t pkt;
-  pkt.sensorId = 1;
+  DistancePacket pkt;
+  pkt.header.type = PKT_DISTANCE_TO_MASTER;
+  pkt.header.sensorId = 1;
   pkt.distance = dist;
   esp_now_send(masterMac, (uint8_t*)&pkt, sizeof(pkt));
-  Serial.printf("📤 Gesendet: %d cm\n", dist);
 }
 
 void setup() {
@@ -88,10 +145,21 @@ void setup() {
   pinMode(okLed, OUTPUT);
   pinMode(hitLed, OUTPUT);
 
+  setLedState(ok, LED_BLINK_FAST);
+  setLedState(hit, LED_OFF);
+
   setupESPNow();
+  delay(500);
+  Serial.println("Sensor bereit");
 }
 
 void loop() {
+  updateLed(ok);
+  updateLed(hit);
+  checkHeartbeat();
+  
+  if(espStatus!="running") return;       
+
   while (Serial2.available()) {
     uint8_t b = Serial2.read();
     if (!inFrame) {

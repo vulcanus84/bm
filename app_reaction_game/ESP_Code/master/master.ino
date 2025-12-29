@@ -2,6 +2,7 @@
 #include <esp_now.h>
 #include "esp_timer.h"
 #include <ArduinoJson.h>  // Bibliothek für JSON
+#include "../common/esp_now_structs.h"
 
 // ==================== UART DEFINITIONS ====================
 #define UART_RX 6
@@ -22,24 +23,7 @@ int exerciseId = 0;    // neu, genau wie userId
 
 // ==================== ESP-NOW DEFINITIONS ====================
 uint8_t sensorMac[6] = {0x38,0x18,0x2B,0x69,0xE2,0xA8}; // Sensor MAC
-
-typedef struct __attribute__((packed)) {
-  uint8_t sensorId;
-  int distance;
-} dist_packet_t;
-
-enum GameState : uint8_t {
-  IDLE = 0,
-  RUNNING = 1
-};
-
-struct GameMsg {
-  GameState state; // Dauerzustand
-  bool hit;        // Einmal-Event
-};
-
 int64_t lastEventTime = 0;
-  
 
 // ==================== FUNCTION DECLARATIONS ====================
 RangeType getRange(int dist);
@@ -52,21 +36,16 @@ void setup() {
   Serial.begin(115200);              // USB Debug
   Serial1.begin(9600, SERIAL_8N1, UART_RX, UART_TX);  // UART zum Gateway
 
-  // Beispielsequenz initialisieren
-  sequence[0] = V; sequenceIds[0] = 1;
-  sequence[1] = M; sequenceIds[1] = 2;
-  sequence[2] = H; sequenceIds[2] = 3;
-
   // ESP-NOW Setup
   WiFi.mode(WIFI_STA);
-  if (esp_now_init() != ESP_OK) Serial.println("❌ ESP-NOW Init fehlgeschlagen");
+  if (esp_now_init() != ESP_OK) Serial.println("ESP-NOW Init fehlgeschlagen");
 
   // Peer Sensor registrieren
   esp_now_peer_info_t peer{};
   memcpy(peer.peer_addr, sensorMac, 6);
   peer.channel = 0;
   peer.encrypt = false;
-  if (esp_now_add_peer(&peer) != ESP_OK) Serial.println("❌ Peer hinzufügen fehlgeschlagen");
+  if (esp_now_add_peer(&peer) != ESP_OK) Serial.println("Peer hinzufügen fehlgeschlagen");
 
   esp_now_register_recv_cb(onDataRecv);
   Serial.println("Master bereit");
@@ -88,7 +67,7 @@ void loop() {
 RangeType getRange(int dist) {
   if (dist > 0 && dist < 150) return V;
   if (dist >= 300 && dist <= 350) return M;
-  if (dist > 550) return H;
+  if (dist > 500) return H;
   return X;
 }
 
@@ -111,17 +90,10 @@ String getSequenceAsString() {
   return result;
 }
 
-// ==================== ESP-NOW CALLBACK ====================
-void onDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *incomingData, int len) {
-  if (len != sizeof(dist_packet_t)) return;
-
-  dist_packet_t pkt;
-  memcpy(&pkt, incomingData, sizeof(pkt));
-  int distance = pkt.distance;
-
+void evaluateDistance(int distance) {
   RangeType currentRange = getRange(distance);
   if(espStatus=="running") {
-    Serial.printf("Sensor %d Distanz: %d cm | Range: %s\n", pkt.sensorId, distance, rangeToChar(currentRange));
+    Serial.printf("Sensor Distanz: %d cm | Range: %s\n", distance, rangeToChar(currentRange));
   }
 
   // Sequenzprüfung
@@ -146,14 +118,13 @@ void onDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *incomingDat
     String uartMsg = String("EVENT:?pos=") + sequenceIds[seqIndex] + 
       "&duration=" + String(delta_s) +
       "&userId=" + String(userId) +
-      "&exerciseId=" + String(exerciseId) + 
+      "&exerciseId=" + String(exerciseId) +
       "&lastDistance=" + String(distance) +
     "\n";
     Serial1.print(uartMsg);
 
     // LED-Kommando zurück an Sensor
-    GameMsg msg = { RUNNING, true };
-    esp_now_send(sensorMac, (uint8_t*)&msg, sizeof(msg));
+    sendToSensor(PKT_GAMEMSG_TO_SENSOR, true);
     
     lastEventTime = now;
     lastRange = currentRange;
@@ -171,6 +142,59 @@ void onDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *incomingDat
 }
 
 
+// ==================== ESP-NOW CALLBACK ====================
+void onDataRecv(const esp_now_recv_info_t *recv_info,
+                const uint8_t *incomingData,
+                int len)
+{
+  if (len < sizeof(PacketHeader)) return;
+
+  const PacketHeader *hdr =
+    (const PacketHeader *)incomingData;
+
+  switch (hdr->type) {
+
+    case PKT_HEARTBEAT:
+      if (len == sizeof(HeartbeatPacket)) {
+        const HeartbeatPacket *pkt =
+          (const HeartbeatPacket *)incomingData;
+        sendToSensor(PKT_HEARTBEAT, true);
+      }
+      break;
+
+    case PKT_DISTANCE_TO_MASTER:
+      if (len == sizeof(DistancePacket)) {
+        const DistancePacket *pkt =
+          (const DistancePacket *)incomingData;
+        evaluateDistance(pkt->distance);
+      }
+      break;
+  }
+}
+
+void sendToSensor(PacketType type, bool hitLedOn) {
+  switch (type) {
+    case PKT_HEARTBEAT: {
+      HeartbeatPacket pkt;
+      pkt.header.type = type;
+      pkt.header.sensorId = 0; // Master ID
+      pkt.ok = 1;
+      esp_now_send(sensorMac, (uint8_t*)&pkt, sizeof(pkt));
+      break;
+    }
+    case PKT_GAMEMSG_TO_SENSOR: {
+      GameMsg msg;
+      msg.header.type = PKT_GAMEMSG_TO_SENSOR;
+      msg.header.sensorId = 0; // Master ID
+      msg.state = (espStatus == "running") ? RUNNING : IDLE;
+      msg.hit = hitLedOn;
+      esp_now_send(sensorMac, (uint8_t*)&msg, sizeof(msg));
+      break;
+    }
+  }
+}
+
+// ==================== CONFIG READING ====================
 void readConfig(String payload) {
   StaticJsonDocument<256> doc;
   DeserializationError err = deserializeJson(doc, payload);
@@ -220,17 +244,13 @@ void readConfig(String payload) {
               "&sequence=" + getSequenceAsString() +
               "&nextPos=" + sequenceIds[seqIndex]);
 
-      GameMsg msg = { IDLE, false };
-      esp_now_send(sensorMac, (uint8_t*)&msg, sizeof(msg));
     } else {
-      GameMsg msg = { RUNNING, false };
-      esp_now_send(sensorMac, (uint8_t*)&msg, sizeof(msg));
-
       int64_t now = esp_timer_get_time(); // µs
       lastEventTime = now;
       
       Serial.println("Status not idle, no config set");
     }
+    sendToSensor(PKT_GAMEMSG_TO_SENSOR, false);
   } else {
     Serial.print("JSON Fehler: "); Serial.println(err.c_str());
   }
