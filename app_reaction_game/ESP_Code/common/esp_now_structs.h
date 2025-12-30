@@ -31,5 +31,5 @@ enum GameState : uint8_t {
 struct __attribute__((packed))  GameMsg {
   PacketHeader header;
   GameState state; // Dauerzustand
-  bool hit;        // Einmal-Event
+  uint8_t hit;        // Einmal-Event
 };

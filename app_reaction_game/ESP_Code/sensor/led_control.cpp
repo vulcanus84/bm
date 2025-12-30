@@ -1,9 +1,14 @@
 #include "led_control.h"
 
-// Initialisierung der LEDs
-LedControl ok  = { 25, LED_OFF, 0, LOW, false };  // Pin 25
-LedControl hit = { 26, LED_OFF, 0, LOW, false };  // Pin 26
+// =======================
+// Globale LED-Instanzen
+// =======================
+LedControl ok  = { 25, LED_OFF, 0, LOW, false };
+LedControl hit = { 26, LED_OFF, 0, LOW, false };
 
+// =======================
+// Initialisierung
+// =======================
 void setInitialLedStates() {
     pinMode(ok.pin, OUTPUT);
     pinMode(hit.pin, OUTPUT);
@@ -12,33 +17,57 @@ void setInitialLedStates() {
     setLedState(hit, LED_OFF);
 }
 
+// =======================
+// Zustand setzen
+// =======================
 void setLedState(LedControl &led, LedState newState) {
     led.state = newState;
     led.lastToggle = millis();
     led.oneBlinkDone = false;
 
-    if (newState == LED_ON) digitalWrite(led.pin, HIGH);
-    else if (newState == LED_OFF) digitalWrite(led.pin, LOW);
+    switch (newState) {
+        case LED_ON:
+            led.level = HIGH;
+            digitalWrite(led.pin, HIGH);
+            break;
+
+        case LED_OFF:
+            led.level = LOW;
+            digitalWrite(led.pin, LOW);
+            break;
+
+        case LED_ONEBLINK:
+            // EIN schalten, Ausschalten erfolgt im updateLeds()
+            led.level = HIGH;
+            digitalWrite(led.pin, HIGH);
+            break;
+
+        default:
+            // BLINK / BLINK_FAST: nichts sofort schalten
+            break;
+    }
 }
 
+// =======================
+// LEDs aktualisieren
+// =======================
 void updateLeds() {
     unsigned long now = millis();
-    unsigned long interval;
 
-    // Pointers auf LEDs, sauber in Schleife iterierbar
+    // einfache Iteration, robust
     LedControl* leds[] = { &ok, &hit };
 
     for (LedControl* pLed : leds) {
-        LedControl &led = *pLed; // Referenz auf aktuelles Objekt
+        LedControl &led = *pLed;
 
         switch (led.state) {
+
             case LED_OFF:
             case LED_ON:
                 break;
 
             case LED_BLINK:
-                interval = 800;
-                if (now - led.lastToggle >= interval) {
+                if (now - led.lastToggle >= 800) {
                     led.lastToggle = now;
                     led.level = !led.level;
                     digitalWrite(led.pin, led.level);
@@ -46,8 +75,7 @@ void updateLeds() {
                 break;
 
             case LED_BLINK_FAST:
-                interval = 120;
-                if (now - led.lastToggle >= interval) {
+                if (now - led.lastToggle >= 120) {
                     led.lastToggle = now;
                     led.level = !led.level;
                     digitalWrite(led.pin, led.level);
@@ -55,9 +83,10 @@ void updateLeds() {
                 break;
 
             case LED_ONEBLINK:
-                if (!led.oneBlinkDone && now - led.lastToggle >= 200) {
+                // EIN → warten → AUS → zurück zu OFF
+                if (now - led.lastToggle >= 200) {
+                    led.level = LOW;
                     digitalWrite(led.pin, LOW);
-                    led.oneBlinkDone = true;
                     led.state = LED_OFF;
                 }
                 break;

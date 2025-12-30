@@ -171,5 +171,6 @@
         Serial.print("Neue Config Params: "); Serial.println(configParams);
       }
       
-    } 
+    }
+    delay(10);
   }

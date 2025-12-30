@@ -52,7 +52,6 @@ void onDataRecv(const esp_now_recv_info_t *recv_info,
       if (len == sizeof(GameMsg)) {
         const GameMsg *pkt =
           (const GameMsg *)incomingData;
-
           // Status auswerten
           if (pkt->state == RUNNING) {
             setLedState(ok,LED_BLINK_FAST);
@@ -64,7 +63,8 @@ void onDataRecv(const esp_now_recv_info_t *recv_info,
           }
 
           // Einmal-Event
-          if (pkt->hit) {
+          if (pkt->hit == 1) {
+            Serial.println("Einmal blinken");
             setLedState(hit,LED_ONEBLINK);
           }
       }
@@ -78,7 +78,6 @@ void checkHeartbeat() {
     if(millis() - lastHeartbeatCheckFailed > 2000) {
       lastHeartbeatCheckFailed = millis();
       setLedState(ok, LED_BLINK);
-      Serial.println("Heartbeat verloren");
     }
   } else {
     if(espStatus != "running") setLedState(ok, LED_ON);
