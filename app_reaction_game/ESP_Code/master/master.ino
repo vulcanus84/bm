@@ -28,7 +28,6 @@ int64_t lastEventTime = 0;
 // ==================== FUNCTION DECLARATIONS ====================
 RangeType getRange(int dist);
 const char* rangeToChar(RangeType r);
-void sendLedCmd(bool hitLedOn);
 void onDataRecv(const uint8_t *mac, const uint8_t *incomingData, int len);
 
 // ==================== SETUP ====================

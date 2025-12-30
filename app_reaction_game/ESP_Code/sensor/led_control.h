@@ -1,4 +1,4 @@
-#pragma once
+#pragma once // Verhindert mehrfaches Einbinden
 #include <Arduino.h>
 
 enum LedState {
@@ -17,5 +17,10 @@ struct LedControl {
   bool oneBlinkDone;
 };
 
+// Globale Instanzen (werden in .cpp definiert)
+extern LedControl ok;
+extern LedControl hit;
+
 void setLedState(LedControl &led, LedState newState);
-void updateLed(LedControl &led);
+void updateLeds();
+void setInitialLedStates();

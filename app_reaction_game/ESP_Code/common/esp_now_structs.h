@@ -1,6 +1,4 @@
-#ifndef ESPNOW_STRUCTS_H
-#define ESPNOW_STRUCTS_H
-
+#pragma once // Verhindert mehrfaches Einbinden
 #include <Arduino.h>
 
 // ESP Packet Strukturen
@@ -35,5 +33,3 @@ struct __attribute__((packed))  GameMsg {
   GameState state; // Dauerzustand
   bool hit;        // Einmal-Event
 };
-
-#endif
