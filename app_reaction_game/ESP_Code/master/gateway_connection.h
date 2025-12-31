@@ -6,3 +6,5 @@ String getGameStatus();
 int getUserId();
 int getExerciseId();
 void sendConfig();
+void setupGatewayConnection();
+void checkGateway();

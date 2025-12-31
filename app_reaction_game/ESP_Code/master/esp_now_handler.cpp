@@ -2,7 +2,7 @@
 #include "esp_timer.h"
 #include "esp_now_handler.h"
 #include "calc_position.h"
-#include "get_config.h"
+#include "gateway_connection.h"
 
 uint8_t sensorMac[6] = {0x38,0x18,0x2B,0x69,0xE2,0xA8}; // Sensor MAC
 int lastDistance = 0;

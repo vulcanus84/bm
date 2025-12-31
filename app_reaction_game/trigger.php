@@ -28,4 +28,22 @@ $db->insert([
     "repl_duration" => $duration
 ], "reaction_exercises_positions_live");
 
+$data = ["rec_last_update" => date("Y-m-d H:i:s")];
+if(isset($_GET['distance'])) { $data["rec_distance"] = $_GET['distance']; } else { $data["rec_distance"] = null; }
+
+if (isset($_GET['nextPos']) && $_GET['nextPos'] != 0) {
+    $data["rec_expected_pos_id"] = $_GET['nextPos'];
+    $db->sql_query("SELECT * FROM reaction_exercises_positions WHERE rep_id=:posId", ['posId'=>$_GET['nextPos']]);
+    if($db->count() == 0) { $data["rec_expected_pos_id"] = null; }
+} else {
+    $data["rec_expected_pos_id"] = null;
+}
+
+$db->update(
+    $data,
+    "reaction_exercises_cubes",
+    "rec_mac",
+    $_GET['mac']
+);
+
 echo "OK";

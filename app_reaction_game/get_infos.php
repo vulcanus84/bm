@@ -63,7 +63,7 @@ if(isset($_GET['mode']) &&  $_GET['mode'] === 'admin') {
         // *****************************************
         // Prepare response to update cube
         // *****************************************
-        if(isset($cube_data) && $cube_data->rec_status != 'running') {
+        if(isset($cube_data)) {
             if($cube_data->rec_re_id != null) {
                 $response['excId'] = $cube_data->rec_re_id;
                 $data = $db->sql_query_with_fetch("SELECT * FROM reaction_exercises_cubes WHERE rec_re_id=:id", ['id'=>$response['excId']]);
@@ -88,12 +88,7 @@ if(isset($_GET['mode']) &&  $_GET['mode'] === 'admin') {
                     "excId" => "Not defined"
                 ];
             }
-        } else {
-            $response = [
-                "status" => "running"
-            ];
-        }
-
+        } 
     } else {
         $response['status'] = "error";
         $response['message'] = "No MAC address provided.";

@@ -1,7 +1,7 @@
 #include "calc_position.h"
 #include "esp_now_handler.h"
 #include "../common/esp_now_structs.h"
-#include "get_config.h"
+#include "gateway_connection.h"
 
 const uint8_t MAX_SEQ = 10;
 enum RangeType { V, M, H, X }; // X = undefiniert
@@ -60,13 +60,23 @@ void evaluateDistance(int distance) {
     Serial.print("Dauer seit letztem: ");
     Serial.print(delta_s);
     Serial.println(" s");
+    
+    int nextSeqIndex;
 
+    if (seqIndex >= SEQ_LENGTH) {
+      nextSeqIndex = 0;
+      Serial.println("=== SEQUENZ BEENDET ===");
+    } else {
+      nextSeqIndex = seqIndex + 1;
+    }
+    
     // Event an Gateway senden
     String uartMsg = String("EVENT:?pos=") + sequenceIds[seqIndex] + 
       "&duration=" + String(delta_s) +
       "&userId=" + String(getUserId()) +
       "&exerciseId=" + String(getExerciseId()) +
       "&distance=" + String(distance) +
+      "&nextPos=" + sequenceIds[nextSeqIndex] +
     "\n";
     Serial.print(uartMsg);
     Serial1.print(uartMsg);
@@ -76,17 +86,7 @@ void evaluateDistance(int distance) {
     
     lastEventTime = now;
     lastRange = currentRange;
-    seqIndex++;
-    if (seqIndex >= SEQ_LENGTH) {
-      seqIndex = 0;
-      Serial.println("=== SEQUENZ BEENDET ===");
-    }
-    String configString = "CONFIG:?user_id=" + String(getUserId()) +
-            "&sequence=" + getSequenceAsString() +
-            "&distance=" + distance +
-            "&nextPos=" + sequenceIds[seqIndex];
-    Serial.println(configString);
-    Serial1.println(configString);
+    seqIndex = nextSeqIndex;
   }
 }
 

@@ -8,17 +8,17 @@ const char* password = "0792318193";
 String mac = "";
 bool networkReady = false;
 
-const char* CONFIG_URL  = "https://clanic.ch/app_reaction_game/get_infos.php";
-const char* TRIGGER_URL = "https://clanic.ch/app_reaction_game/trigger.php";
+//const char* CONFIG_URL  = "https://clanic.ch/app_reaction_game/get_infos.php";
+//const char* TRIGGER_URL = "https://clanic.ch/app_reaction_game/trigger.php";
 
-//const char* CONFIG_URL  = "http://192.168.1.133:8888/bm/app_reaction_game/get_infos.php";
-//const char* TRIGGER_URL = "http://192.168.1.133:8888/bm/app_reaction_game/trigger.php";
+const char* CONFIG_URL  = "http://192.168.1.133:8888/bm/app_reaction_game/get_infos.php";
+const char* TRIGGER_URL = "http://192.168.1.133:8888/bm/app_reaction_game/trigger.php";
 
 unsigned long lastConfigCheck = 0;
 const unsigned long CONFIG_INTERVAL = 2000;
 
 String configParams = "?dummy=0";
-String triggerParams = "";
+String triggerParams = "?dummy=0";
 String lastConfigParams = "";
 
 void connectWLAN() {
@@ -81,16 +81,15 @@ void checkServer() {
       return;
     };
 
-    HTTPClient http;
     Serial.print("Config-Params: ");
     Serial.println(configParams);
-    Serial.print("Abfrage URL: "); Serial.println(String(CONFIG_URL) + 
-              configParams + "&mac=" + mac
-    );
-    http.begin(String(CONFIG_URL) + configParams + "&mac=" + mac
-    );
+    String url = String(CONFIG_URL) + configParams + "&mac=" + mac;
+    Serial.println("Abfrage URL: " + url);
 
+    HTTPClient http;
+    http.begin(url);
     http.addHeader("User-Agent", "ESP32");
+
     int code = http.GET();
     if (code > 0) {
       String payload = http.getString();
@@ -120,7 +119,7 @@ void sendEventToServer() {
     return;
   };
 
-  String url = String(TRIGGER_URL) + triggerParams;
+  String url = String(TRIGGER_URL) + triggerParams + "&mac=" + mac;
   Serial.print("Sende: "); Serial.println(url);
 
   HTTPClient http;
