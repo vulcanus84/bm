@@ -15,9 +15,9 @@ int64_t lastEventTime = 0;
 
 // ==================== RANGE LOGIC ====================
 RangeType getRange(int dist) {
-  if (dist > 0 && dist < 150) return V;
-  if (dist >= 300 && dist <= 350) return M;
-  if (dist > 500) return H;
+  if (dist > 0 && dist < 180) return V;
+  if (dist >= 320 && dist <= 380) return M;
+  if (dist > 530) return H;
   return X;
 }
 

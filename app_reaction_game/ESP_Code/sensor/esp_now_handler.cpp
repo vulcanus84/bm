@@ -45,6 +45,7 @@ void onDataRecv(const esp_now_recv_info_t *recv_info,
         const HeartbeatPacket *pkt =
           (const HeartbeatPacket *)incomingData;
         lastHeartbeatReceived = millis();
+        if(espStatus != "running") setLedState(ok, LED_ON);
       }
       break;
 
@@ -64,7 +65,6 @@ void onDataRecv(const esp_now_recv_info_t *recv_info,
 
           // Einmal-Event
           if (pkt->hit == 1) {
-            Serial.println("Einmal blinken");
             setLedState(hit,LED_ONEBLINK);
           }
       }
@@ -78,11 +78,10 @@ void checkHeartbeat() {
     if(millis() - lastHeartbeatCheckFailed > 2000) {
       lastHeartbeatCheckFailed = millis();
       setLedState(ok, LED_BLINK);
+      return;
     }
-  } else {
-    if(espStatus != "running") setLedState(ok, LED_ON);
-  }
-
+  } 
+  
   if (millis() - lastHeartbeatSend > 2000) {
     lastHeartbeatSend = millis();
     HeartbeatPacket pkt;

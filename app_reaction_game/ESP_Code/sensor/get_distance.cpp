@@ -1,7 +1,7 @@
 #include "get_distance.h"
 #include "esp_now_handler.h"
 
-#define FILTER_SIZE 5
+#define FILTER_SIZE 3
 
 int filterValues[FILTER_SIZE];
 uint8_t filterIndex = 0;
@@ -31,8 +31,10 @@ int smoothDistance(int newValue) {
 }
 
 void readDistance(HardwareSerial& serial) {
-   while (Serial2.available()) {
-    uint8_t b = Serial2.read();
+  bool dataFound = false;
+  while (Serial2.available()) {
+    dataFound = true;
+    uint8_t b = serial.read();
     if (!inFrame) {
       if (b == FRAME_HEADER) { buffer[0]=b; bufIndex=1; inFrame=true; }
     } else {
