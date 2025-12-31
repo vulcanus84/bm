@@ -55,7 +55,7 @@ switch($_GET['ajax']) {
             ";
         }
 
-        print "<br><hr/><button type='submit'>Speichern</button></form>";
+        print "<br><hr/><button type='submit'>Speichern</button></form><div style='height:150px;'></div>";
         break;
 
     /* ================= POSITIONEN ================= */

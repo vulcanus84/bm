@@ -42,7 +42,6 @@ String getSequenceAsString() {
 
 void evaluateDistance(int distance) {
   RangeType currentRange = getRange(distance);
-  Serial.printf("Sensor Distanz: %d cm | Range: %s\n", distance, rangeToChar(currentRange));
 
   // Sequenzprüfung
   if (SEQ_LENGTH > 0 &&
@@ -63,9 +62,9 @@ void evaluateDistance(int distance) {
     
     int nextSeqIndex;
 
-    if (seqIndex >= SEQ_LENGTH) {
+    if (seqIndex >= SEQ_LENGTH-1) {
       nextSeqIndex = 0;
-      Serial.println("=== SEQUENZ BEENDET ===");
+      Serial.println("=== LETZTER SEQUENZ PUNKT ===");
     } else {
       nextSeqIndex = seqIndex + 1;
     }
