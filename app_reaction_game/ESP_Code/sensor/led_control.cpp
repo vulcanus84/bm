@@ -103,6 +103,7 @@ void updateLeds() {
                         led.level = LOW;
                         digitalWrite(led.pin, LOW);
                         led.state = LED_OFF;
+                        led.blinkCount = 0;
                     }
                 }
                 break;                
