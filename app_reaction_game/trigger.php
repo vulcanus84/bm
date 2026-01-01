@@ -32,6 +32,7 @@ $db->insert([
 
 $data = ["rec_last_update" => date("Y-m-d H:i:s")];
 if(isset($_GET['distance'])) { $data["rec_distance"] = $_GET['distance']; } else { $data["rec_distance"] = null; }
+if(isset($_GET['gameStatus'])) { $data["rec_status"] = $_GET['gameStatus']; }
 
 if (isset($_GET['nextPos']) && $_GET['nextPos'] != 0) {
     $data["rec_expected_pos_id"] = $_GET['nextPos'];

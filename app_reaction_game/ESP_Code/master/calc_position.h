@@ -8,4 +8,4 @@ void setSequenceStrings(String seqStr);
 String getNextSequenceId();
 void startExercise();
 void stopExercise();
-void setMaxRuns(int maxRuns);
+void setMaxRuns(int repetitions);

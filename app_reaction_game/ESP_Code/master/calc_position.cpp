@@ -72,7 +72,11 @@ void evaluateDistance(int distance) {
       if(runsCount>=maxRuns) { 
         setGameStatus("idle"); 
       }
-      Serial.println("=== LETZTER SEQUENZ PUNKT ===");
+      Serial.print("Sequenz ");
+      Serial.print(runsCount);
+      Serial.print(" von ");
+      Serial.print(maxRuns);
+      Serial.println(" abgeschlossen");
     } else {
       nextSeqIndex = seqIndex + 1;
     }
@@ -128,8 +132,8 @@ void setSequenceStrings(String seqStr) {
   }
 }
 
-void setMaxRuns(int maxRuns) {
-  maxRuns = maxRuns;
+void setMaxRuns(int repetitions) {
+  maxRuns = repetitions;
 }
 
 String getNextSequenceId() {
