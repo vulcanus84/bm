@@ -154,7 +154,7 @@ function poll() {
             const isFresh = diffSeconds <= 10;
 
             // Prüfen, ob Sensor bereits zugewiesen
-            const isAssigned = sensor.rec_re_id == excId;
+            const isAssigned = sensor.rec_re_id == excId && sensor.rec_user_id == userId;
             if(isAssigned) { 
                 if(sensor.rec_user_id == userId) {
                     if(sensor.rec_status !== 'running') {
