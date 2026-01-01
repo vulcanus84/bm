@@ -1,6 +1,117 @@
-.leaderboard { display:grid; gap:14px; margin-top:20px; }
-.card { background:#fff; border-radius:14px; padding:18px 22px; display:grid; grid-template-columns:50px 1fr auto; align-items:center; box-shadow:0 10px 25px rgba(0,0,0,.08); }
-.rank { font-size:1.2em; font-weight:bold; color:#ff8c00; }
-.num { text-align:right; margin-left:16px; }
-.session { margin-left:60px; font-size:0.95em; color:#555; display:grid; grid-template-columns:1fr repeat(4, auto); gap:10px; padding:2px 0; }
-.incomplete { opacity:0.5; font-style:italic; }
+/* ----------------------------- */
+/* Gesamt-Container */
+.leaderboard {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+/* Benutzer-Karten */
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Benutzer-Header (Rang + Name + Anzahl Sessions) */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.rank {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ff8c00;
+    margin-right: 10px;
+}
+
+.user-name {
+    font-weight: 600;
+    flex: 1;
+    min-width: 120px;
+}
+
+.num {
+    font-size: 0.95em;
+    color: #555;
+    text-align: right;
+    margin-left: 10px;
+}
+
+/* Session-Liste */
+.session-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-left: 12px;
+}
+
+/* Einzelne Session */
+.session {
+    background: #f9f9f9;
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 6px;
+    font-size: 0.9em;
+    align-items: center;
+}
+
+/* Unvollständige Sessions */
+.incomplete {
+    opacity: 0.5;
+    font-style: italic;
+    border-left: 3px solid #ff8c00;
+    padding-left: 9px;
+}
+
+/* Session-Label (Startzeit) */
+.session-label {
+    flex: 1 1 120px;
+    font-weight: 500;
+    color: #333;
+}
+
+/* Session-Daten */
+.session-data {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.session-data div {
+    min-width: 70px;
+    text-align: right;
+}
+
+/* ----------------------------- */
+/* Mobile Anpassungen */
+@media (max-width: 500px) {
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .num {
+        text-align: left;
+        margin-left: 0;
+    }
+    .session {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .session-data {
+        flex-direction: column;
+        gap: 4px;
+    }
+}
