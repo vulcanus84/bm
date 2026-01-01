@@ -1,17 +1,22 @@
-.leaderboard { display:flex; flex-direction:column; gap:20px; margin-top:20px; }
-.card { display:flex; flex-wrap:wrap; background:#fff; border-radius:14px; padding:16px; box-shadow:0 10px 25px rgba(0,0,0,.08); gap:16px; }
-.card-left { flex:1 1 150px; display:flex; flex-direction:column; gap:6px; }
-.card-right { flex:2 1 300px; display:flex; flex-direction:column; gap:10px; }
-.rank { font-size:1.4em; font-weight:bold; color:#ff8c00; }
-.user-name { font-size:1.2em; font-weight:600; }
-.num { font-size:0.95em; color:#555; }
-.session { display:flex; flex-direction:column; gap:4px; }
-.session-label { font-weight:600; }
-.bars { display:flex; gap:4px; height:12px; margin-top:2px; }
-.bar { border-radius:6px; height:100%; }
-.bar.total { background:#ddd; }
-.bar.fastest { background:#1a8cff; }
-.bar.slowest { background:#ff4d4d; }
-.session-values { display:flex; gap:12px; font-size:0.9em; font-weight:500; flex-wrap:wrap; }
-.incomplete { opacity:0.5; border-left:4px dashed #ff8c00; padding-left:6px; }
-@media(max-width:768px) { .card { flex-direction:column; } .card-left, .card-right { flex:1 1 100%; } }
+.leaderboard { display:grid; gap:20px; margin-top:20px; }
+.card { background:#fff; border-radius:14px; padding:18px; display:grid; grid-template-columns:1fr; gap:10px; align-items:start; box-shadow:0 10px 25px rgba(0,0,0,.08); }
+
+.card-left { display:flex; flex-direction:row; justify-content:space-between; align-items:center; gap:10px; }
+.rank { font-size:1.3em; font-weight:bold; color:#ff8c00; }
+.user-name { font-weight:bold; font-size:1em; text-align:left; flex:1; }
+.num { font-size:0.85em; color:#666; text-align:right; }
+
+.card-right { display:grid; gap:12px; }
+
+.session { display:grid; gap:4px; }
+.incomplete { opacity:0.6; font-style:italic; }
+
+.bars { display:grid; gap:4px; }
+.bar-row { display:flex; align-items:center; gap:6px; }
+.bar-row .time { width:50px; text-align:right; font-size:0.85em; color:#333; font-weight:bold; }
+.bar { height:14px; border-radius:7px; }
+.bar.total { background:#ff8c00; }
+.bar.fastest { background:#4caf50; }
+.bar.slowest { background:#f44336; }
+
+.session-info { font-size:0.8em; color:#666; margin-left:56px; margin-top:2px; }
