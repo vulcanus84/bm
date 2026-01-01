@@ -160,7 +160,7 @@ function poll() {
                     if(sensor.rec_status !== 'running') {
                         if(isFresh) {
                             $('#start').prop('disabled', false); 
-                            $('#start').addClass('green').removeClass('gray');
+                            $('#start').addClass('green').removeClass('gray orange');
                             $('#start').text('Starten');
                             $('#start').val('Starten');
                             activeSensorFound = true;

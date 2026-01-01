@@ -59,7 +59,7 @@ void onDataRecv(const esp_now_recv_info_t *recv_info,
   }
 }
 
-void sendToSensor(PacketType type, bool hitLedOn) {
+void sendToSensor(PacketType type, int hitLed) {
   switch (type) {
     case PKT_HEARTBEAT: {
       HeartbeatPacket pkt;
@@ -75,7 +75,7 @@ void sendToSensor(PacketType type, bool hitLedOn) {
       msg.header.sensorId = 0; // Master ID
       Serial.println(getGameStatus());
       msg.state = (getGameStatus() == "running") ? RUNNING : IDLE;
-      msg.hit = hitLedOn;
+      msg.hit = hitLed;
       esp_now_send(sensorMac, (uint8_t*)&msg, sizeof(msg));
       break;
     }

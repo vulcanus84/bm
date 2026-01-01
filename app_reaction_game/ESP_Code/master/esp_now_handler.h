@@ -5,7 +5,7 @@
 
 void setupESPNow();
 void onDataRecv(const esp_now_recv_info_t *recv_info, const uint8_t *incomingData, int len);
-void sendToSensor(PacketType type, bool hitLedOn);
+void sendToSensor(PacketType type, int hitLed);
 String getGameStatus();
 void setGameStatus(String gameStatus);
 int getLastDistance();

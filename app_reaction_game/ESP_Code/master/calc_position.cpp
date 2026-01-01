@@ -70,7 +70,7 @@ void evaluateDistance(int distance) {
       nextSeqIndex = 0;
       runsCount++;
       if(runsCount>=maxRuns) { 
-        setGameStatus("idle"); 
+        setGameStatus("idle");
       }
       Serial.print("Sequenz ");
       Serial.print(runsCount);
@@ -95,7 +95,11 @@ void evaluateDistance(int distance) {
     Serial1.print(uartMsg);
 
     // LED-Kommando zurück an Sensor
-    sendToSensor(PKT_GAMEMSG_TO_SENSOR, 1);
+    if(runsCount>=maxRuns) { 
+      sendToSensor(PKT_GAMEMSG_TO_SENSOR, 2); // Signal für Abschluss
+    } else {
+      sendToSensor(PKT_GAMEMSG_TO_SENSOR, 1); // Signal für Position erreicht
+    }
     
     lastEventTime = now;
     lastRange = currentRange;

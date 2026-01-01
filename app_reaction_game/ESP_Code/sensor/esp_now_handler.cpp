@@ -63,9 +63,14 @@ void onDataRecv(const esp_now_recv_info_t *recv_info,
             espStatus = "idle";
           }
 
-          // Einmal-Event
+          // Position erreicht
           if (pkt->hit == 1) {
             setLedState(hit,LED_ONEBLINK);
+          }
+
+          // Session abgeschlossen
+          if (pkt->hit == 2) {
+            setLedState(hit,LED_FIVEBLINKS);
           }
       }
       break;

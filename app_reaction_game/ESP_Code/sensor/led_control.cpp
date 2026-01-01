@@ -3,8 +3,8 @@
 // =======================
 // Globale LED-Instanzen
 // =======================
-LedControl ok  = { 25, LED_OFF, 0, LOW, false };
-LedControl hit = { 26, LED_OFF, 0, LOW, false };
+LedControl ok  = { 25, LED_OFF, 0, LOW, false, 0 };
+LedControl hit = { 26, LED_OFF, 0, LOW, false, 0 };
 
 // =======================
 // Initialisierung
@@ -37,6 +37,7 @@ void setLedState(LedControl &led, LedState newState) {
             break;
 
         case LED_ONEBLINK:
+        case LED_FIVEBLINKS:
             // EIN schalten, Ausschalten erfolgt im updateLeds()
             led.level = HIGH;
             digitalWrite(led.pin, HIGH);
@@ -90,6 +91,21 @@ void updateLeds() {
                     led.state = LED_OFF;
                 }
                 break;
+
+            case LED_FIVEBLINKS:
+                if (now - led.lastToggle >= 200) {
+                    led.lastToggle = now;
+                    led.level = !led.level;
+                    digitalWrite(led.pin, led.level);
+                    led.blinkCount++;
+
+                    if (led.blinkCount >= 10) { // 5 Blinks
+                        led.level = LOW;
+                        digitalWrite(led.pin, LOW);
+                        led.state = LED_OFF;
+                    }
+                }
+                break;                
         }
     }
 }

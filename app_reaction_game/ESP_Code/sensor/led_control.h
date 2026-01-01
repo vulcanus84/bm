@@ -6,7 +6,8 @@ enum LedState {
   LED_ON,
   LED_BLINK,
   LED_BLINK_FAST,
-  LED_ONEBLINK
+  LED_ONEBLINK,
+  LED_FIVEBLINKS
 };
 
 struct LedControl {
@@ -15,6 +16,7 @@ struct LedControl {
   unsigned long lastToggle;
   bool level;
   bool oneBlinkDone;
+  uint8_t blinkCount; 
 };
 
 // Globale Instanzen (werden in .cpp definiert)
