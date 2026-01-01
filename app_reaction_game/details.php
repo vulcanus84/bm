@@ -32,7 +32,7 @@ try {
                             FROM users
                             WHERE user_hide != 1
                             ORDER BY user_fullname ASC");
-        $myPage->add_content("<div><a href='index.php'><button class='orange'><<</button></a>");
+        $myPage->add_content("<div><a href='overview.php?exc_id=".$_GET['exc_id']."'><button class='orange'><<</button></a>");
         $myPage->add_content($myHTML->get_selection($db,'user_selection','user_id','user_fullname',""));
         $myPage->add_content("</div>");
 

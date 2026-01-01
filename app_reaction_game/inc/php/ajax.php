@@ -39,6 +39,16 @@ switch($_GET['ajax']) {
             <label>Beschreibung<br>
                 <textarea name='description'>".htmlspecialchars($exc->re_description)."</textarea>
             </label><br><br>
+
+            <label>Wiederholungen<br>
+                <select name='repetitions' required>";
+                    for ($i = 1; $i <= 20; $i++) {
+                        $selected = ($i == $exc->re_repetitions) ? 'selected' : '';
+                        print "<option value=\"$i\" $selected>$i</option>";
+                    }
+        print "
+                </select>
+            </label><br><br>
         ";
 
         if ($exc->re_id > 0) {
@@ -143,18 +153,14 @@ switch($_GET['ajax']) {
     /* ================= SAVE ================= */
 
     case 'save_reaction_exercise':
-        if ($_GET['id'] > 0) {
-            $db->sql_query("
-                UPDATE reaction_exercises
-                SET re_title=:t, re_description=:d
-                WHERE re_id=:id
-            ", ['t'=>$_GET['title'],'d'=>$_GET['description'],'id'=>$_GET['id']]);
-        } else {
-            $db->insert([
-                're_title'=>$_GET['title'],
+        $data = ['re_title'=>$_GET['title'],
                 're_description'=>$_GET['description'],
-                're_created_by'=>$_SESSION['login_user']->id
-            ], 'reaction_exercises');
+                're_repetitions'=>$_GET['repetitions'],
+                're_created_by'=>$_SESSION['login_user']->id];
+        if ($_GET['id'] > 0) {
+            $db->update($data,"reaction_exercises","re_id",$_GET['id']);
+        } else {
+            $db->insert($data, 'reaction_exercises');
         }
         print "OK";
         break;

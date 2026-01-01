@@ -65,7 +65,7 @@ $(function(){
             data.forEach(exc => {
                 let box = $('<div>').addClass('exercise_box').attr('data-id', exc.re_id);
 
-                $('<div>').addClass('exercise_title').text(exc.re_title).appendTo(box);
+                $('<div>').addClass('exercise_title').text(exc.re_repetitions + "x " + exc.re_title).appendTo(box);
                 $('<div>').addClass('exercise_desc').text(exc.re_description || '').appendTo(box);
 
                 let actions = $('<div>').addClass('exercise_actions');
@@ -170,6 +170,6 @@ $(function(){
     $(document).on('click', '.start', function() {
         const excId = $(this).data('id');
         // Hier URL anpassen, z. B. auf eine Detailseite
-        window.location.href = 'details.php?exc_id=' + excId;
+        window.location.href = 'overview.php?exc_id=' + excId;
     });
 });

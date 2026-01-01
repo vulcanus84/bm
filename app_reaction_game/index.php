@@ -6,15 +6,11 @@ try {
     if(!IS_AJAX) {
         $myPage = new page();
         $myPage->set_title("Reaction Exercises");
-        if(!$myPage->is_logged_in()) { 
-            print $myPage->get_html_code(); 
-            exit; 
-        }
+        if(!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
 
         $myPage->add_js_link('inc/js/index.js');
         $myPage->add_css_link('inc/css/index.css');
 
-        $myPage->add_content("<h1>Reaction Exercises</h1>");
         $myPage->add_content("<button id='new_exercise'>Neu anlegen</button>");
         $myPage->add_content("<div id='reaction_list'></div>");
 

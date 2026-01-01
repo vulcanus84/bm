@@ -370,7 +370,6 @@ function poll() {
         })
         .fail(function(jqXHR, textStatus, errorThrown) {
             console.error("Server nicht erreichbar. Fehler: ", textStatus, errorThrown);
-            alert("Fehler beim Serverzugriff: " + textStatus + "\nPolling wird abgebrochen.");
         });
     } else {
         setTimeout(() => poll(), 1000);

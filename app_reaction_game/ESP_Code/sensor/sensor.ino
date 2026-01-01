@@ -21,5 +21,5 @@ void loop() {
   updateLeds();
   checkHeartbeat();
   readDistance(Serial2);
-  delay(20);
+  delay(1);
 }

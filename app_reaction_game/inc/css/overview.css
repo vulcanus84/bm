@@ -1,0 +1,6 @@
+.leaderboard { display:grid; gap:14px; margin-top:20px; }
+.card { background:#fff; border-radius:14px; padding:18px 22px; display:grid; grid-template-columns:50px 1fr auto; align-items:center; box-shadow:0 10px 25px rgba(0,0,0,.08); }
+.rank { font-size:1.2em; font-weight:bold; color:#ff8c00; }
+.num { text-align:right; margin-left:16px; }
+.session { margin-left:60px; font-size:0.95em; color:#555; display:grid; grid-template-columns:1fr repeat(4, auto); gap:10px; padding:2px 0; }
+.incomplete { opacity:0.5; font-style:italic; }
