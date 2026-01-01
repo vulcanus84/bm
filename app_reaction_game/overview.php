@@ -18,13 +18,10 @@ if (!IS_AJAX) {
 
     $myPage = new page();
     $myHTML = new html();
-
     $myPage->set_title($exc_data->re_title);
-    if (!$myPage->is_logged_in()) {
-        print $myPage->get_html_code();
-        exit;
-    }
+    if (!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
 
+    // CSS einfügen (kann auch in overview.css ausgelagert werden)
     $myPage->add_css_link('inc/css/overview.css');
     $myPage->add_content("<h1>{$myPage->get_title()}</h1>");
     $myPage->add_content("<a href='index.php'><button class='orange'><<</button></a>");
@@ -41,7 +38,6 @@ if (!IS_AJAX) {
     while ($p = $db->get_next_res()) {
         $pattern[] = (int)$p->rep_id;
     }
-
     if (!$pattern) {
         $myPage->add_content("<p><em>Kein Muster definiert.</em></p>");
         print $myPage->get_html_code();
@@ -49,7 +45,7 @@ if (!IS_AJAX) {
     }
     $patternLength = count($pattern);
 
-    // Live-Daten
+    // Live-Daten laden
     $db->sql_query("
         SELECT
             repl_duration,
@@ -73,7 +69,6 @@ if (!IS_AJAX) {
     $expectedRuns = (int)$exc_data->re_repetitions;
 
     while ($d = $db->get_next_res()) {
-
         $userId   = (int)$d->user_id;
         $userName = $d->user_account;
         $time     = strtotime($d->repl_ts);
@@ -86,12 +81,8 @@ if (!IS_AJAX) {
 
         if ($newSession) {
             if ($currentSession !== null) {
-                // Session speichern
                 if (!isset($users[$currentSession['user_id']])) {
-                    $users[$currentSession['user_id']] = [
-                        'user' => $currentSession['user_name'],
-                        'sessions' => []
-                    ];
+                    $users[$currentSession['user_id']] = ['user'=>$currentSession['user_name'],'sessions'=>[]];
                 }
                 $users[$currentSession['user_id']]['sessions'][] = [
                     'runs' => $currentSession['runs'],
@@ -113,7 +104,6 @@ if (!IS_AJAX) {
                 'slowest_run' => null,
                 'start_time' => $time
             ];
-
             $patternIndex = 0;
             $currentRunTime = 0;
         }
@@ -124,24 +114,13 @@ if (!IS_AJAX) {
         if ($repId === $pattern[$patternIndex]) {
             $currentRunTime += $duration;
             $patternIndex++;
-
             if ($patternIndex === $patternLength) {
                 $currentSession['runs']++;
-
-                // FASTEST RUN
-                if ($currentSession['fastest_run'] === null || $currentRunTime < $currentSession['fastest_run']) {
-                    $currentSession['fastest_run'] = $currentRunTime;
-                }
-
-                // SLOWEST RUN
-                if ($currentSession['slowest_run'] === null || $currentRunTime > $currentSession['slowest_run']) {
-                    $currentSession['slowest_run'] = $currentRunTime;
-                }
-
+                $currentSession['fastest_run'] = is_null($currentSession['fastest_run']) ? $currentRunTime : min($currentSession['fastest_run'],$currentRunTime);
+                $currentSession['slowest_run'] = is_null($currentSession['slowest_run']) ? $currentRunTime : max($currentSession['slowest_run'],$currentRunTime);
                 $patternIndex = 0;
                 $currentRunTime = 0;
             }
-
         } else {
             $patternIndex = 0;
             $currentRunTime = 0;
@@ -154,10 +133,7 @@ if (!IS_AJAX) {
     // letzte Session speichern
     if ($currentSession !== null) {
         if (!isset($users[$currentSession['user_id']])) {
-            $users[$currentSession['user_id']] = [
-                'user' => $currentSession['user_name'],
-                'sessions' => []
-            ];
+            $users[$currentSession['user_id']] = ['user'=>$currentSession['user_name'],'sessions'=>[]];
         }
         $users[$currentSession['user_id']]['sessions'][] = [
             'runs' => $currentSession['runs'],
@@ -169,44 +145,63 @@ if (!IS_AJAX) {
         ];
     }
 
-    // Sortieren nach Bestzeit des Users (kleinste Gesamtdauer aller Sessions)
-    uasort($users, function($a, $b) {
-        $bestA = min(array_column(array_filter($a['sessions'], fn($s)=>($s['complete'] ?? false)), 'total_duration') ?: [PHP_FLOAT_MAX]);
-        $bestB = min(array_column(array_filter($b['sessions'], fn($s)=>($s['complete'] ?? false)), 'total_duration') ?: [PHP_FLOAT_MAX]);
+    // Sortieren nach bester Gesamtzeit (kleinste)
+    uasort($users, function($a,$b){
+        $bestA = min(array_column(array_filter($a['sessions'], fn($s)=>($s['complete']??false)),'total_duration')?:[PHP_FLOAT_MAX]);
+        $bestB = min(array_column(array_filter($b['sessions'], fn($s)=>($s['complete']??false)),'total_duration')?:[PHP_FLOAT_MAX]);
         return $bestA <=> $bestB;
     });
 
     // HTML-Ausgabe
     $myPage->add_content("<div class='leaderboard'>");
-
     $rank = 1;
-    foreach ($users as $user) {
+    foreach($users as $user) {
         $myPage->add_content("
-            <div class='card'>
+        <div class='card'>
+            <div class='card-left'>
                 <div class='rank'>#{$rank}</div>
-                <div><strong>".htmlspecialchars($user['user'])."</strong></div>
-                <div class='num'>".count($user['sessions'])." Sessions</div>
+                <div class='user-name'>".htmlspecialchars($user['user'])."</div>
+                <div class='num'>".count($user['sessions'])." Session(s)</div>
             </div>
+            <div class='card-right'>
         ");
 
-        foreach ($user['sessions'] as $i => $sess) {
-            $class  = ($sess['complete'] ?? false) ? '' : 'incomplete';
-            $label  = ($sess['complete'] ?? false) ? '' : '(unvollständig)';
-            $sessionLabel = date("d.m.Y H:i", $sess['start_time'] ?? time());
-            $fastest = $sess['fastest_run'] !== null ? number_format($sess['fastest_run'],2) : '-';
-            $slowest = $sess['slowest_run'] !== null ? number_format($sess['slowest_run'],2) : '-';
+        // max Gesamtzeit für Balkenberechnung
+        $maxTotal = max(array_column($user['sessions'],'total_duration'));
+
+        foreach($user['sessions'] as $sess) {
+            $complete = $sess['complete'] ?? false;
+            $class = $complete ? '' : 'incomplete';
+            $label = $complete ? '' : '(unvollständig)';
+            $sessionLabel = date("d.m.Y H:i",$sess['start_time'] ?? time());
+
+            $totalPercent = $maxTotal>0 ? ($sess['total_duration']/$maxTotal)*100 : 0;
+            $fastPercent  = $sess['fastest_run']>0 ? ($sess['fastest_run']/$maxTotal)*100 : 0;
+            $slowPercent  = $sess['slowest_run']>0 ? ($sess['slowest_run']/$maxTotal)*100 : 0;
+
+            $fastest = $sess['fastest_run']!==null?number_format($sess['fastest_run'],2):'-';
+            $slowest = $sess['slowest_run']!==null?number_format($sess['slowest_run'],2):'-';
+            $total   = number_format($sess['total_duration'],2);
 
             $myPage->add_content("
-                <div class='session $class'>
-                    <div>{$sessionLabel}</div>
-                    <div class='num'>{$sess['runs']} Runs $label</div>
-                    <div class='num'>Gesamt: ".number_format($sess['total_duration'],2)." s</div>
-                    <div class='num'>Schnellster: {$fastest} s</div>
-                    <div class='num'>Langsamster: {$slowest} s</div>
+            <div class='session $class'>
+                <div class='session-label'>{$sessionLabel}</div>
+                <div class='bars'>
+                    <div class='bar total' style='width:{$totalPercent}%;'></div>
+                    <div class='bar fastest' style='width:{$fastPercent}%;'></div>
+                    <div class='bar slowest' style='width:{$slowPercent}%;'></div>
                 </div>
+                <div class='session-values'>
+                    <span class='total-time'>{$total} s</span>
+                    <span class='fastest'>{$fastest} s</span>
+                    <span class='slowest'>{$slowest} s</span>
+                    <span class='runs'>{$sess['runs']} Runs {$label}</span>
+                </div>
+            </div>
             ");
         }
 
+        $myPage->add_content("</div></div>");
         $rank++;
     }
 
@@ -215,7 +210,7 @@ if (!IS_AJAX) {
     print $myPage->get_html_code();
 }
 
-} catch (Exception $e) {
+} catch(Exception $e){
     $myPage = new page();
     $myPage->error_text = $e->getMessage();
     print $myPage->get_html_code();

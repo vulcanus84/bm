@@ -1,117 +1,17 @@
-/* ----------------------------- */
-/* Gesamt-Container */
-.leaderboard {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 20px;
-}
-
-/* Benutzer-Karten */
-.card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-/* Benutzer-Header (Rang + Name + Anzahl Sessions) */
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.rank {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #ff8c00;
-    margin-right: 10px;
-}
-
-.user-name {
-    font-weight: 600;
-    flex: 1;
-    min-width: 120px;
-}
-
-.num {
-    font-size: 0.95em;
-    color: #555;
-    text-align: right;
-    margin-left: 10px;
-}
-
-/* Session-Liste */
-.session-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-left: 12px;
-}
-
-/* Einzelne Session */
-.session {
-    background: #f9f9f9;
-    border-radius: 8px;
-    padding: 8px 12px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: 6px;
-    font-size: 0.9em;
-    align-items: center;
-}
-
-/* Unvollständige Sessions */
-.incomplete {
-    opacity: 0.5;
-    font-style: italic;
-    border-left: 3px solid #ff8c00;
-    padding-left: 9px;
-}
-
-/* Session-Label (Startzeit) */
-.session-label {
-    flex: 1 1 120px;
-    font-weight: 500;
-    color: #333;
-}
-
-/* Session-Daten */
-.session-data {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.session-data div {
-    min-width: 70px;
-    text-align: right;
-}
-
-/* ----------------------------- */
-/* Mobile Anpassungen */
-@media (max-width: 500px) {
-    .card-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-    }
-    .num {
-        text-align: left;
-        margin-left: 0;
-    }
-    .session {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .session-data {
-        flex-direction: column;
-        gap: 4px;
-    }
-}
+.leaderboard { display:flex; flex-direction:column; gap:20px; margin-top:20px; }
+.card { display:flex; flex-wrap:wrap; background:#fff; border-radius:14px; padding:16px; box-shadow:0 10px 25px rgba(0,0,0,.08); gap:16px; }
+.card-left { flex:1 1 150px; display:flex; flex-direction:column; gap:6px; }
+.card-right { flex:2 1 300px; display:flex; flex-direction:column; gap:10px; }
+.rank { font-size:1.4em; font-weight:bold; color:#ff8c00; }
+.user-name { font-size:1.2em; font-weight:600; }
+.num { font-size:0.95em; color:#555; }
+.session { display:flex; flex-direction:column; gap:4px; }
+.session-label { font-weight:600; }
+.bars { display:flex; gap:4px; height:12px; margin-top:2px; }
+.bar { border-radius:6px; height:100%; }
+.bar.total { background:#ddd; }
+.bar.fastest { background:#1a8cff; }
+.bar.slowest { background:#ff4d4d; }
+.session-values { display:flex; gap:12px; font-size:0.9em; font-weight:500; flex-wrap:wrap; }
+.incomplete { opacity:0.5; border-left:4px dashed #ff8c00; padding-left:6px; }
+@media(max-width:768px) { .card { flex-direction:column; } .card-left, .card-right { flex:1 1 100%; } }
