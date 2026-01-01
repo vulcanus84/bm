@@ -2,6 +2,7 @@
 #include "esp_now_handler.h"
 #include "../common/esp_now_structs.h"
 #include "gateway_connection.h"
+#include "session_id.h"
 
 const uint8_t MAX_SEQ = 10;
 enum RangeType { V, M, H, X }; // X = undefiniert
@@ -10,6 +11,9 @@ uint8_t sequenceIds[MAX_SEQ];
 int SEQ_LENGTH = 0;
 int seqIndex = 0;
 RangeType lastRange = X;
+String sessionId;
+int runsCount = 0;
+int maxRuns = 0;
 
 int64_t lastEventTime = 0;
 
@@ -64,6 +68,10 @@ void evaluateDistance(int distance) {
 
     if (seqIndex >= SEQ_LENGTH-1) {
       nextSeqIndex = 0;
+      runsCount++;
+      if(runsCount>=maxRuns) { 
+        setGameStatus("idle"); 
+      }
       Serial.println("=== LETZTER SEQUENZ PUNKT ===");
     } else {
       nextSeqIndex = seqIndex + 1;
@@ -74,8 +82,10 @@ void evaluateDistance(int distance) {
       "&duration=" + String(delta_s) +
       "&userId=" + String(getUserId()) +
       "&exerciseId=" + String(getExerciseId()) +
+      "&sessionId=" + sessionId +
       "&distance=" + String(distance) +
       "&nextPos=" + sequenceIds[nextSeqIndex] +
+      "&gameStatus=" + getGameStatus() +
     "\n";
     Serial.print(uartMsg);
     Serial1.print(uartMsg);
@@ -118,6 +128,10 @@ void setSequenceStrings(String seqStr) {
   }
 }
 
+void setMaxRuns(int maxRuns) {
+  maxRuns = maxRuns;
+}
+
 String getNextSequenceId() {
    return String(sequenceIds[seqIndex]);
 }
@@ -127,6 +141,8 @@ void startExercise() {
   lastEventTime = now;
   seqIndex = 0;
   lastRange = X;
+  runsCount = 0;
+  sessionId = generateSessionId();
   Serial.println("Übung gestartet");
   sendToSensor(PKT_GAMEMSG_TO_SENSOR, 0);
 }

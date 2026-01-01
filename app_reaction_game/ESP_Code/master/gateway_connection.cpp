@@ -10,6 +10,7 @@ const uint8_t gatewayTX = 7;
 String gameStatus = "idle";
 int userId = 0;
 int exerciseId = 0;
+int repetitions = 0;
 unsigned long lastConfigSend = 0;
 
 void setupGatewayConnection() {
@@ -38,9 +39,11 @@ void readConfig(String payload) {
     String seqIdStr = doc["sequenceIds"].as<String>();
     userId = doc["userId"].as<int>();
     exerciseId = doc["exerciseId"].as<int>();
+    repetitions = doc["repetitions"].as<int>();
 
     setSequenceIDs(seqIdStr);
     setSequenceStrings(seqStr);
+    setMaxRuns(repetitions);
 
     if(gameStatus != oldGameStatus) {
       if(gameStatus == "running") startExercise();
@@ -52,7 +55,8 @@ void readConfig(String payload) {
             "&user_id=" + String(userId) +
             "&distance=" + String(getLastDistance()) +
             "&sequence=" + getSequenceAsString() +
-            "&nextPos=" + getNextSequenceId();
+            "&nextPos=" + getNextSequenceId() +
+            "&repetitions=" + String(repetitions);
 
     Serial.println(configString);
     Serial1.println(configString);
@@ -74,6 +78,10 @@ void sendConfig() {
 
 String getGameStatus() {
   return gameStatus;
+}
+
+void setGameStatus(String gS) {
+  gameStatus = gS;
 }
 
 int getUserId() {

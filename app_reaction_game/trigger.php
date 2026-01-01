@@ -6,6 +6,7 @@ require_once(level."inc/standard_includes.php");
 $duration = isset($_GET['duration']) ? floatval($_GET['duration']) : 0.0;
 $user_id = isset($_GET['userId']) ? intval($_GET['userId']) : 0;
 $pos = isset($_GET['pos']) ? intval($_GET['pos']) : 0;
+$session_id = isset($_GET['sessionId']) ? $_GET['sessionId'] : 0;
 
 // Jetzt mit Mikrosekunden holen
 $now = microtime(true);
@@ -25,7 +26,8 @@ $db->insert([
     "repl_pos_id"  => $pos,
     "repl_user_id" => $user_id,
     "repl_ts"      => $eventDate,
-    "repl_duration" => $duration
+    "repl_duration" => $duration,
+    "repl_session_id" => $session_id
 ], "reaction_exercises_positions_live");
 
 $data = ["rec_last_update" => date("Y-m-d H:i:s")];

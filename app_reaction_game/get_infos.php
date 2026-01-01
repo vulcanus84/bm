@@ -69,8 +69,9 @@ if(isset($_GET['mode']) &&  $_GET['mode'] === 'admin') {
                 $data = $db->sql_query_with_fetch("SELECT * FROM reaction_exercises_cubes WHERE rec_re_id=:id", ['id'=>$response['excId']]);
                 $data2 = $db->sql_query_with_fetch(
                     "SELECT GROUP_CONCAT(rep_pos_id ORDER BY rep_id ASC) AS sequence,
-                            GROUP_CONCAT(rep_id ORDER BY rep_id ASC) AS sequenceIds
+                            GROUP_CONCAT(rep_id ORDER BY rep_id ASC) AS sequenceIds, re_repetitions
                     FROM reaction_exercises_positions
+                    LEFt JOIN reaction_exercises ON reaction_exercises_positions.rep_re_id = reaction_exercises.re_id
                     WHERE rep_re_id = :id",
                     ['id' => $response['excId']]
                 );
@@ -81,7 +82,8 @@ if(isset($_GET['mode']) &&  $_GET['mode'] === 'admin') {
                     "sequence" => $data2->sequence,
                     "sequenceIds" => $data2->sequenceIds,
                     "userId" => $data->rec_user_id,
-                    "exerciseId" => $data->rec_re_id
+                    "exerciseId" => $data->rec_re_id,
+                    "repetitions" => $data2->re_repetitions
                 ];
             } else {
                 $response = [
