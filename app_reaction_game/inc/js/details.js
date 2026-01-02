@@ -35,6 +35,12 @@ function toggleMisc() {
 $(function() {
     const urlParams = new URLSearchParams(window.location.search);
     excId = urlParams.get('exc_id'); 
+    userId = urlParams.get('user_id');
+    if(globalStatus=='idle' && userId !=null) { 
+        $('#user_selection').val(userId);
+        $('#cube_infos').show();
+        $.get('', { ajax: 'set_user', userId: userId, excId: excId}); 
+    }
 
     initChart();
     setTimeout(() => poll(), 1000);
@@ -62,22 +68,6 @@ $(function() {
 
         // AJAX Request
         $.get('', { ajax: 'set_status', status: status });
-    });
-
-    $(document).on('click','#delete_data',function(){
-        if(userId>0) { 
-            $.get('', { ajax: 'delete_data', userId: userId }, function(res){
-                if(res === "OK"){
-                    // Chart leeren
-                    chart.data.labels = [];
-                    chart.data.datasets[0].data = [];
-                    chart.update();
-                    lastTimestamp = 0; // Reset timestamp
-                }
-            });
-        } else {
-            alert("Bitte zuerst einen Benutzer auswählen.");
-        }
     });
 });
 
@@ -251,28 +241,40 @@ function poll() {
         $.getJSON("check.php", { last: lastTimestamp, userId: userId, excId: excId })
         .done(function(data) {
             console.log("Daten aktualisiert. Letzter Timestamp: " + lastTimestamp + " von  UserID: " + data.userId);
-
+            console.log(data);
             // Runs aus Events erstellen
             const runs = [];
             const template = data.template; // [1,3,4,5]
             let currentRun = [];
             let runDuration = 0;
+            const processRun = (run, duration) => {
+                if (run.length === template.length) {
+                    if (duration > maxRunDuration) maxRunDuration = duration;
+                    if (duration < minDuration) minDuration = duration;
+                }
+                runs.push(run);
+            };
+
             let maxRunDuration = 0;
             let minDuration = 999;
+
             data.events.forEach(ev => {
                 if (ev.pos_id === template[0] && currentRun.length > 0) {
-                    if (currentRun.length === template.length ) {
-                        runs.push(currentRun);
-                        if (runDuration > maxRunDuration) { maxRunDuration = runDuration;}
-                        if (runDuration<minDuration) { minDuration = runDuration; }
-                    }
+                    // Startposition wieder erreicht, Run abschließen
+                    processRun(currentRun, runDuration);
                     currentRun = [];
                     runDuration = 0;
                 }
+
+                // Zeit zählen und Events sammeln
                 runDuration += ev.duration;
-                if(ev.duration > 0) { currentRun.push(ev); }
+                if (ev.duration > 0) currentRun.push(ev);
             });
-            runs.push(currentRun);
+
+            // Restlichen Run hinzufügen
+            if (currentRun.length > 0) {
+                processRun(currentRun, runDuration);
+            }
 
             $('#misc_container').html(`
             <div style="
@@ -290,7 +292,7 @@ function poll() {
                     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                     text-align: center;
                 ">
-                <div style="font-size: 14px; color: #555;">Schnellster</div>
+                <div style="font-size: 14px; color: #555;">Schnellster Run</div>
                 <div style="font-size: 24px; font-weight: bold; color: #43a047;">${minDuration.toFixed(1)}s</div>
                 </div>
 
@@ -302,7 +304,7 @@ function poll() {
                     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
                     text-align: center;
                 ">
-                <div style="font-size: 14px; color: #555;">Langsamster</div>
+                <div style="font-size: 14px; color: #555;">Langsamster Run</div>
                 <div style="font-size: 24px; font-weight: bold; color: #e53935;">${maxRunDuration.toFixed(1)}s</div>
                 </div>
 
@@ -320,10 +322,26 @@ function poll() {
             </div>
             `);
 
-            // X-Achse = Durchläufe
-            const labels = runs.map((_, i) => (i + 1));
+            // Gruppiere Runs nach session_id
+            const sessionsMap = {}; // session_id -> Array von Runs
+            runs.forEach(run => {
+                if(run.length === 0) return;
+                const sessionId = run[0].session_id; // alle Events im Run haben gleiche session_id
+                if(!sessionsMap[sessionId]) sessionsMap[sessionId] = [];
+                sessionsMap[sessionId].push(run);
+            });
 
-            // Farben-Array für automatische Zuweisung
+            // Sortiere nach zeitlich erster Run pro Session (optional)
+            const sessionIds = Object.keys(sessionsMap).sort((a,b) => {
+                const t1 = new Date(sessionsMap[a][0][0].timestamp);
+                const t2 = new Date(sessionsMap[b][0][0].timestamp);
+                return t1 - t2;
+            });
+
+            // Labels = Sessions
+            const labels = sessionIds.map((sid, i) => 'Session ' + (i+1));
+
+            // Farbpalette für pos_id
             const colorPalette = [
                 'rgba(255, 99, 132, 0.7)',
                 'rgba(75, 192, 192, 0.7)',
@@ -335,35 +353,35 @@ function poll() {
                 'rgba(128, 0, 128, 0.7)'
             ];
 
-            // Mapping pos_id → Farbe
-            const posColors = {};
+            const datasets = [];
+            const posColors = {}; 
             let colorIndex = 0;
             template.forEach(posId => {
-                if (!posColors[posId]) {
-                    posColors[posId] = colorPalette[colorIndex % colorPalette.length];
-                    colorIndex++;
-                }
+                if(!posColors[posId]) posColors[posId] = colorPalette[colorIndex++ % colorPalette.length];
             });
 
-            // Datasets pro pos_id (gestapelt!)
-            const datasets = template.map(posId => {
-                return {
-                    label: 'P' + posId,
-                    stack: 'runs',
-                    backgroundColor: posColors[posId],
-                    data: runs.map((run, runIdx) => {
-                        const runData = run;
-                        const ev = runData.find(e => e.pos_id === posId);
-                        return ev ? Number(ev.duration.toFixed(3)) : 0;
-                    })
-                };
+            // Für jede Session
+            sessionIds.forEach((sid, sessIdx) => {
+                const runsInSession = sessionsMap[sid];
+                runsInSession.forEach((run, runIdx) => {
+                    template.forEach(posId => {
+                        const ev = run.find(e => e.pos_id === posId);
+                        const value = ev ? Number(ev.duration.toFixed(3)) : 0;
+                        // Dataset für Chart.js
+                        datasets.push({
+                            label: `P${posId} (R${runIdx+1})`,
+                            stack: 'run-' + runIdx,
+                            backgroundColor: posColors[posId],
+                            data: sessionIds.map((_, i) => i === sessIdx ? value : 0)
+                        });
+                    });
+                });
             });
 
             // Chart aktualisieren
             chart.data.labels = labels;
             chart.data.datasets = datasets;
             chart.update();
-
 
             lastTimestamp = data.serverTimestamp;
             setTimeout(() => poll(), 1000);
@@ -381,6 +399,6 @@ function assignSensor(mac, excId) {
     });
 }
 
-function updateButtons() {
+function checkMinMaxDuration() {
 
 }

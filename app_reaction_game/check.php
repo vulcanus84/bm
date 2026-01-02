@@ -33,7 +33,7 @@ $response["template"] = $positions;
 $db->sql_query("
     SELECT repl_pos_id AS pos_id,
            DATE_FORMAT(repl_ts, '%H:%i:%s') as timestamp,
-           repl_duration
+           repl_duration, repl_session_id
     FROM (
         SELECT *
         FROM reaction_exercises_positions_live
@@ -49,7 +49,8 @@ while ($row = $db->get_next_res()) {
     $response["events"][] = [
         "pos_id"    => intval($row->pos_id),
         "timestamp" => $row->timestamp,
-        "duration"  => floatval($row->repl_duration)
+        "duration"  => floatval($row->repl_duration),
+        "session_id" => $row->repl_session_id
     ];
 }
 

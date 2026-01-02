@@ -32,7 +32,7 @@ try {
                             FROM users
                             WHERE user_hide != 1
                             ORDER BY user_fullname ASC");
-        $myPage->add_content("<div><a href='overview.php?exc_id=".$_GET['exc_id']."'><button class='orange'><<</button></a>");
+        $myPage->add_content("<div><a id='back_link' href='overview.php?exc_id=".$_GET['exc_id']."'><button class='orange'><<</button></a>");
         $myPage->add_content($myHTML->get_selection($db,'user_selection','user_id','user_fullname',""));
         $myPage->add_content("</div>");
 
@@ -44,7 +44,6 @@ try {
                 <span>Kontrollbuttons</span>
             </div>
             <div id='buttons_list'>
-                <button class='red' id='delete_data'>Daten löschen</button>
                 <button class='green' value='Starten' id='start'>Starten</button>
             </div>
 
@@ -76,12 +75,6 @@ try {
         print $myPage->get_html_code();
     } else {
         switch($_GET['ajax']) {
-            case 'delete_data':
-                $userId = isset($_GET['userId']) ? intval($_GET['userId']) : 0;
-                $db->sql_query("DELETE FROM reaction_exercises_positions_live WHERE repl_user_id=:userId", ['userId'=>$userId]);
-                print "OK";
-                break;
-
             case 'set_user':
                 $userId = isset($_GET['userId']) ? intval($_GET['userId']) : null;
                 $db->sql_query("UPDATE reaction_exercises_cubes SET rec_user_id = :userId WHERE rec_re_id=:exc_id", ['userId'=>$userId, 'exc_id'=>$exc_id]);

@@ -7,6 +7,27 @@ if (!isset($_GET['exc_id'])) {
 }
 
 $exc_id = intval($_GET['exc_id']);
+
+// ======= NEU: Session löschen, falls delete_session_id gesetzt =======
+if (isset($_GET['delete_session_id'])) {
+    $delete_id = $_GET['delete_session_id'];
+    
+    // Optional: nur Admins oder eingeloggter Nutzer darf löschen
+    $myPage = new page();
+    if (!$myPage->is_logged_in()) {
+        die("Nicht eingeloggt!");
+    }
+
+    $db->sql_query("DELETE FROM reaction_exercises_positions_live WHERE repl_session_id = :sess_id", [
+        'sess_id' => $delete_id
+    ]);
+
+    // zurück zur Übersicht der Sessions
+    header("Location: overview.php?exc_id=".$exc_id);
+    exit;
+}
+// ====================================================================
+
 $exc_data = $db->sql_query_with_fetch(
     "SELECT * FROM reaction_exercises WHERE re_id=:exc_id",
     ['exc_id' => $exc_id]
@@ -18,7 +39,7 @@ if (!IS_AJAX) {
 
     $myPage = new page();
     $myHTML = new html();
-    $myPage->set_title($exc_data->re_title);
+    $myPage->set_title($exc_data->re_repetitions."x ".$exc_data->re_title);
     if (!$myPage->is_logged_in()) { print $myPage->get_html_code(); exit; }
 
     $myPage->add_css_link('inc/css/overview.css');
@@ -26,9 +47,7 @@ if (!IS_AJAX) {
     $myPage->add_content("<a href='index.php'><button class='orange'><<</button></a>");
     $myPage->add_content("<a href='details.php?exc_id=".$exc_id."'><button>Übung starten</button></a>");
 
-    /* ===============================
-       Muster laden
-    =============================== */
+    // ====== Muster laden ======
     $pattern = [];
     $db->sql_query("
         SELECT rep_id
@@ -47,9 +66,7 @@ if (!IS_AJAX) {
     }
     $patternLength = count($pattern);
 
-    /* ===============================
-       Live-Daten (MIT Session-ID)
-    =============================== */
+    // ====== Live-Daten (MIT Session-ID) ======
     $db->sql_query("
         SELECT
             repl_duration,
@@ -66,7 +83,6 @@ if (!IS_AJAX) {
     ");
 
     $users = [];
-
     $currentSession = null;
     $lastSessionId  = null;
 
@@ -83,17 +99,14 @@ if (!IS_AJAX) {
         $duration   = (float)$d->repl_duration;
         $repId      = (int)$d->rep_id;
 
-        /* ===============================
-           Neue Session nur bei neuer Session-ID
-        =============================== */
         $newSession = $currentSession === null || $sessionId !== $lastSessionId;
 
         if ($newSession) {
-
             if ($currentSession !== null) {
                 if (!isset($users[$currentSession['user_id']])) {
                     $users[$currentSession['user_id']] = [
                         'user' => $currentSession['user_name'],
+                        'user_id' => $currentSession['user_id'],
                         'sessions' => []
                     ];
                 }
@@ -104,11 +117,11 @@ if (!IS_AJAX) {
                     'fastest_run' => $currentSession['fastest_run'],
                     'slowest_run' => $currentSession['slowest_run'],
                     'complete' => $currentSession['runs'] == $expectedRuns,
-                    'start_time' => $currentSession['start_time']
+                    'start_time' => $currentSession['start_time'],
+                    'session_id' => $lastSessionId // <-- Session-ID für Löschlink
                 ];
             }
 
-            // neue Session initialisieren
             $currentSession = [
                 'user_id' => $userId,
                 'user_name' => $userName,
@@ -123,14 +136,8 @@ if (!IS_AJAX) {
             $currentRunTime = 0;
         }
 
-        /* ===============================
-           Dauer aufsummieren
-        =============================== */
         $currentSession['total_duration'] += $duration;
 
-        /* ===============================
-           1:1 Musterprüfung
-        =============================== */
         if ($repId === $pattern[$patternIndex]) {
 
             $currentRunTime += $duration;
@@ -162,13 +169,12 @@ if (!IS_AJAX) {
         $lastSessionId = $sessionId;
     }
 
-    /* ===============================
-       Letzte Session speichern
-    =============================== */
+    // Letzte Session speichern
     if ($currentSession !== null) {
         if (!isset($users[$currentSession['user_id']])) {
             $users[$currentSession['user_id']] = [
                 'user' => $currentSession['user_name'],
+                'user_id' => $currentSession['user_id'],
                 'sessions' => []
             ];
         }
@@ -179,22 +185,19 @@ if (!IS_AJAX) {
             'fastest_run' => $currentSession['fastest_run'],
             'slowest_run' => $currentSession['slowest_run'],
             'complete' => $currentSession['runs'] == $expectedRuns,
-            'start_time' => $currentSession['start_time']
+            'start_time' => $currentSession['start_time'],
+            'session_id' => $lastSessionId
         ];
     }
 
-    /* ===============================
-       Ranking: beste vollständige Session
-    =============================== */
+    // Ranking wie gehabt
     uasort($users, function($a,$b){
         $bestA = min(array_column(array_filter($a['sessions'], fn($s)=>($s['complete']??false)), 'total_duration') ?: [PHP_FLOAT_MAX]);
         $bestB = min(array_column(array_filter($b['sessions'], fn($s)=>($s['complete']??false)), 'total_duration') ?: [PHP_FLOAT_MAX]);
         return $bestA <=> $bestB;
     });
 
-    /* ===============================
-       HTML-Ausgabe (unverändert)
-    =============================== */
+    // HTML-Ausgabe
     $myPage->add_content("<div class='leaderboard'>");
     $rank = 1;
 
@@ -205,7 +208,10 @@ if (!IS_AJAX) {
             <div class='card-left'>
                 <div class='rank'>#{$rank}</div>
                 <div class='user-name'>".htmlspecialchars($user['user'])."</div>
-                <div class='num'>".count($user['sessions'])." Session(s)</div>
+                <div class='num'>
+                    ".count($user['sessions'])." Session(s)
+                    <a href='details.php?exc_id={$exc_id}&user_id={$user["user_id"]}' class='repeat-button' title='Nochmals'>🔄</a>
+                </div>
             </div>
             <div class='card-right'>
         ");
@@ -222,14 +228,20 @@ if (!IS_AJAX) {
             $fastPercent  = $sess['fastest_run'] ? ($sess['fastest_run'] / $maxTotal) * 100 : 0;
             $slowPercent  = $sess['slowest_run'] ? ($sess['slowest_run'] / $maxTotal) * 100 : 0;
 
+            // ===== NEU: Lösch-Button =====
+            $deleteLink = "overview.php?exc_id={$exc_id}&delete_session_id=".$sess['session_id'];
+
             $myPage->add_content("
             <div class='session $class'>
                 <div class='bars'>
-                    <div class='bar-row'><span class='time'><strong>".number_format($sess['total_duration'],2)."s</strong></span><div class='bar total' style='width:{$totalPercent}%;'></div></div>
-                    <div class='bar-row'><span class='time'><strong>".number_format($sess['fastest_run'],2)."s</strong></span><div class='bar fastest' style='width:{$fastPercent}%;'></div></div>
-                    <div class='bar-row'><span class='time'><strong>".number_format($sess['slowest_run'],2)."s</strong></span><div class='bar slowest' style='width:{$slowPercent}%;'></div></div>
+                    <div class='bar-row'><span class='time'><strong>".number_format($sess['total_duration'] ?? 0,2)."s</strong></span><div class='bar total' style='width:{$totalPercent}%;'></div></div>
+                    <div class='bar-row'><span class='time'><strong>".number_format($sess['fastest_run'] ?? 0,2)."s</strong></span><div class='bar fastest' style='width:{$fastPercent}%;'></div></div>
+                    <div class='bar-row'><span class='time'><strong>".number_format($sess['slowest_run'] ?? 0,2)."s</strong></span><div class='bar slowest' style='width:{$slowPercent}%;'></div></div>
                 </div>
-                <div class='session-info'>{$sessionLabel} | {$sess['runs']} Runs {$label}</div>
+                <div class='session-info'>
+                    {$sessionLabel} | {$sess['runs']} Runs {$label} 
+                    <a href='{$deleteLink}' class='delete-session' onclick='return confirm(\"Wirklich löschen?\");'>🗑️</a>
+                </div>
             </div>
             ");
         }

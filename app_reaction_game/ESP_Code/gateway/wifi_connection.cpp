@@ -2,17 +2,16 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include "wifi_connection.h"
+#include <Preferences.h>
 
-const char* ssid = "Claude";
-const char* password = "0792318193";
+static Preferences prefs;
+String ssid;
+String password;
 String mac = "";
 bool networkReady = false;
 
-const char* CONFIG_URL  = "https://clanic.ch/app_reaction_game/get_infos.php";
-const char* TRIGGER_URL = "https://clanic.ch/app_reaction_game/trigger.php";
-
-//const char* CONFIG_URL  = "http://192.168.1.133:8888/bm/app_reaction_game/get_infos.php";
-//const char* TRIGGER_URL = "http://192.168.1.133:8888/bm/app_reaction_game/trigger.php";
+String CONFIG_URL;
+String TRIGGER_URL;
 
 unsigned long lastConfigCheck = 0;
 const unsigned long CONFIG_INTERVAL = 2000;
@@ -20,6 +19,19 @@ const unsigned long CONFIG_INTERVAL = 2000;
 String configParams = "?dummy=0";
 String triggerParams = "?dummy=0";
 String lastConfigParams = "";
+
+void initWLAN() {
+  // Preferences starten
+  prefs.begin("config", true); // read-only für Initialisierung
+
+  // Werte laden (Defaults falls leer)
+  ssid = prefs.getString("wifi_ssid", "Claude");
+  password = prefs.getString("wifi_pw", "0792318193");
+  CONFIG_URL = prefs.getString("config_url", "https://clanic.ch/app_reaction_game/get_infos.php");
+  TRIGGER_URL = prefs.getString("trigger_url", "https://clanic.ch/app_reaction_game/trigger.php");
+
+  prefs.end(); // fertig
+}
 
 void connectWLAN() {
   WiFi.begin(ssid, password);
