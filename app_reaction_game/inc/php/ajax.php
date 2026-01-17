@@ -58,9 +58,23 @@ switch($_GET['ajax']) {
 
                 <div id='add_position_buttons'>
                 Add Position:
-                    <button type='button' class='add-pos-btn' data-value='V'>V</button>
-                    <button type='button' class='add-pos-btn' data-value='M'>M</button>
-                    <button type='button' class='add-pos-btn' data-value='H'>H</button>
+                    <table>
+                        <tr>
+                            <td><button type='button' class='add-pos-btn' data-value='HL'>HL</button></td>
+                            <td><button type='button' class='add-pos-btn' data-value='HM'>HM</button></td>
+                            <td><button type='button' class='add-pos-btn' data-value='HR'>HR</button></td>
+                        </tr>
+                        <tr>
+                            <td><button type='button' class='add-pos-btn' data-value='ML'>ML</button></td>
+                            <td><button type='button' class='add-pos-btn' data-value='MM'>MM</button></td>
+                            <td><button type='button' class='add-pos-btn' data-value='MR'>MR</button></td>
+                        </tr>
+                        <tr>
+                            <td><button type='button' class='add-pos-btn' data-value='VL'>VL</button></td>
+                            <td><button type='button' class='add-pos-btn' data-value='VM'>VM</button></td>
+                            <td><button type='button' class='add-pos-btn' data-value='VR'>VR</button></td>
+                        </tr>
+                    </table>
                 </div>
             ";
         }
