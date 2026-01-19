@@ -40,7 +40,6 @@ $db->sql_query("
         WHERE repl_pos_id IN (" . implode(',', $positions) . ")
           AND repl_user_id = :userId
         ORDER BY repl_ts DESC
-        LIMIT 50
     ) AS sub
     ORDER BY repl_ts ASC
 ", ['userId' => $userId]);
