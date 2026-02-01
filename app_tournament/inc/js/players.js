@@ -135,10 +135,6 @@ function setEvents() {
       });
   });
 
-
-
-
-
   $('#left_col').off('click').on('click', function(e) {
     if (!$(e.target).closest('.user_pic, button, select, a, .dropdown,img').length) {
       $(this).toggleClass('open');
@@ -169,7 +165,8 @@ function setEvents() {
     }
 
     // ---------- BILD VERKLEINERN ----------
-    const file = formData.get('pictures[]');
+    var input = document.querySelector('input[name="pictures[]"]');
+    var file = input && input.files.length ? input.files[0] : null;
 
     if (
       canResizeImages() &&
