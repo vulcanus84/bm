@@ -11,13 +11,50 @@ for (const [key, value] of params) {
   urlParams[key] = value;
 }
 
+function resizeImage(file, maxSize) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = e => img.src = e.target.result;
+    reader.onerror = reject;
+
+    img.onload = () => {
+      let { width, height } = img;
+
+      if (width > height && width > maxSize) {
+        height = height * (maxSize / width);
+        width = maxSize;
+      } else if (height > maxSize) {
+        width = width * (maxSize / height);
+        height = maxSize;
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        blob => blob ? resolve(blob) : reject(),
+        'image/jpeg',
+        0.8
+      );
+    };
+
+    reader.readAsDataURL(file);
+  });
+}
+
+
 $(document).ready(function() {
   playerId = $('#content').data('user-id');
   if(!playerId) $('#left_col').addClass('open'); 
 
-  if(playerId>0) {
-    $('#right_col').load(server_link+'&ajax=show_infos');
-  }
+  if(playerId>0) { $('#right_col').load(server_link+'&ajax=show_infos'); }
   setEvents();
 });
 
@@ -98,51 +135,60 @@ function setEvents() {
 
   $('img.img_sort').off('click').on('click', (e) => change_group_by(e));
   
-  $('#content').on('submit','form#new_user', function(e) {
+  $('#content').on('submit', 'form#new_user', async function (e) {
     e.preventDefault(); // Formular nicht normal absenden
-  
+
     let formData = new FormData(this); // FormData aus Formular
 
-    //Check Formular-Data
+    // ---------- Checkbox-Check ----------
     const checkboxes = document.querySelectorAll('#new_user input[type="checkbox"][name^="loc_"]');
     let checked = false;
 
     checkboxes.forEach(box => {
-        if (box.checked) {
-            checked = true;
-        }
+      if (box.checked) checked = true;
     });
 
     var oldVal = $('select[name="location"]').val();
 
     if (!checked) {
-        alert("Bitte mindestens einen Trainingsort auswählen!");
-    } else {
-      $.ajax({
-        url: server_link+'&ajax=save_user',
-        type: 'POST',
-        data: formData,
-        processData: false, // wichtig bei FormData
-        contentType: false, // ebenfalls wichtig
-        success: function(response) {
-          if (!isNaN(response) && response.trim() !== '') 
-          {
-            $('#left_content').load(server_link+'&ajax=get_left_col_users', function() {
-              $('select[name="location"]').val(oldVal);
-              $('select[name="location"]').trigger('change');
-              show_infos('user_' + response,true);
-            });
-          } 
-          else 
-          {
-            $('#right_content').html(response);
-          }
-        },
-        error: function(xhr, status, error) {
-          $('#right_content').html(error);
-        }
-      });
+      alert("Bitte mindestens einen Trainingsort auswählen!");
+      return;
     }
+
+    // ---------- BILD VERKLEINERN ----------
+    const file = formData.get('pictures[]');
+
+    if (file && file instanceof File && file.size > 0) {
+      try {
+        const resizedBlob = await resizeImage(file, 1000); 
+        formData.set('pictures[]', resizedBlob, file.name);
+      } catch (err) {
+        console.error('Bildverkleinerung fehlgeschlagen', err);
+      }
+    }
+
+    // ---------- AJAX ----------
+    $.ajax({
+      url: server_link + '&ajax=save_user',
+      type: 'POST',
+      data: formData,
+      processData: false,
+      contentType: false,
+      success: function (response) {
+        if (!isNaN(response) && response.trim() !== '') {
+          $('#left_content').load(server_link + '&ajax=get_left_col_users', function () {
+            $('select[name="location"]').val(oldVal).trigger('change');
+            show_infos('user_' + response, true);
+          });
+        } else {
+          $('#right_content').html(response);
+        }
+      },
+      error: function (xhr, status, error) {
+        $('#right_content').html(error);
+      }
+    });
+    
   });
 
 }
