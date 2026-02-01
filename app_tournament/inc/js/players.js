@@ -49,6 +49,19 @@ function resizeImage(file, maxSize) {
   });
 }
 
+function canResizeImages() {
+  return (
+    typeof FileReader !== 'undefined' &&
+    typeof HTMLCanvasElement !== 'undefined' &&
+    !!document.createElement('canvas').getContext &&
+    (
+      typeof HTMLCanvasElement.prototype.toBlob === 'function' ||
+      typeof HTMLCanvasElement.prototype.toDataURL === 'function'
+    )
+  );
+}
+
+
 
 $(document).ready(function() {
   playerId = $('#content').data('user-id');
@@ -158,13 +171,17 @@ function setEvents() {
     // ---------- BILD VERKLEINERN ----------
     const file = formData.get('pictures[]');
 
-    if (file && file instanceof File && file.size > 0) {
-      try {
-        const resizedBlob = await resizeImage(file, 1000); 
+    if (
+      canResizeImages() &&
+      file &&
+      file.size > 0 &&
+      file.type.match(/^image\//)
+    ) {
+      resizeImage(file, 800).then(function (resizedBlob) {
         formData.set('pictures[]', resizedBlob, file.name);
-      } catch (err) {
+      }).catch(function () {
         console.error('Bildverkleinerung fehlgeschlagen', err);
-      }
+      });
     }
 
     // ---------- AJAX ----------
