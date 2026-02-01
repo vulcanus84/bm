@@ -15,7 +15,6 @@ function resizeImage(file, maxSize) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     const reader = new FileReader();
-
     reader.onload = e => img.src = e.target.result;
     reader.onerror = reject;
 
@@ -38,30 +37,29 @@ function resizeImage(file, maxSize) {
       ctx.imageSmoothingQuality = 'high';
       ctx.drawImage(img, 0, 0, width, height);
 
-      canvas.toBlob(
-        blob => blob ? resolve(blob) : reject(),
-        'image/jpeg',
-        0.8
-      );
+      // toBlob benutzen, wenn verfügbar
+      if (canvas.toBlob) {
+        canvas.toBlob(function(blob) {
+          resolve(blob);
+        }, 'image/jpeg', 0.8);
+      } else {
+        var dataURL = canvas.toDataURL('image/jpeg', 0.8);
+        resolve(dataURLtoBlob(dataURL));
+      }    
     };
-
     reader.readAsDataURL(file);
   });
 }
 
-function canResizeImages() {
-  return (
-    typeof FileReader !== 'undefined' &&
-    typeof HTMLCanvasElement !== 'undefined' &&
-    !!document.createElement('canvas').getContext &&
-    (
-      typeof HTMLCanvasElement.prototype.toBlob === 'function' ||
-      typeof HTMLCanvasElement.prototype.toDataURL === 'function'
-    )
-  );
+function dataURLtoBlob(dataURL) {
+  var parts = dataURL.split(',');
+  var byteString = atob(parts[1]);
+  var mimeString = parts[0].split(':')[1].split(';')[0];
+  var ab = new ArrayBuffer(byteString.length);
+  var ia = new Uint8Array(ab);
+  for (var i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+  return new Blob([ab], { type: mimeString });
 }
-
-
 
 $(document).ready(function() {
   playerId = $('#content').data('user-id');
@@ -147,7 +145,7 @@ function setEvents() {
   $('#content').on('submit', 'form#new_user', async function (e) {
     e.preventDefault(); // Formular nicht normal absenden
 
-    let formData = new FormData(this); // FormData aus Formular
+    let formData = new FormData(); // FormData aus Formular
 
     // ---------- Checkbox-Check ----------
     const checkboxes = document.querySelectorAll('#new_user input[type="checkbox"][name^="loc_"]');
@@ -163,19 +161,34 @@ function setEvents() {
       alert("Bitte mindestens einen Trainingsort auswählen!");
       return;
     }
-
     // ---------- BILD VERKLEINERN ----------
     var input = document.querySelector('input[name="pictures[]"]');
     var file = input && input.files.length ? input.files[0] : null;
-
     if (
-      canResizeImages() &&
       file &&
       file.size > 0 &&
       file.type.match(/^image\//)
     ) {
       const resizedBlob = await resizeImage(file, 800);
-      formData.set('pictures[]', resizedBlob, file.name);
+      if (resizedBlob) {
+        formData.append('pictures[]', resizedBlob, file.name);
+      }
+    }
+
+    var elements = this.elements;
+
+    for (var i = 0; i < elements.length; i++) {
+      var el = elements[i];
+
+      if (!el.name || el.type === 'file') continue;
+
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        if (el.checked) {
+          formData.append(el.name, el.value);
+        }
+      } else {
+        formData.append(el.name, el.value);
+      }
     }
 
     // ---------- AJAX ----------
