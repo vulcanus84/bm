@@ -174,11 +174,8 @@ function setEvents() {
       file.size > 0 &&
       file.type.match(/^image\//)
     ) {
-      resizeImage(file, 800).then(function (resizedBlob) {
-        formData.set('pictures[]', resizedBlob, file.name);
-      }).catch(function () {
-        console.error('Bildverkleinerung fehlgeschlagen', err);
-      });
+      const resizedBlob = await resizeImage(file, 800);
+      formData.set('pictures[]', resizedBlob, file.name);
     }
 
     // ---------- AJAX ----------
