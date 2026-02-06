@@ -3,6 +3,7 @@
 #include <ArduinoJson.h>
 #include "wifi_connection.h"
 #include <Preferences.h>
+#include "led_control.h"
 
 static Preferences prefs;
 String ssid;
@@ -13,6 +14,7 @@ bool networkReady = false;
 String CONFIG_URL;
 String TRIGGER_URL;
 
+
 unsigned long lastConfigCheck = 0;
 const unsigned long CONFIG_INTERVAL = 2000;
 
@@ -21,6 +23,7 @@ String triggerParams = "?dummy=0";
 String lastConfigParams = "";
 
 void initWLAN() {
+  Serial.println("Lade Konfiguration...");
   // Preferences starten
   prefs.begin("config", true); // read-only für Initialisierung
 
@@ -35,8 +38,13 @@ void initWLAN() {
 
 void connectWLAN() {
   WiFi.begin(ssid, password);
-  Serial.println("Verbinde mit WLAN...");
+  Serial.print("SSID: ");
+  Serial.print(ssid);
+  Serial.print(" / PW: ");
+  Serial.print(password);
+  Serial.println(" verbinde mit WLAN...");
 
+  
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(500);
@@ -52,8 +60,12 @@ void connectWLAN() {
   networkReady = false;
 
   while (!networkReady && millis() - start < 10000) {
-    if (testHttpConnection()) networkReady = true;
-    else delay(500);
+    if (testHttpConnection()) {
+      networkReady = true;
+    } else {
+      Serial.print(".");
+      delay(500);
+    }
   }
 
   if (networkReady) {
@@ -87,12 +99,16 @@ void checkServer() {
   if (millis() - lastConfigCheck > CONFIG_INTERVAL) {
     lastConfigCheck = millis();
 
-    if (!networkReady || WiFi.status() != WL_CONNECTED) connectWLAN();
+    if (!networkReady || WiFi.status() != WL_CONNECTED) {
+      setLedState(ok, LED_OFF);
+      connectWLAN();
+    }
     if (!networkReady || WiFi.status() != WL_CONNECTED) {
       Serial.println("Netzwerk nicht bereit für Config Abfrage");
       return;
     };
 
+    setLedState(ok, LED_ON);
     Serial.print("Config-Params: ");
     Serial.println(configParams);
     String url = String(CONFIG_URL) + configParams + "&mac=" + mac;
@@ -116,6 +132,7 @@ void checkServer() {
 
     } else {
       Serial.print("HTTP Fehler: "); Serial.println(code);
+      setLedState(ok, LED_OFF);
       connectWLAN();
     }
 

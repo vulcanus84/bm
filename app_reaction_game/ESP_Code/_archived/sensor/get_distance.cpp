@@ -18,6 +18,16 @@ uint8_t buffer[BUFFER_SIZE];
 bool inFrame = false;
 uint16_t bufIndex = 0;
 
+void startRadarMeasurement() {
+  uint8_t cmdStart[] = {0xF4, 0x00, 0x01, 0x00, 0x01, 0xF8, 0xF7, 0xF6, 0xF5};
+  Serial2.write(cmdStart, sizeof(cmdStart));
+}
+
+void stopRadarMeasurement() {
+  uint8_t cmdStop[] = {0xF4, 0x00, 0x01, 0x00, 0x00, 0xF8, 0xF7, 0xF6, 0xF5};
+  Serial2.write(cmdStop, sizeof(cmdStop));
+}
+
 int smoothDistance(int newValue) {
   if (newValue <= 0 || newValue > 3000) return lastSmoothed;
   filterValues[filterIndex] = newValue;

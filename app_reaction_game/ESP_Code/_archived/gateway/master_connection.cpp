@@ -15,7 +15,7 @@ void checkMaster() {
     Serial.println("Received: " + msg);
     //Get Trigger command
     if (msg.startsWith("EVENT:")) {
-      triggerParams = msg.substring(6);
+       triggerParams = msg.substring(6);
       Serial.print("Trigger Params gesetzt: "); Serial.println(triggerParams);
       sendEventToServer();
       return;

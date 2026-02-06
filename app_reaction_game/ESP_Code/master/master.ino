@@ -1,22 +1,24 @@
-#include <WiFi.h>
-#include <esp_now.h>
-#include "esp_timer.h"
-#include <ArduinoJson.h>  // Bibliothek für JSON
-#include "../common/esp_now_structs.h"
-#include "esp_now_handler.h"
-#include "calc_position.h"
-#include "gateway_connection.h"
+#include "wifi_connection.h"
+#include "led_control.h"
+#include "sensor_connection.h"
+#include "game_control.h"
 
-// ==================== SETUP ====================
 void setup() {
   Serial.begin(115200);
-  setupGatewayConnection();
-  setupESPNow();
-  Serial.println("Master bereit");
+  delay(1000); // Warte auf stabile serielle Verbindung
+
+  setupSensorConnection();
+
+  // LED-Matrix initialisieren
+  initLedMatrix();
+
+  // Tasks starten
+  xTaskCreate(taskWifi, "WifiTask", 8192, NULL, 2, NULL);
+  xTaskCreate(taskLedMatrix, "LedMatrixTask", 4096, NULL, 2, NULL);
+  xTaskCreate(taskGameControl, "GameControlTask", 4096, NULL, 2, NULL);
+  xTaskCreate(taskRadar, "RadarTask", 4096, NULL, 2, NULL);
 }
 
-// ==================== LOOP ====================
 void loop() {
-  checkGateway();
-  delay(10);
+  // Hauptloop bleibt leer, alle Logik in Tasks
 }

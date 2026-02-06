@@ -116,7 +116,7 @@ try {
                     $data['sensors'][] = $cube;
                 }
 
-                // JSON ausgeben
+                // JSON ausgebenadd po
                 header('Content-Type: application/json');
                 echo json_encode($data);
                 break;
