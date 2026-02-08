@@ -7,11 +7,23 @@ enum WifiState {
   WIFI_CONNECTED,
   SERVER_CHECKING,
   SERVER_OK,
-  SERVER_ERROR
+  SERVER_ERROR,
+  AP_MODE
 };
 
 extern volatile WifiState wifiState;
 
+enum WifiCommandType {
+  WIFI_SEND_EVENT,
+  WIFI_GET_CONFIG
+};
+
+struct WifiCommand {
+  WifiCommandType type;
+  String payload;
+};
+
+extern QueueHandle_t wifiQueue;
+
 void taskWifi(void *pvParameters);
-void sendEventToServer(String triggerParams);
 String getConfigFromServer(String configParams);
