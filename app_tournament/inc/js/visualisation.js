@@ -13,7 +13,7 @@ $( document ).ready(function() {
 function refresh()
 {
   //Load next tournament
-  if(curr_round==rounds) {
+  if(curr_round>=rounds) {
     if(arr_tournaments.length>curr_tournament+1) { curr_tournament++; } else { curr_tournament = 0; }
     curr_round = 0; 
     $.ajax({
@@ -22,7 +22,7 @@ function refresh()
       data: { action: 'get_number_of_rounds', tournament_id: arr_tournaments[curr_tournament] }
     })
     .done(function(data) {
-      rounds=data;
+      rounds=parseInt(data);
     });
 
     $('#title').load('visualisation.php?action=get_title&tournament_id='+all_tournament_ids+'&curr_id='+arr_tournaments[curr_tournament]);

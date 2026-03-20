@@ -47,6 +47,10 @@ div#rounds {
   padding-bottom:10px;
 }
 
+div.court {
+  width: 50%;
+}
+
 div#all_courts {
   display:flex;
   flex-wrap:wrap;
