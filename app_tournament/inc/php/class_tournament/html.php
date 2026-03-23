@@ -574,10 +574,18 @@ class html
     else
     {
       $this->db->sql_query("SELECT *, 
-												COALESCE(
+											CONCAT(
+													COALESCE(
 															NULLIF(CONCAT_WS(' ', user_firstname, user_lastname), ''), 
 															user_account
-														) AS user_full
+													),
+													CASE 
+															WHEN group2user_seeded IS NOT NULL 
+																		AND group2user_seeded < 10
+															THEN CONCAT(' [', group2user_seeded, ']')
+															ELSE ''
+													END
+											) AS user_full
                       FROM group2user
                       LEFT JOIN users ON group2user_user_id = user_id
                       WHERE group2user_group_id = '$_GET[tournament_id]'
