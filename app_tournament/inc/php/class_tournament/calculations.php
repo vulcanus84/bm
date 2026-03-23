@@ -29,6 +29,12 @@ class calc
   function define_games() {
 		
 		$arr_players_available = $this->tournament->arr_players;
+		if($this->tournament->curr_round==1) {
+			uasort($arr_players_available, function($a, $b) {
+				return $a->seeding_no <=> $b->seeding_no;
+			});
+		}
+
 		$arr_players_available_single = array();
 
 		if(substr($this->tournament->system,0,6)=='Doppel')
@@ -299,8 +305,15 @@ class calc
 			$user_ids = array_map(fn($u) => $u->id, $this->tournament->arr_players);
 			if(in_array($freilos->id,$user_ids))
 			{
+				//Remove Freilos from available players
 				$arr_players_available = array_filter($arr_players_available,function($user) use ($freilos) { return $user->id!=$freilos->id; }); 
 				$arr_players_available = array_values($arr_players_available);
+
+				//Remove all seeded players if we are in first round
+				if($this->tournament->curr_round==1) {
+					$arr_players_available = array_filter($arr_players_available, function ($user) { return $user->seeding_no == 99; }); 
+					$arr_players_available = array_values($arr_players_available);
+				}
 
 				$opponent = $arr_players_available[Count($arr_players_available)-1];
 				$arr_opponents = $arr_players_available;
