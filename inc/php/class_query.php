@@ -8,7 +8,6 @@
   --------------------------------------------
 */
 require_once("class_column.php");
-require_once("class_PHPExcel.php");
 
 class query
 {
@@ -187,63 +186,41 @@ class query
 				return $this->get_export_data('clipboard');
       }
 
-      if($_GET['ajax']=='export_excel')
-      {
-        $txt = '';
-        // Create new PHPExcel object
-        $objPHPExcel = new PHPExcel();
-        // Set document properties
-        $objPHPExcel->getProperties()->setCreator($_SESSION['login_user']->login)
-        							 ->setTitle("Export");
-        $this->db->sql_query($this->get_sql_for_list());
-        $objPHPExcel->setActiveSheetIndex(0);
-        $cur_col = 0;
-        //Write Header Columns and set to bold
-        foreach($this->columns as $col)
-        {
-          $objPHPExcel->setActiveSheetIndex(0)
-                      ->setCellValueByColumnAndRow($cur_col,1,$col->col_name);
-          $objPHPExcel->getActiveSheet()->getCellByColumnAndRow($cur_col,1)
-                      ->getStyle()->getFont()->setBold(true);
-          $cur_col++;
-        }
-  
-        //Write data
-        $cur_row = 2;
-        while($d = $this->db->get_next_res())
-        {
-          $cur_col = 0;
-          foreach($this->columns as $col)
-          {
-            if($col->get_colDbName_for_list()) { $db = $col->get_colDbName_for_list(); } else { $db = $col->db_col_name; }
-            $objPHPExcel->setActiveSheetIndex(0)
-                        ->setCellValueByColumnAndRow($cur_col,$cur_row,$d->$db);
-            $cur_col++;
+      if ($_GET['ajax'] == 'export_excel') {
+
+          // Dateiname mit Zeitstempel und User
+          $export_file_name = "../temp/Export_" . time() . "_" . $_SESSION['login_user']->login . ".csv";
+
+          // CSV öffnen zum Schreiben
+          $fp = fopen($export_file_name, 'w');
+
+          if (!$fp) {
+              throw new Exception("Kann Datei nicht zum Schreiben öffnen: $export_file_name");
           }
-          $cur_row++;
-        }
-        $cur_col = 0;
 
-        //Activate Autofilter on all columns
-        //$objPHPExcel->getActiveSheet()->setAutoFilter($objPHPExcel->getActiveSheet()->calculateWorksheetDimension());
+          // Header schreiben
+          $header = [];
+          foreach ($this->columns as $col) {
+              $header[] = $col->col_name;
+          }
+          fputcsv($fp, $header);
 
-        //Fit Columns width to content (not exactly the same as Excel itself)
-        foreach($this->columns as $col)
-        {
-          $objPHPExcel->getActiveSheet()->getColumnDimension(chr(65 + $cur_col))->setAutoSize(true);
-          $cur_col++;
-        }
-        
-        //Set Sheet title
-        $objPHPExcel->getActiveSheet()->setTitle("Export");
-        
-        //Save to temp folder with username and time
-        $export_file_name = level."/temp/Export_".time()."_".$_SESSION['login_user']->login.".xlsx";
-        $objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
-        $objWriter->save($export_file_name);
-        
-        //return savepath to make download available
-        return $export_file_name;
+          // Daten abfragen
+          $this->db->sql_query($this->get_sql_for_list());
+          while ($d = $this->db->get_next_res()) {
+              $row = [];
+              foreach ($this->columns as $col) {
+                  $db = $col->get_colDbName_for_list() ?: $col->db_col_name;
+                  $row[] = $d->$db;
+              }
+              fputcsv($fp, $row);
+          }
+
+          // Datei schließen
+          fclose($fp);
+
+          // Pfad zurückgeben
+          return $export_file_name;
       }
 
       if($_GET['ajax']=='get_mails')
