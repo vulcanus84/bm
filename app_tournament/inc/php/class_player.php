@@ -37,7 +37,9 @@ class player extends \user
   }
 
   function get_picture($thumbnail=false,$arr_text_lines=array()) {
-    return parent::get_picture(true, array_merge($arr_text_lines,array($this->login,$this->BHZ.".".$this->FBHZ)));
+    $txt = $this->login;
+    if($this->seeding_no<10 && $this->seeding_no!==null) { $txt .= " [".$this->seeding_no."]"; }
+    return parent::get_picture(true, array_merge($arr_text_lines,array($txt,$this->BHZ.".".$this->FBHZ)));
   }
 
   function save() {
