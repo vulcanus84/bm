@@ -530,7 +530,7 @@ class html
 	}
 
   function get_seeding_definition() {
-		$anz_seeds = round(count($this->tournament->arr_players)/2,0);
+		$anz_seeds = floor(count($this->tournament->arr_players)/2);
 		if($anz_seeds>8) { $anz_seeds = 8; }
     $html = "";
 		for($i=1;$i <= $anz_seeds;$i++)

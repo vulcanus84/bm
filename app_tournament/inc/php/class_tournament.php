@@ -98,7 +98,7 @@ class tournament
 				}
 			}
 
-			$this->max_seeding_pos = round(Count($this->arr_players)/2,0);
+			$this->max_seeding_pos = floor(Count($this->arr_players)/2);
 			if($this->max_seeding_pos>8) { $this->max_seeding_pos=8; }		
 
 			//Load games and group it to rounds

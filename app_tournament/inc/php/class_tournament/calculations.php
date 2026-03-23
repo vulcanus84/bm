@@ -27,14 +27,9 @@ class calc
   }
 
   function define_games() {
-		
+		//Players are sorted by ranking in tournament
 		$arr_players_available = $this->tournament->arr_players;
-		if($this->tournament->curr_round==1) {
-			uasort($arr_players_available, function($a, $b) {
-				return $a->seeding_no <=> $b->seeding_no;
-			});
-		}
-
+		
 		$arr_players_available_single = array();
 
 		if(substr($this->tournament->system,0,6)=='Doppel')
@@ -232,6 +227,13 @@ class calc
 		else
 		{
 			$court_nr=1;
+			//For the first round, sort players by seeding number, so that seeded players get matched with unseeded players
+			if($this->tournament->curr_round==1) {
+				uasort($arr_players_available, function($a, $b) {
+					return $a->seeding_no <=> $b->seeding_no;
+				});
+			}
+			
 			if(Count($this->tournament->arr_players)>Count($this->tournament->arr_rounds)) //Stop it, if they played against each opponent
 			{
 				//Freilos Handling
@@ -267,10 +269,14 @@ class calc
 						if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
 					}
 					
-					//Remove all players with different number of wins
-					$arr_opponents = array_filter($arr_opponents, function ($user) use ($player) { return $user->wins == $player->wins; }); 
-					$arr_opponents = array_values($arr_opponents);
-					if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+					//Remove all players from the lowest number of wins up to the number of wins of the current player
+					//This ensures that you play against someone with the same number of wins if possible, but if not, you play against someone with a similar number of wins
+					//Additionally the lower ranked players have a higher chance to play against a lower ranked player because they are selected later
+					for($i=0; $i<$player->wins; $i++) {
+						$arr_opponents = array_filter($arr_opponents, function ($user) use ($i) { return $user->wins > $i; }); 
+						$arr_opponents = array_values($arr_opponents);
+						if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+					}
 
 					$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
 					$curr_game->p1 = $player;
