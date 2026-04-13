@@ -250,8 +250,8 @@ class calc
 				for ($court_nr=$court_nr; $court_nr <= $this->tournament->number_of_courts; $court_nr++) { 
 					$player = $arr_players_available[array_key_first($arr_players_available)];
 					unset($arr_players_available[$player->id]);
-					$opponent = $arr_players_available[array_key_first($arr_players_available)];
 					$arr_opponents = $arr_players_available;
+					if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
 
 					//Remove all players you have allready played against
 					foreach ($this->tournament->arr_rounds as $round) {
@@ -260,7 +260,7 @@ class calc
 							if($game->p2->id == $player->id) { unset($arr_opponents[$game->p1->id]); }
 						}
 					}
-					if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+					if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
 
 					//If player is seeded and we are in first round, remove all other seeded players
 					if($player->seeding_no<99 && $this->tournament->curr_round==1) {
