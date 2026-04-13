@@ -316,18 +316,20 @@ switch ($_GET['ajax']) {
         break;
       
       case 'pointsOneSet':
+        $point_selection = "0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60";
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
         $myHTML = new html();
         $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1_points;
         $_POST[$curr_game->location.'_set1_p2']=$curr_game->set1_p2_points;
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set1_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set1_p2',false);
         $html.= "<p/><button class='save_game green'>Speichern</button>";
         $html.= "</td>";
         break;
       
       case 'official2sets':
+        $point_selection = '0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30';
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
         $myHTML = new html();
         $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1_points;
@@ -336,23 +338,24 @@ switch ($_GET['ajax']) {
         $_POST[$curr_game->location.'_set2_p2']=$curr_game->set2_p2_points;
         $_POST[$curr_game->location.'_set3_p1']=$curr_game->set3_p1_points;
         $_POST[$curr_game->location.'_set3_p2']=$curr_game->set3_p2_points;
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set1_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set1_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set2_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set2_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set2_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set2_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set3_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set3_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,21,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set3_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set3_p2',false);
         $html.= "<br/>";
         $html.= "<p/><button class='green' onclick=\"set_points_and_winner('{$curr_game->location}'); \">Speichern</button>";
         $html.= "</td>";
         break;
       
       case '2sets11points':
+        $point_selection = '0,11,1,2,3,4,5,6,7,8,9,10,11';
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
         $myHTML = new html();
         $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1_points;
@@ -361,23 +364,24 @@ switch ($_GET['ajax']) {
         $_POST[$curr_game->location.'_set2_p2']=$curr_game->set2_p2_points;
         $_POST[$curr_game->location.'_set3_p1']=$curr_game->set3_p1_points;
         $_POST[$curr_game->location.'_set3_p2']=$curr_game->set3_p2_points;
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set1_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set1_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set1_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set1_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set2_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set2_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set2_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set2_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set3_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set3_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,11,1,2,3,4,5,6,7,8,9,10,11',$curr_game->location.'_set3_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set3_p2',false);
         $html.= "<br/>";
         $html.= "<p/><button class='green' onclick=\"set_points_and_winner('{$curr_game->location}'); \">Speichern</button>";
         $html.= "</td>";
         break;
   
       case '2setswinning':
+        $point_selection = '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30';
         $html.= "<td style='text-align:center;font-size:12pt;' rowspan='2'>";
         $myHTML = new html();
         $_POST[$curr_game->location.'_set1_p1']=$curr_game->set1_p1_points;
@@ -386,17 +390,17 @@ switch ($_GET['ajax']) {
         $_POST[$curr_game->location.'_set2_p2']=$curr_game->set2_p2_points;
         $_POST[$curr_game->location.'_set3_p1']=$curr_game->set3_p1_points;
         $_POST[$curr_game->location.'_set3_p2']=$curr_game->set3_p2_points;
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set1_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set1_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set1_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set2_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set2_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set2_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set2_p2',false);
         $html.= "<br/>";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set3_p1',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set3_p1',false);
         $html.= ":";
-        $html.= $myHTML->get_selection_with_array('0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30',$curr_game->location.'_set3_p2',false);
+        $html.= $myHTML->get_selection_with_array($point_selection,$curr_game->location.'_set3_p2',false);
         $html.= "<br/>";
         $html.= "<p/><button class='green' onclick=\"set_points_and_winner('{$curr_game->location}'); \">Speichern</button>";
         $html.= "</td>";
