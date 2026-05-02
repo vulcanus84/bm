@@ -486,10 +486,17 @@ function define_seeded_players()
 //***** Handling rounds *****
 function define_games()
 {
+  $('div.court').each(function () {
+    $(this).find('img')
+      .attr('src', 'inc/imgs/wuerfel.gif')
+      .removeClass()
+      .addClass('wuerfel');
+  });
+
   $.ajax({ url: server_link+'&ajax=define_games&tournament_id='+tournamentId+'&round=1'  }).done(
   function(data)
   {
-    if(data=='OK')
+    if(data.slice(-2)=='OK')
     {
       var i = 1;
       $('#content')
@@ -505,6 +512,9 @@ function define_games()
       $('#close_tournament').hide();
       $('#stop_tournament').hide();
       setEvents();
+      if(data.length>2) {
+        alert(data.substring(0,data.length-2));
+      }
     }
     else
     {
@@ -516,14 +526,10 @@ function define_games()
 function shuffle_game(court_no)
 {
   var delay = court_no*500;
-  $('#court'+court_no).load(server_link+'&ajax=load',
-  function()
+  $('#court'+court_no).delay(1000).fadeTo(delay,1,
+  function (data)
   {
-    $('#court'+court_no).delay(1000).fadeTo(delay,1,
-    function (data)
-    {
-      $('#court'+court_no).load(server_link+'&ajax=show&court_id='+court_no);
-    });
+    $('#court'+court_no).load(server_link+'&ajax=show&court_id='+court_no);
   });
 }
 

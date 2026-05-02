@@ -247,35 +247,34 @@ class calc
 				}
 				
 				//find best suitable player
+				$txt = "";
 				for ($court_nr=$court_nr; $court_nr <= $this->tournament->number_of_courts; $court_nr++) { 
 					$player = $arr_players_available[array_key_first($arr_players_available)];
 					unset($arr_players_available[$player->id]);
 					$arr_opponents = $arr_players_available;
-					if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+					if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; }
 
 					//Remove all players you have allready played against
 					foreach ($this->tournament->arr_rounds as $round) {
 						foreach ($round->arr_games as $game) {
-							if($game->p1->id == $player->id) { unset($arr_opponents[$game->p2->id]); }
-							if($game->p2->id == $player->id) { unset($arr_opponents[$game->p1->id]); }
+							if($game->p1->id === $player->id) { unset($arr_opponents[$game->p2->id]); }
+							if($game->p2->id === $player->id) { unset($arr_opponents[$game->p1->id]); }
 						}
 					}
-					if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+					if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; } else { $txt .= "Spielwiederholung bei {$player->login} \n"; }	
 
 					//If player is seeded and we are in first round, remove all other seeded players
 					if($player->seeding_no<99 && $this->tournament->curr_round==1) {
 						$arr_opponents = array_filter($arr_opponents, function ($user) { return $user->seeding_no == 99; }); 
-						$arr_opponents = array_values($arr_opponents);
-						if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+						if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; }
 					}
-					
+
 					//Remove all players from the lowest number of wins up to the number of wins of the current player
 					//This ensures that you play against someone with the same number of wins if possible, but if not, you play against someone with a similar number of wins
 					//Additionally the lower ranked players have a higher chance to play against a lower ranked player because they are selected later
 					for($i=0; $i<$player->wins; $i++) {
 						$arr_opponents = array_filter($arr_opponents, function ($user) use ($i) { return $user->wins > $i; }); 
-						$arr_opponents = array_values($arr_opponents);
-						if(Count($arr_opponents)>0) { shuffle($arr_opponents); $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
+						if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; }
 					}
 
 					$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
@@ -288,7 +287,7 @@ class calc
           unset($arr_players_available[$opponent->id]);
 				}
 				$this->tournament->db->insert(array('news_tournament_id'=>$this->tournament->id,'news_title'=>'Neue Runde ausgelost','news_text'=>"Im Turnier {$this->tournament->title} wurde eine neue Runde ausgelost."),'news');
-				print "OK";
+				print $txt."OK";
 				
 			}
 			else {
