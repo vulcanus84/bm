@@ -513,12 +513,20 @@ function define_games()
       $('#stop_tournament').hide();
       setEvents();
       if(data.length>2) {
-        alert(data.substring(0,data.length-2));
+        $('#alerts').html(data.substring(0,data.length-2));
+        $('#alerts').show();
       }
     }
     else
     {
-      alert(data);
+      $('#alerts').html(data);
+      $('#alerts').show();
+      $('div.court').each(function () {
+        $(this).find('img')
+          .attr('src', 'inc/imgs/spielfeld.png')
+          .removeClass()
+          .addClass('img_court');
+      });
     }
   });
 }
@@ -584,6 +592,7 @@ function clear_it()
     $('#draw').show();
     $('#close_tournament').show();
     $('#stop_tournament').show();
+    $('#alerts').hide();
     setEvents();
   }
 }

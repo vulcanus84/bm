@@ -8,6 +8,8 @@ div.ranking { text-align: center; }
 
 div.ranking img { width:120px; }
 
+div#alerts { margin:10px;background-color: #f8d7da; color: #721c24; padding: 10px; border: 1px solid #f5c6cb; border-radius: 5px; margin-bottom: 10px; display:none; }
+
 div.user_pic { 
   float:left;
   text-align:center; 

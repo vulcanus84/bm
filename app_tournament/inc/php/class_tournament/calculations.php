@@ -179,43 +179,9 @@ class calc
 				if(Count($this->tournament->arr_teams)>Count($this->tournament->arr_rounds)) //Stop it, if they played against each opponent
 				{
 					$arr_teams_available = $this->tournament->arr_teams;
-				
-					for ($court_nr=$court_nr; $court_nr <= $this->tournament->number_of_courts; $court_nr++) { 
-						$curr_team = $arr_teams_available[array_key_first($arr_teams_available)];
-						unset($arr_teams_available[$curr_team->id]);
-						
-						$opponent = $arr_teams_available[array_key_first($arr_teams_available)];
-						$arr_opponents = $arr_teams_available;
 
-						//Remove all teams you have allready played against
-						foreach ($this->tournament->arr_rounds as $round) {
-							foreach ($round->arr_games as $game) {
-								//Is team in left side, remove right side
-								if($game->t1->id == $curr_team->id) { unset($arr_opponents[$game->t2->id]); }
-								if($game->t2->id == $curr_team->id) { unset($arr_opponents[$game->t1->id]); }
-							}
-						}
-						if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
-
-						// //Remove all teams with different number of wins
-						$arr_opponents = array_filter($arr_opponents, function ($team) use ($curr_team) { return $team->wins == $curr_team->wins; }); 
-						$arr_opponents = array_values($arr_opponents);
-						shuffle($arr_opponents);
-						if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_key_first($arr_opponents)]; }
-
-						$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
-						$curr_game->p1 = $curr_team->arr_players[0];
-						$curr_game->p3 = $curr_team->arr_players[1];
-						$curr_game->p2 = $opponent->arr_players[0];
-						$curr_game->p4 = $opponent->arr_players[1];
-						$curr_game->t1 = $curr_team;
-						$curr_game->t2 = $opponent;
-						$curr_game->save();
-
-						//Remove team from available list
-						unset($arr_teams_available[$opponent->id]);
-					}
-					print "OK";
+					$matchmaking = new MatchmakingOptimizer($this->tournament, $arr_teams_available, $court_nr);
+					$matchmaking->create_matchups();
 				}
 				else {
 					print "Zu viele Runden für die Anzahl an Teams";
@@ -247,48 +213,8 @@ class calc
 				}
 				
 				//find best suitable player
-				$txt = "";
-				for ($court_nr=$court_nr; $court_nr <= $this->tournament->number_of_courts; $court_nr++) { 
-					$player = $arr_players_available[array_key_first($arr_players_available)];
-					unset($arr_players_available[$player->id]);
-					$arr_opponents = $arr_players_available;
-					if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; }
-
-					//Remove all players you have allready played against
-					foreach ($this->tournament->arr_rounds as $round) {
-						foreach ($round->arr_games as $game) {
-							if($game->p1->id === $player->id) { unset($arr_opponents[$game->p2->id]); }
-							if($game->p2->id === $player->id) { unset($arr_opponents[$game->p1->id]); }
-						}
-					}
-					if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; } else { $txt .= "Spielwiederholung bei {$player->login} \n"; }	
-
-					//If player is seeded and we are in first round, remove all other seeded players
-					if($player->seeding_no<99 && $this->tournament->curr_round==1) {
-						$arr_opponents = array_filter($arr_opponents, function ($user) { return $user->seeding_no == 99; }); 
-						if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; }
-					}
-
-					//Remove all players from the lowest number of wins up to the number of wins of the current player
-					//This ensures that you play against someone with the same number of wins if possible, but if not, you play against someone with a similar number of wins
-					//Additionally the lower ranked players have a higher chance to play against a lower ranked player because they are selected later
-					for($i=0; $i<$player->wins; $i++) {
-						$arr_opponents = array_filter($arr_opponents, function ($user) use ($i) { return $user->wins > $i; }); 
-						if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; }
-					}
-
-					$curr_game = $this->tournament->arr_rounds[$this->tournament->curr_round-1]->add_game();
-					$curr_game->p1 = $player;
-					$curr_game->p2 = $opponent;
-					$curr_game->save();
-
-					//Remove players from available list
-					unset($arr_players_available[$player->id]);
-          unset($arr_players_available[$opponent->id]);
-				}
-				$this->tournament->db->insert(array('news_tournament_id'=>$this->tournament->id,'news_title'=>'Neue Runde ausgelost','news_text'=>"Im Turnier {$this->tournament->title} wurde eine neue Runde ausgelost."),'news');
-				print $txt."OK";
-				
+				$matchmaking = new MatchmakingOptimizer($this->tournament, $arr_players_available, $court_nr);
+				$matchmaking->create_matchups();
 			}
 			else {
 				print "Zu viele Runden für die Anzahl an Spieler";
@@ -377,4 +303,255 @@ class calc
 	}
 
 
+}
+
+class MatchmakingOptimizer {
+
+	private $tournament;
+	private $players;
+	private $court_nr;
+
+	public function __construct($tournament, $players, $court_nr) {
+		$this->tournament = $tournament;
+		$this->players = $players;
+		$this->court_nr = $court_nr;
+	}
+
+	// --------------------------------------------------
+	// ENTRY
+	// --------------------------------------------------
+	public function create_matchups() {
+		if ($this->tournament->curr_round == 1) {
+				$this->round_one();
+		} else {
+				$this->swiss_round();
+		}
+	}
+
+	// --------------------------------------------------
+	// ROUND 1
+	// --------------------------------------------------
+	private function round_one() {
+
+		$seeded = [];
+		$unseeded = [];
+
+		foreach ($this->players as $p) {
+			if(isset($p->seeding_no) && $p->seeding_no < 99) {
+				$seeded[] = $p;
+			} else {
+				$unseeded[] = $p;
+			}
+		}
+
+		//shuffle($unseeded);
+
+		for ($i = 0; $i < count($seeded); $i++) {
+			$this->create_game($seeded[$i], $unseeded[$i]);
+		}
+
+		$rest = array_slice($unseeded, count($seeded));
+		shuffle($rest);
+
+		for ($i = 0; $i < count($rest) - 1; $i += 2) {
+			$this->create_game($rest[$i], $rest[$i + 1]);
+		}
+		print "OK";
+	}
+
+	// --------------------------------------------------
+	// SWISS ROUND
+	// --------------------------------------------------
+	private function swiss_round() {
+
+		$matches = [];
+		$arr_players_available = $this->players;
+		$txt = "";
+		for ($court_nr=$this->court_nr; $court_nr <= $this->tournament->number_of_courts; $court_nr++) { 
+			$player = $arr_players_available[array_key_first($arr_players_available)];
+			unset($arr_players_available[$player->id]);
+			$arr_opponents = $arr_players_available;
+			if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; }
+
+			//Remove all players you have allready played against
+			foreach ($this->tournament->arr_rounds as $round) {
+				foreach ($round->arr_games as $game) {
+					if($this->tournament->system == 'Doppel_fix') {
+						if($game->t1->id === $player->id) { unset($arr_opponents[$game->t2->id]); }
+						if($game->t2->id === $player->id) { unset($arr_opponents[$game->t1->id]); }
+					} else {
+						if($game->p1->id === $player->id) { unset($arr_opponents[$game->p2->id]); }
+						if($game->p2->id === $player->id) { unset($arr_opponents[$game->p1->id]); }
+					}
+				}
+			}
+			if(Count($arr_opponents)>0) { 
+				$opponent = $arr_opponents[array_rand($arr_opponents)]; 
+			} else { 
+				if($this->tournament->system == 'Doppel_fix') {
+					$txt .= "Spielwiederholung bei Team {$player->team_name} <br/>"; 
+				} else {
+					$txt .= "Spielwiederholung bei {$player->login} <br/>"; 
+				}
+			}
+
+			//If player is seeded and we are in first round, remove all other seeded players
+			if($player->seeding_no<99 && $this->tournament->curr_round==1) {
+				$arr_opponents = array_filter($arr_opponents, function ($user) { return $user->seeding_no == 99; }); 
+				if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; }
+			}
+
+			//Remove all players from the lowest number of wins up to the number of wins of the current player
+			//This ensures that you play against someone with the same number of wins if possible, but if not, you play against someone with a similar number of wins
+			//Additionally the lower ranked players have a higher chance to play against a lower ranked player because they are selected later
+			for($i=0; $i<$player->wins; $i++) {
+				$arr_opponents = array_filter($arr_opponents, function ($user) use ($i) { return $user->wins > $i; }); 
+				if(Count($arr_opponents)>0) { $opponent = $arr_opponents[array_rand($arr_opponents)]; }
+			}
+
+			$matches[] = [$player, $opponent];
+
+			//Remove players from available list
+			unset($arr_players_available[$player->id]);
+			unset($arr_players_available[$opponent->id]);
+		}
+		// Round without repetition
+		if($txt=="") { 
+			foreach($matches as $match) {
+				$this->create_game($match[0], $match[1]);
+			}
+		} else {
+			// Try to find a solution without repetition, if not possible, print the players who have to play against each other again
+			$possible_matches = $this->generate_all_combinations();
+			if(count($possible_matches)>0) {
+				$txt = "";
+				$selected = $possible_matches[array_rand($possible_matches)];
+				foreach($selected as $match) {
+					$this->create_game($match[0], $match[1]);
+				}
+			} else {
+				$txt = "Keine Kombination ohne Spielwiederholung mit Standard-Regel gefunden, wende Regel nur auf vordere Hälfte des Tableaus an...<br/>";
+				$possible_matches = $this->generate_all_combinations(1);
+				if(count($possible_matches)>0) {
+					$txt .= count($possible_matches)." mögliche Kombination(en) gefunden.<br/>";
+					$selected = $possible_matches[array_rand($possible_matches)];
+					foreach($selected as $match) {
+						$this->create_game($match[0], $match[1]);
+					}
+				} else {
+					$txt .= "Keine mögliche Kombination gefunden, suche nach ALLEN möglichen Kombinationen ohne Wiederholung der Spiele...<br/>";
+					$possible_matches = $this->generate_all_combinations(2);
+					if(count($possible_matches)>0) {
+						$txt .= count($possible_matches)." mögliche Kombination(en) gefunden.<br/>";
+						$selected = $possible_matches[array_rand($possible_matches)];
+						foreach($selected as $match) {
+							$this->create_game($match[0], $match[1]);
+						}
+					} else {
+							$txt .= "Keine mögliche Kombinationen gefunden, es muss mit Wiederholungen gespielt werden.<br/>";
+						foreach($matches as $match) {
+							$this->create_game($match[0], $match[1]);
+						}
+					}
+				}
+			}
+			$this->tournament->db->insert(array('news_tournament_id'=>$this->tournament->id,'news_title'=>'Neue Runde ausgelost','news_text'=>"Im Turnier {$this->tournament->title} wurde eine neue Runde ausgelost."),'news');
+		}
+		print $txt."OK";
+	}
+	
+	private function generate_all_combinations($mode=0) {
+		return $this->backtrack_all($this->players,$mode);
+	}
+
+	private function backtrack_all($players_left,$mode) {
+		// Alle Lösungen
+		$all_results = [];
+
+		if (count($players_left) === 0) {
+			return [[]]; // eine leere gültige Lösung
+		}
+
+		$player = reset($players_left);
+		unset($players_left[$player->id]);
+
+		$arr_opponents = $players_left;
+
+		// Bereits gespielte entfernen
+		foreach ($this->tournament->arr_rounds as $round) {
+			foreach ($round->arr_games as $game) {
+				if($this->tournament->system == 'Doppel_fix') {
+					if ($game->t1->id === $player->id) {
+						unset($arr_opponents[$game->t2->id]);
+					}
+					if ($game->t2->id === $player->id) {
+						unset($arr_opponents[$game->t1->id]);
+					}
+				} else {
+					if ($game->p1->id === $player->id) {
+						unset($arr_opponents[$game->p2->id]);
+					}
+					if ($game->p2->id === $player->id) {
+						unset($arr_opponents[$game->p1->id]);
+					}
+				}
+			}
+		}
+
+		// Win-Filter
+		if($mode!==2) {
+			if($mode === 0 || ($mode === 1 && count($players_left) >= count($this->players)/2)) {
+				for ($i = 0; $i < $player->wins; $i++) {
+					$filtered = array_filter($arr_opponents, function ($user) use ($i) {
+							return $user->wins > $i;
+					});
+					if (count($filtered) > 0) {
+						$arr_opponents = $filtered;
+					}
+				}
+			}
+		}
+
+		// Keine Gegner → keine Lösung
+		if (count($arr_opponents) === 0) {
+			return [];
+		}
+
+		foreach ($arr_opponents as $opponent) {
+
+			$remaining = $players_left;
+			unset($remaining[$opponent->id]);
+
+			$sub_results = $this->backtrack_all($remaining,$mode);
+
+			foreach ($sub_results as $sub) {
+				$match = [$player, $opponent];
+				$all_results[] = array_merge([$match], $sub);
+			}
+		}
+
+		return $all_results;
+	}
+
+	// --------------------------------------------------
+	// GAME
+	// --------------------------------------------------
+	private function create_game($a, $b) {
+
+		$round = $this->tournament->arr_rounds[$this->tournament->curr_round - 1];
+
+		$game = $round->add_game();
+		if($this->tournament->system == 'Doppel_fix') {
+			$game->t1 = $a;
+			$game->t2 = $b;
+			$game->p1 = $game->t1->arr_players[0];
+			$game->p3 = $game->t1->arr_players[1];
+			$game->p2 = $game->t2->arr_players[0];
+			$game->p4 = $game->t2->arr_players[1];
+		} else {
+			$game->p1 = $a;
+			$game->p2 = $b;
+		}
+		$game->save();
+	}
 }
