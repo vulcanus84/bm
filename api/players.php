@@ -14,7 +14,7 @@ while ($row = $db->get_next_res()) {
     $players[] = [
         "id" => $row->user_id,
         "name" => $row->user_account,
-        "image" => "none"
+        "image" => "https://clanic.ch/app_tournament/user_pics/" . $row->user_id . "_t.png"
     ];
 }
 
