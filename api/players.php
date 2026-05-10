@@ -7,7 +7,7 @@ define("level","../");                               //define the structur to to
 require_once(level."inc/standard_includes.php");     //Load all necessary files (DB-Connection, User-Login, etc.)
 
 $myPage = new page();
-$db->sql_query($myPage->get_setting('sql_user_selection'));
+$db->sql_query("SELECT * FROM users WHERE user_hide = 0 ORDER BY user_account ASC");
 
 $players = [];
 while ($row = $db->get_next_res()) {
