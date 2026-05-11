@@ -13,11 +13,11 @@ $db->sql_query("SELECT * FROM sessions
 $daten = $db->get_next_res();
 if ($db->count()==0)
 {
-    echo json_encode(["valid" => false]);
+    echo json_encode(["valid" => false,"reason" => "Session not found"]);
     exit;
 } else {
     if (strtotime($daten->expires_at) < time() || $daten->revoked) {
-        echo json_encode(["valid" => false]);
+        echo json_encode(["valid" => false,"reason" => "Session expired or revoked"]);
         exit;
     }
 }
