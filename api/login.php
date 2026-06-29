@@ -28,7 +28,7 @@ else
   if (hash('sha256', $password)==$daten->user_password)
   {
     $token = bin2hex(random_bytes(32));
-    $db->insert(array('user_id'=>$daten->user_id,'token'=>$token,'expires_at'=>date('Y-m-d H:i:s', strtotime('+30 days'))),'sessions');
+    $db->insert(array('user_id'=>$daten->user_id,'token'=>$token,'expires_at'=>date('Y-m-d H:i:s', strtotime('+7 days'))),'sessions');
 
     echo json_encode([
         "success" => true,

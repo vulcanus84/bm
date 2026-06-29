@@ -263,57 +263,56 @@ window.addEventListener("load", async () => {
   const timerEl = document.getElementById("timer_" + runningChartId);
   planSeconds = timerEl.dataset.planSeconds;
 
+  timer = setInterval(() => {
 
-        timer = setInterval(() => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - chart.meta.startTime) / 1000);
 
-        const now = Date.now();
-        const elapsed = Math.floor((now - chart.meta.startTime) / 1000);
+      // ⏱️ Timer Anzeige mm:ss
+      const mm = String(Math.floor(elapsed / 60)).padStart(1, '0');
+      const ss = String(elapsed % 60).padStart(2, '0');
+      timerEl.innerText = `${mm}:${ss}`;
 
-        // ⏱️ Timer Anzeige mm:ss
-        const mm = String(Math.floor(elapsed / 60)).padStart(1, '0');
-        const ss = String(elapsed % 60).padStart(2, '0');
-        timerEl.innerText = `${mm}:${ss}`;
+      // 🎯 Ratio gegen Plan
+      let ratio = elapsed / planSeconds;
 
-        // 🎯 Ratio gegen Plan
-        let ratio = elapsed / planSeconds;
+      if (ratio <= 1) {
 
-        if (ratio <= 1) {
+          // 🟢 innerhalb Plan
+          chart.data.datasets[0].data = [
+              elapsed,
+              planSeconds - elapsed
+          ];
 
-            // 🟢 innerhalb Plan
-            chart.data.datasets[0].data = [
-                elapsed,
-                planSeconds - elapsed
-            ];
+          chart.data.datasets[0].backgroundColor = [
+              '#22c55e',
+              '#e5e7eb'
+          ];
 
-            chart.data.datasets[0].backgroundColor = [
-                '#22c55e',
-                '#e5e7eb'
-            ];
+      } else { 
+        if (ratio <= 2) {
 
-        } else { 
-          if (ratio <= 2) {
+          // 🔴 Overload
+          chart.data.datasets[0].data = [
+              elapsed-planSeconds,
+              planSeconds*Math.ceil(ratio)-elapsed
+          ];
 
-            // 🔴 Overload
-            chart.data.datasets[0].data = [
-                elapsed-planSeconds,
-                planSeconds*Math.ceil(ratio)-elapsed
-            ];
-
-            chart.data.datasets[0].backgroundColor = [
-                '#ef4444',
-                '#22c55e'
-            ];
-        } else {
-            // ⚠️ Extreme Overload
-            chart.data.datasets[0].data = [
-              1,0
-            ];
-        }
+          chart.data.datasets[0].backgroundColor = [
+              '#ef4444',
+              '#22c55e'
+          ];
+      } else {
+          // ⚠️ Extreme Overload
+          chart.data.datasets[0].data = [
+            1,0
+          ];
       }
+    }
 
-        chart.update('none');
+      chart.update('none');
 
-    }, 1000);
+  }, 1000);
 
 
 });
